@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { UserAvatarMenu } from '../components/UserAvatarMenu'
 
 export function AdminLayout() {
   const { signOut } = useAuth?.() || {}
@@ -123,9 +124,11 @@ export function AdminLayout() {
           <span className="portal-role-badge portal-role-badge--admin">Admin</span>
         </div>
 
-        <button
-          type="button"
-          className="menu"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <UserAvatarMenu />
+          <button
+            type="button"
+            className="menu"
           aria-label="Toggle Admin Navigation"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -144,6 +147,7 @@ export function AdminLayout() {
             )}
           </svg>
         </button>
+        </div>
 
         {mobileMenuOpen && (
           <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} />

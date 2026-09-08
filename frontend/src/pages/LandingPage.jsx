@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import {
   Button,
   Badge,
@@ -186,6 +187,7 @@ export default function LandingPage() {
         )}
 
         <div className="nav-actions">
+          <UserAvatarMenu />
           <button
             type="button"
             className="menu"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import { Button } from '../components/ui'
 
 export function PublicLayout() {
@@ -31,6 +32,7 @@ export function PublicLayout() {
         )}
 
         <div className="nav-actions">
+          <UserAvatarMenu />
           <button
             type="button"
             className="menu"

@@ -38,26 +38,40 @@ export default function DashboardPage() {
   }, [role])
 
   if (!role) return <Navigate to="/onboarding/role" replace />
-  if (role === 'admin') return <Navigate to="/admin" replace />
 
   const isBrand = role === 'brand'
+  const isAdmin = role === 'admin'
 
   return (
     <main className="page">
       <FadeIn className="page-heading">
         <div>
           <div className="overline">
-            <i /> {isBrand ? 'Brand Workspace' : 'Creator Workspace'}
+            <i /> {isAdmin ? 'System Administration Workspace' : isBrand ? 'Brand Workspace' : 'Creator Workspace'}
           </div>
           <h1 style={{ marginTop: '6px' }}>Welcome back, {profile?.name || 'Collaborator'}.</h1>
           <p>
-            {isBrand
+            {isAdmin
+              ? 'Access platform moderation tools, inspect active creator profiles, and review open advertisement briefs.'
+              : isBrand
               ? 'Post campaign advertisement briefs, discover independent creators, and manage ongoing inquiries.'
               : 'Browse open brand sponsorship ads, pitch your content deliverables, and chat directly with brands.'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          {isBrand ? (
+          {isAdmin ? (
+            <>
+              <Link to="/admin" className="ui-button ui-btn--primary">
+                🛡️ Platform Administration
+              </Link>
+              <Link to="/influencers" className="ui-button ui-btn--secondary">
+                Discover Creators
+              </Link>
+              <Link to="/campaigns" className="ui-button ui-btn--outline">
+                Browse Brand Deals
+              </Link>
+            </>
+          ) : isBrand ? (
             <>
               <Link to="/brand/campaigns" className="ui-button ui-btn--primary">
                 + Post Ad Brief
@@ -81,7 +95,44 @@ export default function DashboardPage() {
 
       {/* BENTO METRIC CARDS */}
       <StaggerContainer className="bento-grid bento-grid--4" style={{ marginBottom: '28px' }} staggerDelay={0.06}>
-        {isBrand ? (
+        {isAdmin ? (
+          <>
+            <StaggerItem>
+              <MetricCard
+                label="System Access"
+                value="Admin"
+                delta="Superuser"
+                deltaType="positive"
+                subtext="Full moderation permissions"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <MetricCard
+                label="Active Conversations"
+                value={String(conversationsCount)}
+                delta="Platform"
+                deltaType="positive"
+                subtext="Threads across workspace"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <MetricCard
+                label="Platform Campaigns"
+                value={String(activeCampaignsCount)}
+                subtext="Active listings"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <MetricCard
+                label="Admin Portal"
+                value="Online"
+                delta="Ready"
+                deltaType="positive"
+                subtext="Real-time moderation active"
+              />
+            </StaggerItem>
+          </>
+        ) : isBrand ? (
           <>
             <StaggerItem>
               <MetricCard

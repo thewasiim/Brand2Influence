@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { UserAvatarMenu } from '../components/UserAvatarMenu'
 
 export function UserLayout() {
   const { user, profile, signOut } = useAuth()
@@ -119,9 +120,11 @@ export function UserLayout() {
           <span className="portal-role-badge">{roleLabel}</span>
         </div>
 
-        <button
-          type="button"
-          className="menu"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <UserAvatarMenu />
+          <button
+            type="button"
+            className="menu"
           aria-label="Toggle Navigation"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
@@ -140,6 +143,7 @@ export function UserLayout() {
             )}
           </svg>
         </button>
+        </div>
 
         {mobileMenuOpen && (
           <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} />
