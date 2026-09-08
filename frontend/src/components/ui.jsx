@@ -563,3 +563,6 @@ export function EmptyState({
     </div>
   )
 }
+
+// 17. Animations (Framer Motion)
+export { FadeIn, StaggerContainer, StaggerItem, ScaleIn, LUXURY_EASING } from './animations'

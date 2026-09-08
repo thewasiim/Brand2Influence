@@ -16,6 +16,9 @@ import {
   BentoGrid,
   MetricCard,
   InfluencerCard,
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
 } from '../../components/ui'
 
 export function InfluencerOnboardingPage() {
@@ -218,7 +221,7 @@ export function DiscoveryPage() {
 
   return (
     <main className="page">
-      <div className="page-heading">
+      <FadeIn className="page-heading">
         <div>
           <div className="overline">
             <i /> Creator Directory
@@ -226,84 +229,91 @@ export function DiscoveryPage() {
           <h1 style={{ marginTop: '6px' }}>Discover verified talent.</h1>
           <p>Filter by creative niche, city location, audience scale, and starting reel rates.</p>
         </div>
-      </div>
+      </FadeIn>
 
       {/* BENTO FILTER BAR */}
-      <form
-        className="bento-search-panel"
-        style={{ marginBottom: '32px' }}
-        onSubmit={(e) => {
-          e.preventDefault()
-          load()
-        }}
-      >
-        <div className="search-field-item">
-          <label>Niche</label>
-          <input
-            placeholder="e.g. Fashion, Food, Tech"
-            value={filters.niche}
-            onChange={(e) => setFilters({ ...filters, niche: e.target.value })}
-          />
-        </div>
+      <FadeIn delay={0.08} distance={18}>
+        <form
+          className="bento-search-panel"
+          style={{ marginBottom: '32px' }}
+          onSubmit={(e) => {
+            e.preventDefault()
+            load()
+          }}
+        >
+          <div className="search-field-item">
+            <label>Niche</label>
+            <input
+              placeholder="e.g. Fashion, Food, Tech"
+              value={filters.niche}
+              onChange={(e) => setFilters({ ...filters, niche: e.target.value })}
+            />
+          </div>
 
-        <div className="search-field-item">
-          <label>Location</label>
-          <input
-            placeholder="City or state"
-            value={filters.location}
-            onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-          />
-        </div>
+          <div className="search-field-item">
+            <label>Location</label>
+            <input
+              placeholder="City or state"
+              value={filters.location}
+              onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+            />
+          </div>
 
-        <div className="search-field-item">
-          <label>Min Followers</label>
-          <input
-            type="number"
-            placeholder="e.g. 10000"
-            value={filters.followersMin}
-            onChange={(e) => setFilters({ ...filters, followersMin: e.target.value })}
-          />
-        </div>
+          <div className="search-field-item">
+            <label>Min Followers</label>
+            <input
+              type="number"
+              placeholder="e.g. 10000"
+              value={filters.followersMin}
+              onChange={(e) => setFilters({ ...filters, followersMin: e.target.value })}
+            />
+          </div>
 
-        <div className="search-field-item">
-          <label>Max Followers</label>
-          <input
-            type="number"
-            placeholder="e.g. 200000"
-            value={filters.followersMax}
-            onChange={(e) => setFilters({ ...filters, followersMax: e.target.value })}
-          />
-        </div>
+          <div className="search-field-item">
+            <label>Max Followers</label>
+            <input
+              type="number"
+              placeholder="e.g. 200000"
+              value={filters.followersMax}
+              onChange={(e) => setFilters({ ...filters, followersMax: e.target.value })}
+            />
+          </div>
 
-        <div className="search-field-item">
-          <label>Max Reel Rate (₹)</label>
-          <input
-            type="number"
-            placeholder="e.g. 5000"
-            value={filters.budget}
-            onChange={(e) => setFilters({ ...filters, budget: e.target.value })}
-          />
-        </div>
+          <div className="search-field-item">
+            <label>Max Reel Rate (₹)</label>
+            <input
+              type="number"
+              placeholder="e.g. 5000"
+              value={filters.budget}
+              onChange={(e) => setFilters({ ...filters, budget: e.target.value })}
+            />
+          </div>
 
-        <Button type="submit" variant="primary">
-          Apply Filters
-        </Button>
-      </form>
+          <Button type="submit" variant="primary">
+            Apply Filters
+          </Button>
+        </form>
+      </FadeIn>
 
       {error && <ErrorState error={error} onRetry={load} />}
 
       {loading ? (
         <LoadingState label="Loading creators…" />
       ) : data?.items?.length ? (
-        <div className="bento-grid bento-grid--3">
+        <StaggerContainer
+          key={filters.niche + filters.location + filters.followersMin + filters.followersMax + filters.budget}
+          className="bento-grid bento-grid--3"
+          staggerDelay={0.07}
+        >
           {data.items.map((creator, idx) => (
-            <InfluencerCard
-              key={creator.id}
-              creator={creator}
-              size={idx === 0 ? 'large' : 'medium'}
-            />
+            <StaggerItem key={creator.id}>
+              <InfluencerCard
+                creator={creator}
+                size={idx === 0 ? 'large' : 'medium'}
+              />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       ) : (
         <EmptyState
           title="No creators match these filters"

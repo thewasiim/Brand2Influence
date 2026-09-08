@@ -1702,23 +1702,30 @@ p {
   width: 100%;
   max-width: var(--max-content-width);
   margin: 0 auto;
-  padding: 80px clamp(16px, 4vw, 48px);
-  text-align: left;
-  background: radial-gradient(circle at 20% 30%, #F9F9FA 0%, #FFFFFF 70%);
+  padding: 88px clamp(16px, 4vw, 48px);
+  text-align: center;
+  background: radial-gradient(circle at 50% 30%, #F9F9FA 0%, #FFFFFF 70%);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .final-cta-content {
   max-width: 680px;
-  margin: 0;
-  text-align: left;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .final-cta-buttons {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
+  align-items: center;
   gap: 18px;
   margin-top: 32px;
 }
@@ -2996,27 +3003,9 @@ footer>small i {
 }
 
 /* --------------------------------------------------------------------------
-   Scroll-Driven Animations (Native CSS view() timeline)
+   Scroll-Driven Animations handled via Framer Motion
    -------------------------------------------------------------------------- */
-@supports (animation-timeline: view()) {
-  @keyframes fadeInUpScroll {
-    from {
-      opacity: 0;
-      transform: translateY(50px);
-    }
 
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .fade-in-up {
-    animation: fadeInUpScroll linear both;
-    animation-timeline: view(block);
-    animation-range: entry 5% cover 20%;
-  }
-}
 
 /* ==========================================================================
    Chip & Filter Pill Utilities

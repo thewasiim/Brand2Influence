@@ -10,6 +10,9 @@ import {
   LoadingState,
   ErrorState,
   EmptyState,
+  FadeIn,
+  StaggerContainer,
+  StaggerItem,
 } from '../../components/ui'
 
 const NICHES = [
@@ -70,7 +73,7 @@ export function CampaignDiscoveryPage() {
 
   return (
     <main className="page">
-      <div className="page-heading">
+      <FadeIn className="page-heading">
         <div>
           <div className="overline">
             <i /> Brand Advertisements & Deals
@@ -87,10 +90,10 @@ export function CampaignDiscoveryPage() {
             </Link>
           </div>
         )}
-      </div>
+      </FadeIn>
 
       {/* SEARCH AND CLEAN FILTERS BUTTON */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
+      <FadeIn delay={0.08} distance={16} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', maxWidth: '640px' }}>
           <div style={{ flex: 1, minWidth: '240px' }}>
             <Input
@@ -208,7 +211,7 @@ export function CampaignDiscoveryPage() {
             </button>
           </div>
         )}
-      </div>
+      </FadeIn>
 
       {/* MOBILE BOTTOM SHEET / FILTER MODAL */}
       {sheetOpen && (
@@ -349,67 +352,74 @@ export function CampaignDiscoveryPage() {
           No brands have active advertisements matching this criteria right now. Check back soon or explore creators!
         </EmptyState>
       ) : (
-        <div className="campaign-grid" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
+        <StaggerContainer
+          key={search + niche + platform}
+          className="campaign-grid"
+          style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}
+          staggerDelay={0.07}
+        >
           {items.map((item) => (
-            <Card key={item.id} variant="elevated" hover padding="lg" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: 'var(--radius-xl)' }}>
+            <StaggerItem key={item.id}>
+              <Card variant="elevated" hover padding="lg" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: 'var(--radius-xl)' }}>
 
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    <Badge variant="primary">{item.platform}</Badge>
-                    <Badge variant="accent">{item.niche}</Badge>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <Badge variant="primary">{item.platform}</Badge>
+                      <Badge variant="accent">{item.niche}</Badge>
+                    </div>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-secondary)' }}>
+                      {item.budget_range}
+                    </span>
                   </div>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-secondary)' }}>
-                    {item.budget_range}
+
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
+                    {item.title}
+                  </h3>
+
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <b>{item.brand?.businessName || item.brand?.name || 'Brand'}</b>
+                    <span>•</span>
+                    <span>{item.location}</span>
+                  </div>
+
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {item.description}
+                  </p>
+
+                  {item.deliverables?.length > 0 && (
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                      {item.deliverables.map((d, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '11px',
+                            background: 'var(--color-surface-3)',
+                            border: '1px solid var(--color-border)',
+                            padding: '3px 8px',
+                            borderRadius: 'var(--radius-sm)',
+                            color: 'var(--color-neutral-subtle)',
+                          }}
+                        >
+                          ✓ {d}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                    Min Followers: {item.target_followers_min ? Number(item.target_followers_min).toLocaleString() : 'Any'}
                   </span>
+                  <Link to={`/campaigns/${item.id}`} className="ui-button ui-btn--primary ui-btn--sm">
+                    View Brief & Contact →
+                  </Link>
                 </div>
-
-                <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
-                  {item.title}
-                </h3>
-
-                <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <b>{item.brand?.businessName || item.brand?.name || 'Brand'}</b>
-                  <span>•</span>
-                  <span>{item.location}</span>
-                </div>
-
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {item.description}
-                </p>
-
-                {item.deliverables?.length > 0 && (
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                    {item.deliverables.map((d, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: '11px',
-                          background: 'var(--color-surface-3)',
-                          border: '1px solid var(--color-border)',
-                          padding: '3px 8px',
-                          borderRadius: 'var(--radius-sm)',
-                          color: 'var(--color-neutral-subtle)',
-                        }}
-                      >
-                        ✓ {d}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                  Min Followers: {item.target_followers_min ? Number(item.target_followers_min).toLocaleString() : 'Any'}
-                </span>
-                <Link to={`/campaigns/${item.id}`} className="ui-button ui-btn--primary ui-btn--sm">
-                  View Brief & Contact →
-                </Link>
-              </div>
-            </Card>
+              </Card>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       )}
     </main>
   )
