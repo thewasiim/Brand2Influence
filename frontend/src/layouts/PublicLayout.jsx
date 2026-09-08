@@ -70,14 +70,40 @@ export function PublicLayout() {
                 </button>
               </div>
 
-              <Link to="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-              <Link to="/campaigns" onClick={() => setMobileMenuOpen(false)}>Brand Deals</Link>
-              <Link to="/influencers" onClick={() => setMobileMenuOpen(false)}>Discover Creators</Link>
+              <Link to="/influencers" onClick={() => setMobileMenuOpen(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
+                Discover Creators
+              </Link>
+              <Link to="/campaigns" onClick={() => setMobileMenuOpen(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                Brand Deals
+              </Link>
+              <Link to="/#how-it-works" onClick={() => setMobileMenuOpen(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                How It Works
+              </Link>
+              <Link to="/#roles-bento" onClick={() => setMobileMenuOpen(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                For Brands
+              </Link>
+              <Link to="/#roles-bento" onClick={() => setMobileMenuOpen(false)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" /></svg>
+                For Influencers
+              </Link>
               {user ? (
                 <>
-                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-                  <Link to="/conversations" onClick={() => setMobileMenuOpen(false)}>Messages</Link>
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>My Profile</Link>
+                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>
+                    Dashboard
+                  </Link>
+                  <Link to="/conversations" onClick={() => setMobileMenuOpen(false)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    Messages
+                  </Link>
+                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    My Profile
+                  </Link>
                   <button
                     type="button"
                     className="nav-login"
@@ -86,7 +112,7 @@ export function PublicLayout() {
                       signOut()
                     }}
                   >
-                    Log out
+                    Log Out
                   </button>
                 </>
               ) : (
@@ -99,7 +125,7 @@ export function PublicLayout() {
                       navigate('/auth/login')
                     }}
                   >
-                    Log in
+                    Log In
                   </button>
                   <button
                     type="button"
@@ -109,7 +135,7 @@ export function PublicLayout() {
                       navigate('/auth/signup')
                     }}
                   >
-                    Get started
+                    Get Started
                   </button>
                 </>
               )}

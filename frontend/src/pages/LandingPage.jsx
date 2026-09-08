@@ -229,9 +229,13 @@ export default function LandingPage() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
                 Discover Creators
               </button>
+              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('brand-deals'); }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                Brand Deals
+              </button>
               <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('how-it-works'); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                How it Works
+                How It Works
               </button>
               <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
@@ -242,10 +246,10 @@ export default function LandingPage() {
                 For Influencers
               </button>
               <button type="button" className="nav-login" onClick={() => { setMobileMenuOpen(false); navigate('/auth/login'); }}>
-                Log in
+                Log In
               </button>
               <button type="button" className="nav-join" onClick={() => { setMobileMenuOpen(false); navigate('/auth/signup'); }}>
-                Get started
+                Get Started
               </button>
             </nav>
           )}
@@ -257,8 +261,8 @@ export default function LandingPage() {
         <section className="bento-hero" id="top" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', width: '100%', maxWidth: '1240px', margin: '0 auto', padding: '60px 24px 40px' }}>
           <div className="bento-hero-left" style={{ maxWidth: '720px', width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: 0 }}>
             <FadeIn delay={0.05} distance={16}>
-              <div className="overline" style={{ justifyContent: 'flex-start', textAlign: 'left' }}>
-                <i /> India’s Creator & Brand Marketplace
+              <div className="hero-badge" style={{ justifyContent: 'flex-start', textAlign: 'left' }}>
+                <i /> INDIA'S CREATOR & BRAND MARKETPLACE
               </div>
             </FadeIn>
             <FadeIn delay={0.12} distance={22}>
@@ -418,7 +422,7 @@ export default function LandingPage() {
               <p>
                 Filter by verified engagement rate, starting reel rate, and exact city. Reach creators directly and coordinate deliverables in one place.
               </p>
-              <Button variant="outline" size="sm" onClick={() => navigate('/auth/signup')}>
+              <Button variant="secondary" size="md" onClick={() => navigate('/auth/signup')}>
                 Explore as a Brand →
               </Button>
             </StaggerItem>
@@ -434,7 +438,7 @@ export default function LandingPage() {
               <p>
                 Set your upfront reel rates, showcase your portfolio links, and receive qualified collaboration requests from brands that value your creative voice.
               </p>
-              <Button variant="accent" size="sm" onClick={() => navigate('/auth/signup')}>
+              <Button variant="primary" size="md" onClick={() => navigate('/auth/signup')}>
                 Join as a Creator →
               </Button>
             </StaggerItem>
@@ -724,7 +728,7 @@ export default function LandingPage() {
               <Button size="lg" variant="primary" onClick={() => navigate('/auth/signup')}>
                 I’m a Brand
               </Button>
-              <Button size="lg" variant="accent" onClick={() => navigate('/auth/signup')}>
+              <Button size="lg" variant="secondary" onClick={() => navigate('/auth/signup')}>
                 I’m an Influencer
               </Button>
             </div>
