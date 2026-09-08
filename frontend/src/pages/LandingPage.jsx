@@ -182,46 +182,6 @@ export default function LandingPage() {
           <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} />
         )}
 
-        <nav className={mobileMenuOpen ? 'open' : ''}>
-          <div className="nav-drawer-header">
-            <span className="nav-drawer-title">Menu</span>
-            <button
-              type="button"
-              className="nav-drawer-close"
-              onClick={() => setMobileMenuOpen(false)}
-              aria-label="Close menu"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-
-          <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('marketplace'); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-            Discover Creators
-          </button>
-          <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('how-it-works'); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            How it Works
-          </button>
-          <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            For Brands
-          </button>
-          <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-            For Influencers
-          </button>
-          <button type="button" className="nav-login" onClick={() => { setMobileMenuOpen(false); navigate('/auth/login'); }}>
-            Log in
-          </button>
-          <button type="button" className="nav-join" onClick={() => { setMobileMenuOpen(false); navigate('/auth/signup'); }}>
-            Get started
-          </button>
-        </nav>
-
         <div className="nav-actions">
           <button
             type="button"
@@ -244,101 +204,106 @@ export default function LandingPage() {
               )}
             </svg>
           </button>
+
+          {mobileMenuOpen && (
+            <nav className="open">
+              <div className="nav-drawer-header">
+                <span className="nav-drawer-title">Navigation</span>
+                <button
+                  type="button"
+                  className="nav-drawer-close"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+
+              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('marketplace'); }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
+                Discover Creators
+              </button>
+              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('how-it-works'); }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+                How it Works
+              </button>
+              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                For Brands
+              </button>
+              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" /></svg>
+                For Influencers
+              </button>
+              <button type="button" className="nav-login" onClick={() => { setMobileMenuOpen(false); navigate('/auth/login'); }}>
+                Log in
+              </button>
+              <button type="button" className="nav-join" onClick={() => { setMobileMenuOpen(false); navigate('/auth/signup'); }}>
+                Get started
+              </button>
+            </nav>
+          )}
         </div>
       </header>
 
       <main>
         {/* 2. BENTO HERO */}
-        <section className="bento-hero" id="top">
-          <div className="bento-hero-left">
-            <div className="overline">
-              <i /> India’s Creator Marketplace
+        <section className="bento-hero" id="top" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', width: '100%', maxWidth: '1240px', margin: '0 auto', padding: '60px 24px 40px' }}>
+          <div className="bento-hero-left" style={{ maxWidth: '720px', width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: 0 }}>
+            <div className="overline" style={{ justifyContent: 'flex-start', textAlign: 'left' }}>
+              <i /> India’s Creator & Brand Marketplace
             </div>
-            <h1 className="hero-title">
+            <h1 className="hero-title" style={{ fontSize: 'clamp(40px, 5.5vw, 64px)', lineHeight: 1.15, marginBottom: '20px', textAlign: 'left' }}>
               Make work that<br />
               <em>moves people.</em>
             </h1>
-            <p className="hero-desc">
-              Discover independent creators who truly understand your brand, your audience, and the cultural impact you want to create. Direct messaging, upfront rates, zero middleman markups.
+            <p className="hero-desc" style={{ maxWidth: '620px', margin: '0 0 28px 0', fontSize: '16px', lineHeight: 1.6, textAlign: 'left' }}>
+              Discover independent creators who truly understand your brand, and explore verified sponsorship campaigns. Direct messaging, upfront rates, zero middleman markups.
             </p>
-            <div className="hero-cta-group">
+            <div className="hero-cta-group" style={{ justifyContent: 'flex-start', gap: '14px', width: '100%' }}>
               <Button size="lg" variant="primary" onClick={() => scrollTo('marketplace')}>
                 Explore Creators
               </Button>
-              <Button size="lg" variant="secondary" onClick={() => scrollTo('how-it-works')}>
-                How it Works
+              <Button size="lg" variant="secondary" onClick={() => navigate('/campaigns')}>
+                Browse Brand Deals
               </Button>
             </div>
-            <p className="quiet">
+            <p className="quiet" style={{ marginTop: '20px', textAlign: 'left' }}>
               Are you a creator? <b onClick={() => navigate('/auth/signup')} style={{ cursor: 'pointer' }}>Join the community →</b>
             </p>
-          </div>
 
-          {/* Hero Right: Interactive Influencer Profile Card Stack */}
-          <div className="bento-hero-right">
-            <div className="hero-stack-container">
-              <div className="hero-stack-selector">
-                {SHOWCASE_CREATORS.slice(0, 3).map((c, idx) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    className={`hero-stack-tab ${heroCardIndex === idx ? 'active' : ''}`}
-                    onClick={() => setHeroCardIndex(idx)}
-                  >
-                    {c.name.split(' ')[0]}
-                  </button>
-                ))}
+            {/* Clean Platform Trust Indicators */}
+            <div style={{
+              display: 'flex',
+              justify: 'flex-start',
+              gap: '40px',
+              flexWrap: 'wrap',
+              marginTop: '44px',
+              paddingTop: '28px',
+              borderTop: '1px solid var(--color-border)',
+              width: '100%',
+              maxWidth: '680px',
+              textAlign: 'left',
+            }}>
+              <div>
+                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>500+</b>
+                <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Verified Creators</small>
               </div>
-
-              <div className="hero-stack-card">
-                <div className="creator-card-badge-row">
-                  <Badge variant="accent">Top Collaborator</Badge>
-                  <span className="creator-card-available">Verified</span>
-                </div>
-
-                <div className="creator-card-header">
-                  <Avatar name={activeHeroCreator.name} size="lg" tone="secondary" />
-                  <div>
-                    <h3>{activeHeroCreator.name} <span className="verified-check">✓</span></h3>
-                    <p className="creator-handle">{activeHeroCreator.username}</p>
-                    <div className="creator-meta-pills">
-                      <span className="meta-pill">{activeHeroCreator.niche}</span>
-                      <span className="meta-pill">{activeHeroCreator.location}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="creator-bio">{activeHeroCreator.bio}</p>
-
-                <div className="creator-card-metrics">
-                  <div>
-                    <b>{(activeHeroCreator.followersCount / 1000).toFixed(0)}K</b>
-                    <small>Followers</small>
-                  </div>
-                  <div>
-                    <b>{activeHeroCreator.engagementRate}%</b>
-                    <small>Engagement</small>
-                  </div>
-                  <div>
-                    <b>₹{activeHeroCreator.rateCard.reel.toLocaleString()}</b>
-                    <small>Starting / Reel</small>
-                  </div>
-                </div>
-
-                <div className="creator-card-actions">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    className="full"
-                    onClick={() => navigate('/auth/signup')}
-                  >
-                    Message {activeHeroCreator.name.split(' ')[0]}
-                  </Button>
-                </div>
+              <div>
+                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>100%</b>
+                <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Upfront Rates</small>
+              </div>
+              <div>
+                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>Direct</b>
+                <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Brand Messaging</small>
               </div>
             </div>
           </div>
         </section>
+
 
         {/* 3. INTERACTIVE INFLUENCER SEARCH (BENTO SEARCH PANEL) */}
         <section className="bento-search-section">
@@ -426,9 +391,9 @@ export default function LandingPage() {
             <article className="role-bento-card role-bento-card--brand">
               <div className="role-icon-box">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-                  <path d="M3 6h18"/>
-                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                  <path d="M3 6h18" />
+                  <path d="M16 10a4 4 0 0 1-8 0" />
                 </svg>
               </div>
               <Badge variant="secondary">For Growing Brands</Badge>
@@ -444,7 +409,7 @@ export default function LandingPage() {
             <article className="role-bento-card role-bento-card--creator">
               <div className="role-icon-box">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                  <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                 </svg>
               </div>
               <Badge variant="accent">For Independent Creators</Badge>
@@ -512,12 +477,12 @@ export default function LandingPage() {
 
         {/* 6. HOW IT WORKS (BENTO WORKFLOW) */}
         <section className="section fade-in-up" id="how-it-works">
-          <div className="center">
-            <span className="eyebrow">Simple, By Design</span>
-            <h2>How Brand2Influence Works</h2>
-            <p style={{ maxWidth: '500px', margin: '12px auto 0' }}>
-              From initial creative discovery to confirmed collaboration in four clear steps.
-            </p>
+          <div className="page-heading">
+            <div>
+              <span className="eyebrow">Simple, By Design</span>
+              <h2>How Brand2Influence Works</h2>
+            </div>
+            <p>From initial creative discovery to confirmed collaboration in four clear steps.</p>
           </div>
 
           <div className="workflow-grid">
@@ -577,29 +542,134 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 8. PHASE-2 CAMPAIGN PREVIEW */}
-        <section className="section fade-in-up">
-          <div className="campaign-phase2-card">
+        {/* 8. LIVE BRAND ADVERTISEMENTS & DEALS SHOWCASE */}
+        <section className="section fade-in-up" id="brand-deals">
+          <div className="page-heading">
             <div>
-              <span className="campaign-phase2-badge">Coming in Phase 2</span>
-              <h3 style={{ fontSize: '28px', marginBottom: '10px' }}>Open Campaign Briefs</h3>
-              <p style={{ maxWidth: '540px', color: 'var(--color-text-secondary)', fontSize: '14px', lineHeight: 1.7 }}>
-                Post a structured project brief with your exact budget, deliverables, and aesthetic requirements. Relevant creators apply directly with customized concepts.
-              </p>
+              <span className="eyebrow">Active Sponsorships</span>
+              <h2>Featured Brand Advertisements</h2>
             </div>
-            <div className="campaign-phase2-action">
-              <Button variant="ghost" disabled size="md" style={{ border: '1px dashed var(--color-border)', width: '100%' }}>
-                Phase 2 In Development
-              </Button>
-            </div>
+            <p>Explore open campaign briefs posted by verified brands looking for creators.</p>
+          </div>
+
+          <div className="bento-grid bento-grid--3" style={{ marginTop: '24px' }}>
+            {[
+              {
+                id: 'samp-1',
+                title: 'Specialty Coffee & Cold Brew Aesthetic Reels',
+                brand: 'Blue Tokai Coffee Roasters',
+                niche: 'Food & Beverage',
+                platform: 'Instagram',
+                budget: '₹6,000–₹12,000',
+                location: 'Mumbai / Delhi NCR',
+                deliverables: ['1 Reel (30-60s)', '2 Stories with Link'],
+                desc: 'Looking for food, lifestyle, and coffee enthusiast creators to create aesthetic morning routine reels showcasing our new Cold Brew cans.',
+              },
+              {
+                id: 'samp-2',
+                title: 'Weekend Travel & Cabin Bag Unboxing',
+                brand: 'Mokobara Luggage',
+                niche: 'Travel & Lifestyle',
+                platform: 'Instagram',
+                budget: '₹12,000–₹25,000',
+                location: 'Remote / Pan-India',
+                deliverables: ['1 Travel Vlog Reel', '3 Stories', 'Unboxing'],
+                desc: 'Mokobara is partnering with travel bloggers and aesthetic lifestyle creators for our Transit Backpack & Carry-on Suitcase collection.',
+              },
+              {
+                id: 'samp-3',
+                title: 'Clean Beauty GRWM & Lip Lacquer Review',
+                brand: 'Kiro Beauty & Skincare',
+                niche: 'Beauty & Skincare',
+                platform: 'Instagram',
+                budget: '₹5,000–₹10,000',
+                location: 'Pan-India',
+                deliverables: ['1 GRWM Makeup Reel', '1 Texture Story'],
+                desc: 'Looking for beauty & skincare creators who champion clean, botanical-infused cosmetics. Show a Get Ready With Me featuring our Super Butter Lip Lacquer.',
+              },
+            ].map((c) => (
+              <div
+                key={c.id}
+                className="bento-card bento-card--elevated"
+                style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '24px' }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <Badge variant="primary">{c.platform}</Badge>
+                      <Badge variant="accent">{c.niche}</Badge>
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-secondary)' }}>
+                      {c.budget}
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px', lineHeight: 1.3 }}>
+                    {c.title}
+                  </h3>
+
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <b>{c.brand}</b>
+                    <span>•</span>
+                    <span>📍 {c.location}</span>
+                  </div>
+
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
+                    {c.desc}
+                  </p>
+
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    {c.deliverables.map((d, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: '11px',
+                          background: 'var(--color-surface-3)',
+                          border: '1px solid var(--color-border)',
+                          padding: '3px 8px',
+                          borderRadius: 'var(--radius-sm)',
+                          color: 'var(--color-neutral-subtle)',
+                        }}
+                      >
+                        ✓ {d}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                    Verified Ad Brief
+                  </span>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate('/campaigns')}
+                  >
+                    View Brief & Pitch →
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '28px' }}>
+            <Button variant="secondary" size="md" onClick={() => navigate('/campaigns')}>
+              Explore All Open Brand Campaigns ({'>'} 6 Available) →
+            </Button>
           </div>
         </section>
 
+
+
         {/* 9. VALUE PROPOSITION (4-CARD BENTO GRID) */}
         <section className="section fade-in-up">
-          <div className="center">
-            <span className="eyebrow">Why Brand2Influence</span>
-            <h2>Built on Radical Transparency</h2>
+          <div className="page-heading">
+            <div>
+              <span className="eyebrow">Why Brand2Influence</span>
+              <h2>Built on Radical Transparency</h2>
+            </div>
+            <p>Clear pricing, direct messaging, and verified creator insights.</p>
           </div>
 
           <div className="bento-grid bento-grid--4" style={{ marginTop: '40px' }}>

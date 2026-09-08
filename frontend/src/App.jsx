@@ -10,9 +10,10 @@ import { LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage } from './
 import RoleSelectionPage from './pages/RoleSelectionPage'
 import { BrandOnboardingPage } from './pages/brand/BrandPages'
 import { InfluencerOnboardingPage, DiscoveryPage, InfluencerProfilePage } from './pages/influencer/InfluencerPages'
+import { CampaignDiscoveryPage, CampaignDetailPage, BrandCampaignsPage } from './pages/campaign/CampaignPages'
 import DashboardPage from './pages/DashboardPage'
 import { ConversationsPage, ConversationThreadPage } from './pages/ConversationsPage'
-import { AdminDashboardPage, AdminUsersPage, ReportsPage, SettingsPage } from './pages/admin/AdminPages'
+import { AdminDashboardPage, AdminUsersPage, AdminCampaignsPage, ReportsPage, SettingsPage } from './pages/admin/AdminPages'
 
 export default function App() {
   return (
@@ -22,6 +23,8 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route path="/influencers" element={<DiscoveryPage />} />
         <Route path="/influencers/:id" element={<InfluencerProfilePage />} />
+        <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
+        <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
       </Route>
 
       <Route element={<AuthLayout />}>
@@ -47,6 +50,9 @@ export default function App() {
           <Route path="/profile" element={<InfluencerOnboardingPage />} />
           <Route path="/conversations" element={<ConversationsPage />} />
           <Route path="/conversations/:id" element={<ConversationThreadPage />} />
+          <Route element={<RoleProtectedRoute roles={['brand', 'admin']} />}>
+            <Route path="/brand/campaigns" element={<BrandCampaignsPage />} />
+          </Route>
         </Route>
 
         <Route element={<AdminRoute />}>
@@ -55,6 +61,7 @@ export default function App() {
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/influencers" element={<AdminUsersPage role="influencer" />} />
             <Route path="/admin/brands" element={<AdminUsersPage role="brand" />} />
+            <Route path="/admin/campaigns" element={<AdminCampaignsPage />} />
             <Route path="/admin/reports" element={<ReportsPage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
           </Route>
@@ -65,4 +72,5 @@ export default function App() {
     </Routes>
   )
 }
+
 

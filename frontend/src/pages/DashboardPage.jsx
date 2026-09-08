@@ -1,18 +1,38 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { campaignsService } from '../services/campaigns'
+import { conversationsService } from '../services/conversations'
 import {
   Button,
   MetricCard,
   Badge,
   Card,
   BentoGrid,
-  BentoCell,
 } from '../components/ui'
 
 export default function DashboardPage() {
   const { profile } = useAuth()
   const role = profile?.role
+
+  const [activeCampaignsCount, setActiveCampaignsCount] = useState(0)
+  const [conversationsCount, setConversationsCount] = useState(0)
+
+  useEffect(() => {
+    if (role === 'brand') {
+      campaignsService.listMine().then(res => {
+        setActiveCampaignsCount(res.items?.filter(x => x.status === 'active')?.length || 0)
+      }).catch(() => {})
+    } else if (role === 'influencer') {
+      campaignsService.list().then(res => {
+        setActiveCampaignsCount(res.items?.length || 0)
+      }).catch(() => {})
+    }
+
+    conversationsService.list().then(res => {
+      setConversationsCount(res.items?.length || 0)
+    }).catch(() => {})
+  }, [role])
 
   if (!role) return <Navigate to="/onboarding/role" replace />
   if (role === 'admin') return <Navigate to="/admin" replace />
@@ -29,19 +49,29 @@ export default function DashboardPage() {
           <h1 style={{ marginTop: '6px' }}>Welcome back, {profile?.name || 'Collaborator'}.</h1>
           <p>
             {isBrand
-              ? 'Discover independent creators, monitor ongoing inquiries, and manage your partnerships.'
-              : 'Keep your media kit and rate card current so brands can discover and contact you directly.'}
+              ? 'Post campaign advertisement briefs, discover independent creators, and manage ongoing inquiries.'
+              : 'Browse open brand sponsorship ads, pitch your content deliverables, and chat directly with brands.'}
           </p>
         </div>
-        <div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {isBrand ? (
-            <Link to="/influencers" className="ui-button ui-btn--primary">
-              Discover Creators
-            </Link>
+            <>
+              <Link to="/brand/campaigns" className="ui-button ui-btn--primary">
+                + Post Ad Brief
+              </Link>
+              <Link to="/influencers" className="ui-button ui-btn--secondary">
+                Discover Creators
+              </Link>
+            </>
           ) : (
-            <Link to="/profile" className="ui-button ui-btn--secondary">
-              Edit Rate Card
-            </Link>
+            <>
+              <Link to="/campaigns" className="ui-button ui-btn--primary">
+                Browse Brand Deals
+              </Link>
+              <Link to="/profile" className="ui-button ui-btn--secondary">
+                Edit Media Kit
+              </Link>
+            </>
           )}
         </div>
       </div>
@@ -51,36 +81,45 @@ export default function DashboardPage() {
         {isBrand ? (
           <>
             <MetricCard
-              label="Active Conversations"
-              value="3"
-              delta="+1 this week"
+              label="My Active Ads"
+              value={String(activeCampaignsCount)}
+              delta="Live briefs"
               deltaType="positive"
-              subtext="Unread messages in inbox"
+              subtext="Open for creator proposals"
+            />
+            <MetricCard
+              label="Active Conversations"
+              value={String(conversationsCount)}
+              delta="Inbox"
+              deltaType="positive"
+              subtext="Messages & pitches"
             />
             <MetricCard
               label="Saved Creators"
-              value="12"
-              subtext="Added to shortlist"
+              value="Verified"
+              subtext="Direct discovery ready"
             />
             <MetricCard
-              label="Avg Reel Rate"
-              value="₹3,200"
-              subtext="Across your saved talent"
-            />
-            <MetricCard
-              label="Campaigns"
-              value="Phase 2"
-              subtext="Open briefs coming soon"
+              label="Budget Type"
+              value={profile?.budgetRange || 'Flexible'}
+              subtext="Standard campaign scale"
             />
           </>
         ) : (
           <>
             <MetricCard
-              label="Profile Status"
-              value="Active"
-              delta="Published"
+              label="Open Brand Deals"
+              value={String(activeCampaignsCount)}
+              delta="Active Ads"
               deltaType="positive"
-              subtext="Discoverable in marketplace"
+              subtext="Available to pitch today"
+            />
+            <MetricCard
+              label="Active Chats"
+              value={String(conversationsCount)}
+              delta="Inbox"
+              deltaType="positive"
+              subtext="Brand conversation threads"
             />
             <MetricCard
               label="Starting Reel Rate"
@@ -88,16 +127,11 @@ export default function DashboardPage() {
               subtext="Direct quote on profile"
             />
             <MetricCard
-              label="Incoming Inquiries"
-              value="2"
-              delta="Pending"
+              label="Profile Status"
+              value="Active"
+              delta="Published"
               deltaType="positive"
-              subtext="Check conversations"
-            />
-            <MetricCard
-              label="Engagement Score"
-              value={profile?.engagementRate ? `${profile.engagementRate}%` : '5.2%'}
-              subtext="Verified rate"
+              subtext="Discoverable in marketplace"
             />
           </>
         )}
@@ -108,7 +142,7 @@ export default function DashboardPage() {
         {/* Left: Main Action Card */}
         <Card variant="elevated" padding="lg">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <Badge variant="primary">{isBrand ? 'Talent Directory' : 'Media Kit'}</Badge>
+            <Badge variant="primary">{isBrand ? 'Campaign Briefs & Talent' : 'Opportunities & Media Kit'}</Badge>
             <span style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
               Quick Actions
             </span>
@@ -116,31 +150,37 @@ export default function DashboardPage() {
 
           {isBrand ? (
             <div>
-              <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Search & Compare Creators</h2>
+              <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Post Advertisements & Discover Creators</h2>
               <p style={{ marginBottom: '24px', fontSize: '14px', lineHeight: 1.7 }}>
-                Browse verified creators filtered by city, starting reel rates, and engagement performance. Review their portfolios and connect without intermediary fees.
+                Publish detailed campaign briefs (deliverables, budgets, target metrics). Creators can discover your listing and apply directly with custom pitches and quotes.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <Link to="/influencers" className="ui-button ui-btn--primary">
-                  Open Creator Discovery
+                <Link to="/brand/campaigns" className="ui-button ui-btn--primary">
+                  Manage My Advertisements
+                </Link>
+                <Link to="/influencers" className="ui-button ui-btn--secondary">
+                  Browse Creators Directory
                 </Link>
                 <Link to="/conversations" className="ui-button ui-btn--outline">
-                  Open Messages
+                  Open Messages ({conversationsCount})
                 </Link>
               </div>
             </div>
           ) : (
             <div>
-              <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Optimize Your Discoverability</h2>
+              <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Find Brand Sponsorships & Pitch Direct</h2>
               <p style={{ marginBottom: '24px', fontSize: '14px', lineHeight: 1.7 }}>
-                Profiles with transparent starting rates receive up to 3x more qualified brand inquiries. Add your recent reel portfolio links and exact location.
+                Explore open advertisements posted by brands looking for creators. Submit your proposals, ask questions, and chat directly in real-time.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <Link to="/profile" className="ui-button ui-btn--primary">
-                  Update Profile Details
+                <Link to="/campaigns" className="ui-button ui-btn--primary">
+                  Explore Open Brand Deals
                 </Link>
-                <Link to="/conversations" className="ui-button ui-btn--outline">
+                <Link to="/conversations" className="ui-button ui-btn--secondary">
                   View Message Inbox
+                </Link>
+                <Link to="/profile" className="ui-button ui-btn--outline">
+                  Update Media Kit
                 </Link>
               </div>
             </div>
@@ -150,24 +190,24 @@ export default function DashboardPage() {
         {/* Right: Informational Bento Card */}
         <Card variant="glass" padding="lg">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <Badge variant="accent">Marketplace Note</Badge>
+            <Badge variant="accent">Collaboration Best Practice</Badge>
           </div>
           <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>
-            {isBrand ? 'Transparent Rates Upfront' : 'Direct Brand Connections'}
+            {isBrand ? 'Structured Briefs = Better Pitches' : 'Stand Out With Your Pitch'}
           </h3>
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
             {isBrand
-              ? 'Every creator listed on Brand2Influence sets their minimum deliverables upfront, saving hours of cold reachout and negotiations.'
-              : 'Brands reach out directly with brief proposals. Ensure your notifications and message inbox are checked regularly.'}
+              ? 'Include exact deliverables (e.g. 1 Reel + 2 Stories) and target follower ranges in your advertisement to attract the most suitable talent.'
+              : 'When pitching to an ad, mention your average view metrics and include a direct link to a past reel matching the brand’s niche.'}
           </p>
           <div style={{ padding: '14px', borderRadius: 'var(--radius-md)', background: 'var(--color-surface-3)', border: '1px solid var(--color-border)' }}>
             <small style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
-              PRO TIP
+              DIRECT CHAT
             </small>
             <span style={{ fontSize: '12px', color: 'var(--color-neutral-muted)' }}>
               {isBrand
-                ? 'Specify campaign dates and sample reel concepts in your first message for faster turnaround.'
-                : 'Keep your portfolio links active with your latest viral or highest engagement reels.'}
+                ? 'Applications create direct messaging threads linked to your campaign brief.'
+                : 'Brands receive your initial proposal immediately in their collaboration inbox.'}
             </span>
           </div>
         </Card>
@@ -175,3 +215,4 @@ export default function DashboardPage() {
     </main>
   )
 }
+

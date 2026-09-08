@@ -20,26 +20,39 @@ function AuthCard({ eyebrow = 'Brand2Influence Access', title, subtitle = null, 
 export function LoginPage() {
   const nav = useNavigate()
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user) {
+    if (profile?.role === 'admin') return <Navigate to="/admin" replace />
+    return <Navigate to={location.state?.from || '/dashboard'} replace />
+  }
 
   const submit = async (e) => {
     e.preventDefault()
     setBusy(true)
     setError('')
     try {
-      await authService.signIn(form)
-      nav(location.state?.from || '/dashboard')
+      const res = await authService.signIn(form)
+      if (res?.user?.role === 'admin') {
+        nav('/admin')
+      } else {
+        nav(location.state?.from || '/dashboard')
+      }
     } catch (err) {
-      setError(err.message)
+      const msg = err.message || ''
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        setError('Your email has not been confirmed yet. Please verify your inbox or try logging in again.')
+      } else {
+        setError(msg)
+      }
     } finally {
       setBusy(false)
     }
   }
+
 
   return (
     <AuthCard title="Welcome back" subtitle="Log in to manage your creator collaborations and messages.">

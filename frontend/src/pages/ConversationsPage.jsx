@@ -51,9 +51,21 @@ export function ConversationsPage() {
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <Avatar name={c.otherParticipant?.name || 'User'} size="sm" tone="secondary" />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <b style={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {c.otherParticipant?.name || 'Collaboration Thread'}
-                    </b>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '6px' }}>
+                      <b style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {c.otherParticipant?.name || 'Collaboration Thread'}
+                      </b>
+                      {c.campaign && (
+                        <span style={{ fontSize: '10px', color: 'var(--color-secondary)', fontWeight: 600, background: 'var(--color-surface-3)', padding: '2px 6px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
+                          📢 Ad
+                        </span>
+                      )}
+                    </div>
+                    {c.campaign && (
+                      <div style={{ fontSize: '11px', color: 'var(--color-neutral-subtle)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        Brief: {c.campaign.title}
+                      </div>
+                    )}
                     <small style={{ color: 'var(--color-text-tertiary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                       {c.lastMessage?.content || 'No messages yet'}
                     </small>
@@ -86,11 +98,21 @@ export function ConversationThreadPage() {
   const { id } = useParams()
   const nav = useNavigate()
   const [messages, setMessages] = useState(null)
+  const [activeConv, setActiveConv] = useState(null)
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
+    // Fetch conversation info
+    conversationsService
+      .list()
+      .then((res) => {
+        const found = res.items?.find((x) => x.id === id)
+        if (found) setActiveConv(found)
+      })
+      .catch(() => {})
+
     messagesService
       .list(id)
       .then((x) => setMessages(x.items))
@@ -127,13 +149,26 @@ export function ConversationThreadPage() {
 
   return (
     <main className="page thread">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-        <Button variant="secondary" size="sm" onClick={() => nav('/conversations')}>
-          ← Back to Inbox
-        </Button>
-        <div className="overline">
-          <i /> Active Thread
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Button variant="secondary" size="sm" onClick={() => nav('/conversations')}>
+            ← Back to Inbox
+          </Button>
+          <div className="overline">
+            <i /> {activeConv?.otherParticipant?.name ? `Chat with ${activeConv.otherParticipant.name}` : 'Active Thread'}
+          </div>
         </div>
+
+        {activeConv?.campaign && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+              📢 Campaign: <b>{activeConv.campaign.title}</b>
+            </span>
+            <Link to={`/campaigns/${activeConv.campaign.id}`} className="ui-button ui-btn--outline ui-btn--sm" style={{ padding: '2px 8px', fontSize: '11px' }}>
+              View Ad Brief
+            </Link>
+          </div>
+        )}
       </div>
 
       {error && <ErrorState error={error} />}
@@ -150,7 +185,7 @@ export function ConversationThreadPage() {
             messages.map((m) => (
               <div key={m.id} className="message">
                 <b>{m.senderName || 'Participant'}</b>
-                <span>{m.content}</span>
+                <span style={{ whiteSpace: 'pre-line' }}>{m.content}</span>
               </div>
             ))
           )}
@@ -161,7 +196,7 @@ export function ConversationThreadPage() {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type your message or brief questions..."
+          placeholder="Type your message or pitch questions..."
           aria-label="Write a message"
         />
         <Button disabled={busy || !text.trim()} loading={busy}>
@@ -171,3 +206,4 @@ export function ConversationThreadPage() {
     </main>
   )
 }
+

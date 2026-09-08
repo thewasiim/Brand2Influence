@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { adminService } from '../../services/admin'
 import {
   EmptyState,
@@ -8,6 +9,7 @@ import {
   BentoGrid,
   Badge,
   Input,
+  Button,
 } from '../../components/ui'
 
 function useAdmin(load) {
@@ -15,15 +17,19 @@ function useAdmin(load) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const reload = () => {
     setLoading(true)
     load()
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    reload()
   }, [])
 
-  return { data, error, loading }
+  return { data, error, loading, reload }
 }
 
 export function AdminDashboardPage() {
@@ -37,7 +43,7 @@ export function AdminDashboardPage() {
             <i /> System Overview
           </div>
           <h1 style={{ marginTop: '6px' }}>Platform Activity</h1>
-          <p>Real-time metrics for users, onboarding submissions, and collaboration activity.</p>
+          <p>Real-time metrics for users, open brand advertisements, and collaboration activity.</p>
         </div>
       </div>
 
@@ -144,6 +150,141 @@ export function AdminUsersPage({ role }) {
   )
 }
 
+export function AdminCampaignsPage() {
+  const [query, setQuery] = useState('')
+  const { data, error, loading, reload } = useAdmin(() => adminService.campaigns({ query }))
+
+  const handleToggleStatus = async (item) => {
+    const nextStatus = item.status === 'active' ? 'paused' : 'active'
+    try {
+      await adminService.updateCampaign(item.id, { status: nextStatus })
+      reload()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to permanently delete this campaign advertisement?')) return
+    try {
+      await adminService.deleteCampaign(id)
+      reload()
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+
+  const filteredItems = data?.items?.filter((c) => {
+    if (!query.trim()) return true
+    const q = query.toLowerCase()
+    return (
+      c.title?.toLowerCase().includes(q) ||
+      c.niche?.toLowerCase().includes(q) ||
+      c.platform?.toLowerCase().includes(q) ||
+      c.brandName?.toLowerCase().includes(q)
+    )
+  })
+
+  return (
+    <main className="page">
+      <div className="page-heading">
+        <div>
+          <div className="overline">
+            <i /> Campaign Moderation
+          </div>
+          <h1 style={{ marginTop: '6px' }}>Brand Advertisements</h1>
+          <p>Review, pause, or remove sponsored ad briefs across all brands.</p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '400px', marginBottom: '24px' }}>
+        <Input
+          placeholder="Filter by title, niche, platform, or brand..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search campaigns"
+        />
+      </div>
+
+      {error && <ErrorState error={error} />}
+
+      {loading ? (
+        <LoadingState label="Loading campaign advertisements…" />
+      ) : filteredItems?.length ? (
+        <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-xl)', background: 'var(--color-surface-1)' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Campaign Title</th>
+                <th>Brand Name</th>
+                <th>Platform & Niche</th>
+                <th>Budget</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((c) => (
+                <tr key={c.id}>
+                  <td>
+                    <b>{c.title}</b>
+                    <small style={{ display: 'block', color: 'var(--color-text-tertiary)' }}>
+                      Min: {c.target_followers_min || 'Any'} followers
+                    </small>
+                  </td>
+                  <td>
+                    <div>{c.brandName}</div>
+                    <small style={{ color: 'var(--color-text-tertiary)' }}>{c.brandEmail}</small>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <Badge variant="primary">{c.platform}</Badge>
+                      <Badge variant="accent">{c.niche}</Badge>
+                    </div>
+                  </td>
+                  <td style={{ fontWeight: 600, color: 'var(--color-secondary)' }}>
+                    {c.budget_range}
+                  </td>
+                  <td>
+                    <Badge variant={c.status === 'active' ? 'secondary' : 'outline'}>
+                      {c.status.toUpperCase()}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <Link to={`/campaigns/${c.id}`} className="ui-button ui-btn--secondary ui-btn--sm" style={{ padding: '2px 8px', fontSize: '11px' }}>
+                        View
+                      </Link>
+                      <button
+                        type="button"
+                        className="ui-button ui-btn--outline ui-btn--sm"
+                        style={{ padding: '2px 8px', fontSize: '11px' }}
+                        onClick={() => handleToggleStatus(c)}
+                      >
+                        {c.status === 'active' ? 'Pause' : 'Activate'}
+                      </button>
+                      <button
+                        type="button"
+                        className="ui-button ui-btn--outline ui-btn--sm"
+                        style={{ padding: '2px 8px', fontSize: '11px', color: 'var(--color-error)' }}
+                        onClick={() => handleDelete(c.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <EmptyState>No campaign advertisements found.</EmptyState>
+      )}
+    </main>
+  )
+}
+
 export function ReportsPage() {
   return (
     <main className="page">
@@ -179,3 +320,4 @@ export function SettingsPage() {
     </main>
   )
 }
+

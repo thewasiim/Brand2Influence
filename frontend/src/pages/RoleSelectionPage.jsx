@@ -1,15 +1,23 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { authService } from '../services/auth'
 import { useAuth } from '../context/AuthContext'
 import { Button, ErrorState, Badge } from '../components/ui'
 
 export default function RoleSelectionPage() {
   const nav = useNavigate()
-  const { refreshProfile } = useAuth()
+  const { profile, refreshProfile, loading } = useAuth()
   const [role, setRole] = useState('brand')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+
+  // Redirect admin directly to admin panel, and users who already have roles to dashboard
+  if (!loading && profile?.role) {
+    if (profile.role === 'admin') {
+      return <Navigate to="/admin" replace />
+    }
+    return <Navigate to="/dashboard" replace />
+  }
 
   const submit = async () => {
     setBusy(true)
@@ -24,6 +32,7 @@ export default function RoleSelectionPage() {
       setBusy(false)
     }
   }
+
 
   return (
     <main className="setup">
