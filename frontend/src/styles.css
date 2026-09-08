@@ -45,10 +45,10 @@
   --color-bg: #FDFAE2;
   --color-bg-elevated: #FFFFFF;
   --color-surface-1: #FFFFFF;
-  --color-surface-2: #FDFAE2;
-  --color-surface-3: #F5F1CB;
-  --color-surface-glass: rgba(255, 255, 255, 0.85);
-  --color-surface-glass-heavy: rgba(255, 255, 255, 0.95);
+  --color-surface-2: #FFFFFF;
+  --color-surface-3: #FFFFFF;
+  --color-surface-glass: rgba(255, 255, 255, 0.90);
+  --color-surface-glass-heavy: rgba(255, 255, 255, 0.98);
 
   /* Typography Colors */
   --color-text-primary: #1D1D1F;
@@ -1696,7 +1696,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  background: #FAFAFA;
+  background: #FFFFFF;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 10px 14px;
@@ -1729,7 +1729,7 @@ p {
   min-width: 0;
   box-sizing: border-box;
   border: 1px solid rgba(44, 48, 21, 0.12);
-  background: #FDFAE2;
+  background: #FFFFFF;
   border-radius: 9999px;
   padding: 8px 14px;
   font-size: 13.5px;
@@ -3017,7 +3017,7 @@ footer>small i {
   }
 
   .search-field-item {
-    background: #FAFAFA;
+    background: #FFFFFF;
     padding: 10px 12px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
