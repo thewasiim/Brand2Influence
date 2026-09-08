@@ -111,7 +111,7 @@ export function AdminUsersPage({ role }) {
       {loading ? (
         <LoadingState label="Loading users…" />
       ) : filteredUsers?.length ? (
-        <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-xl)', background: 'var(--color-surface-1)' }}>
+        <div className="table-responsive">
           <table>
             <thead>
               <tr>
@@ -211,7 +211,7 @@ export function AdminCampaignsPage() {
       {loading ? (
         <LoadingState label="Loading campaign advertisements…" />
       ) : filteredItems?.length ? (
-        <div style={{ overflowX: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-xl)', background: 'var(--color-surface-1)' }}>
+        <div className="table-responsive">
           <table>
             <thead>
               <tr>
@@ -237,7 +237,7 @@ export function AdminCampaignsPage() {
                     <small style={{ color: 'var(--color-text-tertiary)' }}>{c.brandEmail}</small>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       <Badge variant="primary">{c.platform}</Badge>
                       <Badge variant="accent">{c.niche}</Badge>
                     </div>
@@ -251,14 +251,14 @@ export function AdminCampaignsPage() {
                     </Badge>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <Link to={`/campaigns/${c.id}`} className="ui-button ui-btn--secondary ui-btn--sm" style={{ padding: '2px 8px', fontSize: '11px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      <Link to={`/campaigns/${c.id}`} className="ui-button ui-btn--secondary ui-btn--sm" style={{ padding: '4px 10px', fontSize: '12px' }}>
                         View
                       </Link>
                       <button
                         type="button"
                         className="ui-button ui-btn--outline ui-btn--sm"
-                        style={{ padding: '2px 8px', fontSize: '11px' }}
+                        style={{ padding: '4px 10px', fontSize: '12px' }}
                         onClick={() => handleToggleStatus(c)}
                       >
                         {c.status === 'active' ? 'Pause' : 'Activate'}
@@ -266,7 +266,7 @@ export function AdminCampaignsPage() {
                       <button
                         type="button"
                         className="ui-button ui-btn--outline ui-btn--sm"
-                        style={{ padding: '2px 8px', fontSize: '11px', color: 'var(--color-error)' }}
+                        style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--color-error)' }}
                         onClick={() => handleDelete(c.id)}
                       >
                         Delete

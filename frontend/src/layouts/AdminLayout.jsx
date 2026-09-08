@@ -1,9 +1,28 @@
-import React from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export function AdminLayout() {
   const { signOut } = useAuth?.() || {}
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
+
+  // Close mobile drawer when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [location.pathname])
+
+  // Prevent background scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
 
   const navItems = [
     { to: '/admin', label: 'Overview', icon: (
@@ -47,7 +66,6 @@ export function AdminLayout() {
         <line x1="6" x2="6" y1="20" y2="14" />
       </svg>
     )},
-
     { to: '/admin/settings', label: 'Settings', icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -56,40 +74,111 @@ export function AdminLayout() {
     )}
   ]
 
+  const navLinks = (
+    <>
+      <b>Administration</b>
+      {navItems.map(({ to, label, icon }) => (
+        <NavLink end={to === '/admin'} to={to} key={to} onClick={() => setMobileMenuOpen(false)}>
+          {icon}
+          {label}
+        </NavLink>
+      ))}
+
+      <NavLink to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" x2="5" y1="12" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+        Back to app
+      </NavLink>
+
+      {signOut && (
+        <button
+          type="button"
+          className="portal-logout-btn"
+          onClick={() => {
+            setMobileMenuOpen(false)
+            signOut()
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" x2="9" y1="12" y2="12" />
+          </svg>
+          Log out
+        </button>
+      )}
+    </>
+  )
+
   return (
     <div className="portal admin">
-      <aside>
+      {/* Mobile Top Header Bar (< 1024px) */}
+      <header className="portal-mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link to="/" className="brand">
+            Brand2Influence
+          </Link>
+          <span className="portal-role-badge portal-role-badge--admin">Admin</span>
+        </div>
+
+        <button
+          type="button"
+          className="menu"
+          aria-label="Toggle Admin Navigation"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {mobileMenuOpen ? (
+              <>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </>
+            ) : (
+              <>
+                <line x1="4" y1="7" x2="20" y2="7" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="17" x2="20" y2="17" />
+              </>
+            )}
+          </svg>
+        </button>
+
+        {mobileMenuOpen && (
+          <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} />
+        )}
+
+        {mobileMenuOpen && (
+          <nav className="portal-mobile-drawer open">
+            <div className="nav-drawer-header">
+              <span className="nav-drawer-title">Administration</span>
+              <button
+                type="button"
+                className="nav-drawer-close"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            {navLinks}
+          </nav>
+        )}
+      </header>
+
+      {/* Desktop Left Sidebar (>= 1024px) */}
+      <aside className="portal-desktop-aside">
         <Link to="/" className="brand">
           Brand2Influence
         </Link>
-        <b>Administration</b>
-        {navItems.map(({ to, label, icon }) => (
-          <NavLink end={to === '/admin'} to={to} key={to}>
-            {icon}
-            {label}
-          </NavLink>
-        ))}
-
-        <NavLink to="/dashboard">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" x2="5" y1="12" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-          Back to app
-        </NavLink>
-
-        {signOut && (
-          <button type="button" onClick={signOut}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" x2="9" y1="12" y2="12" />
-            </svg>
-            Log out
-          </button>
-        )}
+        {navLinks}
       </aside>
-      <section>
+
+      <section className="portal-main-section">
         <header className="admin-topbar">Platform administration</header>
         <Outlet />
       </section>
