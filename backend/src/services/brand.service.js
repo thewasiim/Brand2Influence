@@ -1,0 +1,3 @@
+import { adminDb } from '../config/supabase.js'
+import { ApiError, boundedText } from '../utils/api-error.js'
+export async function save(user,payload){if(user.role!=='brand')throw new ApiError(403,'Brand role required','FORBIDDEN');const record={user_id:user.id,business_name:boundedText(payload.businessName,'business name',150),business_type:boundedText(payload.businessType,'business type',100),budget_range:boundedText(payload.budgetRange,'budget range',100),location:boundedText(payload.location,'location',100)};const {data,error}=await adminDb().from('brand_profiles').upsert(record,{onConflict:'user_id'}).select().single();if(error)throw error;return data}

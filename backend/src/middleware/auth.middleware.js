@@ -1,0 +1,3 @@
+import { authClient } from '../config/supabase.js'
+import { ApiError } from '../utils/api-error.js'
+export async function authenticate(request, _response, next) { try { const token=request.headers.authorization?.replace(/^Bearer\s+/i,''); if(!token) throw new ApiError(401,'Authentication is required','UNAUTHENTICATED'); const { data, error }=await authClient().auth.getUser(token); if(error||!data.user) throw new ApiError(401,'Invalid or expired session','UNAUTHENTICATED'); request.auth={ id:data.user.id, email:data.user.email, name:data.user.user_metadata?.name, token }; next() } catch(error) { next(error) } }

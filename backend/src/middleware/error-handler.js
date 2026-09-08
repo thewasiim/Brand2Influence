@@ -1,0 +1,1 @@
+export function errorHandler(error,_request,response,_next){const status=error.status||500;if(status>=500)console.error(error);response.status(status).json({error:{code:error.code||'INTERNAL_ERROR',message:status>=500?'Unexpected server error':error.message}})}
