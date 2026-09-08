@@ -7,6 +7,12 @@ export const authService = {
     if (error) throw error
     return data
   },
+  register: async (payload) => {
+    return api('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+  },
   signIn: async ({ email, password }) => {
     const { data, error } = await requireSupabase().auth.signInWithPassword({ email, password })
     if (error) throw error
@@ -22,5 +28,10 @@ export const authService = {
     if (error) throw error
   },
   me: () => api('/auth/me'),
+  getProfile: () => api('/auth/profile'),
+  updateProfile: (data) => api('/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
   chooseRole: role => api('/auth/role', { method: 'POST', body: JSON.stringify({ role }) }),
 }

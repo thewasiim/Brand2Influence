@@ -1907,6 +1907,80 @@ p {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
 }
 
+.auth-card--wide {
+  width: min(680px, 100%);
+  padding: 40px 44px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .form-row-2,
+  .form-row-3 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .auth-card--wide {
+    padding: 28px 20px;
+  }
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.step-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: var(--color-surface-2);
+  transition: all var(--transition-fast);
+}
+
+.step-item.is-active {
+  background: #0A0A0A;
+  color: #FFFFFF;
+}
+
+.step-item.is-done {
+  background: rgba(10, 10, 10, 0.08);
+  color: #0A0A0A;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 11px;
+}
+
+.step-item.is-active .step-number {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
 .setup {
   width: min(780px, 100%);
   margin: 0 auto;

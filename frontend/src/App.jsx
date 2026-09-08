@@ -12,6 +12,7 @@ import { BrandOnboardingPage } from './pages/brand/BrandPages'
 import { InfluencerOnboardingPage, DiscoveryPage, InfluencerProfilePage } from './pages/influencer/InfluencerPages'
 import { CampaignDiscoveryPage, CampaignDetailPage, BrandCampaignsPage } from './pages/campaign/CampaignPages'
 import DashboardPage from './pages/DashboardPage'
+import ProfileManagementPage from './pages/ProfileManagementPage'
 import { ConversationsPage, ConversationThreadPage } from './pages/ConversationsPage'
 import { AdminDashboardPage, AdminUsersPage, AdminCampaignsPage, ReportsPage, SettingsPage } from './pages/admin/AdminPages'
 
@@ -47,7 +48,7 @@ export default function App() {
 
         <Route element={<UserLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/profile" element={<InfluencerOnboardingPage />} />
+          <Route path="/profile" element={<ProfileManagementPage />} />
           <Route path="/conversations" element={<ConversationsPage />} />
           <Route path="/conversations/:id" element={<ConversationThreadPage />} />
           <Route element={<RoleProtectedRoute roles={['brand', 'admin']} />}>
