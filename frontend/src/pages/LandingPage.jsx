@@ -11,6 +11,8 @@ import {
   StaggerContainer,
   StaggerItem,
   CountUp,
+  ReviewSlider,
+  FaqAccordion,
 } from '../components/ui'
 import BrandCard from '../components/ProfileCard/BrandCard'
 import PixelCard from '../components/PixelCard/PixelCard'
@@ -611,7 +613,37 @@ export default function LandingPage() {
           </StaggerContainer>
         </section>
 
-        {/* 10. FINAL CTA */}
+        {/* 10. REVIEWS & TESTIMONIALS SLIDER */}
+        <section className="section" id="reviews">
+          <FadeIn className="page-heading">
+            <div>
+              <span className="eyebrow">Real Stories & Proven Results</span>
+              <h2>Loved by Growing Brands & Top Creators</h2>
+            </div>
+            <p>Discover how verified partnerships drive authentic audience engagement and predictable growth.</p>
+          </FadeIn>
+
+          <FadeIn delay={0.1} distance={20} style={{ marginTop: '36px' }}>
+            <ReviewSlider />
+          </FadeIn>
+        </section>
+
+        {/* 11. FAQ ACCORDION (QUESTION ANSWERING) */}
+        <section className="section" id="faq">
+          <FadeIn className="page-heading">
+            <div>
+              <span className="eyebrow">Got Questions?</span>
+              <h2>Frequently Asked Questions</h2>
+            </div>
+            <p>Everything you need to know about navigating the Brand2Influence marketplace.</p>
+          </FadeIn>
+
+          <FadeIn delay={0.1} distance={20} style={{ marginTop: '36px' }}>
+            <FaqAccordion />
+          </FadeIn>
+        </section>
+
+        {/* 12. FINAL CTA */}
         <section className="final-cta-bento">
           <FadeIn className="final-cta-content" distance={24} duration={0.75} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
             <span className="eyebrow" style={{ color: 'var(--color-accent)', textAlign: 'center' }}>Your Next Collaboration Starts Here</span>
@@ -647,13 +679,31 @@ export default function LandingPage() {
           <div />
           <nav>
             <button type="button" onClick={() => scrollTo('marketplace')}>Discover</button>
+            <button type="button" onClick={() => scrollTo('reviews')}>Reviews</button>
+            <button type="button" onClick={() => scrollTo('faq')}>FAQ</button>
             <button type="button" onClick={() => scrollTo('how-it-works')}>How it works</button>
             <button type="button" onClick={() => navigate('/auth/signup')}>Join</button>
             <button type="button" onClick={() => navigate('/auth/login')}>Log in</button>
           </nav>
         </div>
-        <small>
+        <small style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <span>© 2026 Brand2Influence. All rights reserved.</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            Made by{' '}
+            <a
+              href="https://www.instagram.com/thewasiim/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: 'var(--color-secondary)',
+                fontWeight: 600,
+                textDecoration: 'underline',
+                cursor: 'pointer',
+              }}
+            >
+              thewasiim
+            </a>
+          </span>
           <i>Designed for meaningful creator partnerships.</i>
         </small>
       </FadeIn>

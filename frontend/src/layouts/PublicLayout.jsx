@@ -29,31 +29,6 @@ export function PublicLayout() {
           Brand2Influence
         </Link>
 
-        {/* Desktop Quick Nav Links */}
-        <nav className="nav-desktop-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <NavLink
-            to="/influencers"
-            className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}
-            style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--color-text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}
-          >
-            Search Creators
-          </NavLink>
-          <NavLink
-            to="/brands"
-            className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}
-            style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--color-text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}
-          >
-            Search Brands
-          </NavLink>
-          <NavLink
-            to="/campaigns"
-            className={({ isActive }) => `nav-link ${isActive ? 'nav-link--active' : ''}`}
-            style={{ fontSize: '13.5px', fontWeight: 500, color: 'var(--color-text-secondary)', textDecoration: 'none', transition: 'color 0.15s ease' }}
-          >
-            Brand Deals
-          </NavLink>
-        </nav>
-
         <div className="nav-actions">
           <UserAvatarMenu />
           <StaggeredMenu

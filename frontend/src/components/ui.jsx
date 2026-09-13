@@ -474,3 +474,5 @@ export function EmptyState({
 // 17. Animations (Framer Motion)
 export { FadeIn, StaggerContainer, StaggerItem, ScaleIn, LUXURY_EASING } from './animations'
 export { default as CountUp } from './CountUp/CountUp'
+export { default as ReviewSlider } from './ReviewSlider/ReviewSlider'
+export { default as FaqAccordion } from './FaqAccordion/FaqAccordion'
