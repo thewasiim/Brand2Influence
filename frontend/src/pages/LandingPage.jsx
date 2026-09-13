@@ -10,6 +10,7 @@ import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
+  CountUp,
 } from '../components/ui'
 import BrandCard from '../components/ProfileCard/BrandCard'
 import PixelCard from '../components/PixelCard/PixelCard'
@@ -239,11 +240,15 @@ export default function LandingPage() {
               }}
             >
               <StaggerItem>
-                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>500+</b>
+                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>
+                  <CountUp from={0} to={500} duration={1.8} separator="," suffix="+" />
+                </b>
                 <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Verified Creators</small>
               </StaggerItem>
               <StaggerItem>
-                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>100%</b>
+                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>
+                  <CountUp from={0} to={100} duration={1.6} suffix="%" />
+                </b>
                 <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Upfront Rates</small>
               </StaggerItem>
               <StaggerItem>
@@ -351,8 +356,8 @@ export default function LandingPage() {
               <p>
                 Filter by verified engagement rate, starting reel rate, and exact city. Reach creators directly and coordinate deliverables in one place.
               </p>
-              <Button variant="secondary" size="md" onClick={() => navigate('/auth/signup')}>
-                Explore as a Brand →
+              <Button variant="secondary" size="md" onClick={() => navigate('/brands')}>
+                Search Brands & Deals →
               </Button>
             </StaggerItem>
 
@@ -367,8 +372,8 @@ export default function LandingPage() {
               <p>
                 Set your upfront reel rates, showcase your portfolio links, and receive qualified collaboration requests from brands that value your creative voice.
               </p>
-              <Button variant="primary" size="md" onClick={() => navigate('/auth/signup')}>
-                Join as a Creator →
+              <Button variant="primary" size="md" onClick={() => navigate('/influencers')}>
+                Search Verified Creators →
               </Button>
             </StaggerItem>
           </StaggerContainer>

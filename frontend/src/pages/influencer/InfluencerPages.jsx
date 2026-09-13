@@ -21,6 +21,17 @@ import {
   StaggerItem,
 } from '../../components/ui'
 
+const CREATOR_NICHES = [
+  'All Niches',
+  'Fashion',
+  'Beauty',
+  'Food',
+  'Fitness',
+  'Travel',
+  'Tech',
+  'Lifestyle',
+]
+
 export function InfluencerOnboardingPage() {
   const nav = useNavigate()
   const [form, setForm] = useState({
@@ -191,6 +202,8 @@ export function InfluencerOnboardingPage() {
 }
 
 export function DiscoveryPage() {
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
   const [filters, setFilters] = useState({
     niche: '',
     location: '',
@@ -206,7 +219,9 @@ export function DiscoveryPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await influencersService.list(filters)
+      const payload = { ...filters }
+      if (search.trim()) payload.search = search.trim()
+      const res = await influencersService.list(payload)
       setData(res)
     } catch (err) {
       setError(err.message)
@@ -217,36 +232,38 @@ export function DiscoveryPage() {
 
   useEffect(() => {
     load()
-  }, [])
+  }, [filters.niche])
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    load()
+  }
 
   return (
     <main className="page">
       <FadeIn className="page-heading">
         <div>
           <div className="overline">
-            <i /> Creator Directory
+            <i /> Creator Directory & Discovery
           </div>
-          <h1 style={{ marginTop: '6px' }}>Discover verified talent.</h1>
+          <h1 style={{ marginTop: '6px' }}>Discover Verified Creators</h1>
           <p>Filter by creative niche, city location, audience scale, and starting reel rates.</p>
         </div>
       </FadeIn>
 
-      {/* BENTO FILTER BAR */}
+      {/* BENTO SEARCH & FILTER PANEL */}
       <FadeIn delay={0.08} distance={18}>
         <form
           className="bento-search-panel"
-          style={{ marginBottom: '32px' }}
-          onSubmit={(e) => {
-            e.preventDefault()
-            load()
-          }}
+          style={{ marginBottom: '24px' }}
+          onSubmit={handleSearchSubmit}
         >
-          <div className="search-field-item">
-            <label>Niche</label>
+          <div className="search-field-item" style={{ flex: 1.5 }}>
+            <label>Search Keyword</label>
             <input
-              placeholder="e.g. Fashion, Food, Tech"
-              value={filters.niche}
-              onChange={(e) => setFilters({ ...filters, niche: e.target.value })}
+              placeholder="Creator name, username, bio..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
@@ -290,9 +307,52 @@ export function DiscoveryPage() {
           </div>
 
           <Button type="submit" variant="primary">
-            Apply Filters
+            Search
           </Button>
         </form>
+      </FadeIn>
+
+      {/* QUICK NICHE PILLS */}
+      <FadeIn delay={0.12} distance={14} style={{ marginBottom: '28px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginRight: '4px' }}>
+            Niche:
+          </span>
+          {CREATOR_NICHES.map((n) => {
+            const active = (!filters.niche && n === 'All Niches') || filters.niche.toLowerCase() === n.toLowerCase()
+            return (
+              <button
+                key={n}
+                type="button"
+                className={`chip ${active ? 'chip--active' : ''}`}
+                onClick={() => setFilters({ ...filters, niche: n === 'All Niches' ? '' : n })}
+              >
+                {n}
+              </button>
+            )
+          })}
+          {(filters.niche || filters.location || filters.followersMin || filters.followersMax || filters.budget || search.trim()) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilters({ niche: '', location: '', followersMin: '', followersMax: '', budget: '' })
+                setSearch('')
+                load()
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-secondary)',
+                fontSize: '12px',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                textDecoration: 'underline',
+              }}
+            >
+              Reset filters
+            </button>
+          )}
+        </div>
       </FadeIn>
 
       {error && <ErrorState error={error} onRetry={load} />}
@@ -301,7 +361,7 @@ export function DiscoveryPage() {
         <LoadingState label="Loading creators…" />
       ) : data?.items?.length ? (
         <StaggerContainer
-          key={filters.niche + filters.location + filters.followersMin + filters.followersMax + filters.budget}
+          key={search + filters.niche + filters.location + filters.followersMin + filters.followersMax + filters.budget}
           className="bento-grid bento-grid--3"
           staggerDelay={0.07}
         >
@@ -310,6 +370,8 @@ export function DiscoveryPage() {
               <InfluencerCard
                 creator={creator}
                 size={idx === 0 ? 'large' : 'medium'}
+                onSelect={() => navigate(`/influencers/${creator.id}`)}
+                onMessage={() => navigate(`/influencers/${creator.id}`)}
               />
             </StaggerItem>
           ))}
@@ -323,6 +385,7 @@ export function DiscoveryPage() {
               size="sm"
               onClick={() => {
                 setFilters({ niche: '', location: '', followersMin: '', followersMax: '', budget: '' })
+                setSearch('')
                 load()
               }}
             >
@@ -372,6 +435,9 @@ export function InfluencerProfilePage() {
     return (
       <main className="page">
         <ErrorState error={error} />
+        <Button style={{ marginTop: '16px' }} onClick={() => nav('/influencers')}>
+          ← Back to Creators Directory
+        </Button>
       </main>
     )
   }
@@ -384,6 +450,12 @@ export function InfluencerProfilePage() {
 
   return (
     <main className="page">
+      <div style={{ marginBottom: '20px' }}>
+        <Button variant="secondary" size="sm" onClick={() => nav('/influencers')}>
+          ← Back to All Creators
+        </Button>
+      </div>
+
       {/* Profile Bento Header */}
       <Card variant="glass" padding="lg" style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -395,7 +467,7 @@ export function InfluencerProfilePage() {
           />
           <div style={{ flex: 1, minWidth: '240px' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '4px' }}>
-              <h1 style={{ fontSize: '28px' }}>{creator.name}</h1>
+              <h1 style={{ fontSize: '28px', fontWeight: 700 }}>{creator.name}</h1>
               <Badge variant="accent">Verified</Badge>
             </div>
             <p style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
@@ -407,7 +479,7 @@ export function InfluencerProfilePage() {
           </div>
           <div>
             <Button size="lg" variant="primary" loading={busy} onClick={message}>
-              Message Creator
+              💬 Message Creator
             </Button>
           </div>
         </div>

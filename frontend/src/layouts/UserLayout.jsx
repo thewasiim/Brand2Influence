@@ -40,6 +40,22 @@ export function UserLayout() {
         Dashboard
       </NavLink>
 
+      <NavLink to="/influencers" onClick={() => setMobileMenuOpen(false)}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+        </svg>
+        Search Creators
+      </NavLink>
+
+      <NavLink to="/brands" onClick={() => setMobileMenuOpen(false)}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+        </svg>
+        Search Brands
+      </NavLink>
+
       {profile?.role === 'brand' ? (
         <NavLink to="/brand/campaigns" onClick={() => setMobileMenuOpen(false)}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -58,14 +74,6 @@ export function UserLayout() {
           Brand Deals
         </NavLink>
       )}
-
-      <NavLink to="/influencers" onClick={() => setMobileMenuOpen(false)}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-        </svg>
-        Discover
-      </NavLink>
 
       <NavLink to="/conversations" onClick={() => setMobileMenuOpen(false)}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

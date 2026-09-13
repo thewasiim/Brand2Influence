@@ -353,6 +353,10 @@ export function InfluencerCard({
 
   const reelRate = rateCard?.reel || creator.budget || 2500
 
+  const instagramUrl = rateCard?.instagram_url || creator.instagramUrl || (rateCard?.instagram_handle ? `https://instagram.com/${rateCard.instagram_handle.replace('@', '')}` : null)
+  const youtubeUrl = rateCard?.youtube_url || creator.youtubeUrl || null
+  const snapchatUrl = rateCard?.snapchat_url || creator.snapchatUrl || null
+
   return (
     <ProfileCard
       name={name}
@@ -364,6 +368,9 @@ export function InfluencerCard({
       engagementRate={`${engagementRate}%`}
       rate={`₹${Number(reelRate).toLocaleString()}`}
       contactText="Connect"
+      instagramUrl={instagramUrl}
+      youtubeUrl={youtubeUrl}
+      snapchatUrl={snapchatUrl}
       onContactClick={() => (onMessage ? onMessage(creator) : onSelect ? onSelect(creator) : null)}
       className={className}
     />
@@ -466,3 +473,4 @@ export function EmptyState({
 
 // 17. Animations (Framer Motion)
 export { FadeIn, StaggerContainer, StaggerItem, ScaleIn, LUXURY_EASING } from './animations'
+export { default as CountUp } from './CountUp/CountUp'

@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/auth'
+import { api } from '../services/api'
 import { Button, Input, Textarea, Badge, LoadingState, ErrorState } from '../components/ui'
 
 export default function ProfileManagementPage() {
   const { user, profile: authProfile, refreshProfile } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [syncingPlatform, setSyncingPlatform] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [syncNotice, setSyncNotice] = useState('')
 
   // Profile Form State
   const [formData, setFormData] = useState({
@@ -22,9 +25,13 @@ export default function ProfileManagementPage() {
     // Influencer specific
     niche: 'Fashion & Lifestyle',
     instagram_handle: '',
+    instagram_url: '',
     instagram_followers: '',
     facebook_followers: '',
+    youtube_url: '',
     youtube_subscribers: '',
+    snapchat_url: '',
+    snapchat_subscribers: '',
     other_platform: '',
     other_followers: '',
     reel_price: '',
@@ -74,9 +81,13 @@ export default function ProfileManagementPage() {
             // Influencer
             niche: inf.niche || 'Fashion & Lifestyle',
             instagram_handle: rateCard.instagram_handle || '',
+            instagram_url: rateCard.instagram_url || (rateCard.instagram_handle ? `https://instagram.com/${rateCard.instagram_handle.replace('@', '')}` : ''),
             instagram_followers: rateCard.instagram_followers || inf.followers_count || '',
             facebook_followers: rateCard.facebook_followers || '',
+            youtube_url: rateCard.youtube_url || '',
             youtube_subscribers: rateCard.youtube_subscribers || '',
+            snapchat_url: rateCard.snapchat_url || '',
+            snapchat_subscribers: rateCard.snapchat_subscribers || '',
             other_platform: rateCard.other_platform || '',
             other_followers: rateCard.other_followers || '',
             reel_price: rateCard.reel ?? '',
@@ -100,6 +111,59 @@ export default function ProfileManagementPage() {
     loadData()
   }, [user, authProfile])
 
+  const handleSyncSocial = async (platform, urlOrHandle, manualCount) => {
+    if (!urlOrHandle) {
+      setErrorMsg(`Please enter a valid ${platform} URL or handle first.`)
+      return
+    }
+    setSyncingPlatform(platform)
+    setSyncNotice('')
+    setErrorMsg('')
+
+    try {
+      const res = await api('/influencers/social-sync', {
+        method: 'POST',
+        body: JSON.stringify({
+          platform,
+          urlOrHandle,
+          manualFollowers: manualCount ? Number(manualCount) : undefined
+        })
+      })
+
+      if (res && res.success && res.stats) {
+        const stats = res.stats
+        if (platform === 'instagram') {
+          setFormData(prev => ({
+            ...prev,
+            instagram_handle: stats.handle || prev.instagram_handle,
+            instagram_url: stats.url || prev.instagram_url,
+            instagram_followers: stats.followers || prev.instagram_followers
+          }))
+        } else if (platform === 'youtube') {
+          setFormData(prev => ({
+            ...prev,
+            youtube_url: stats.url || prev.youtube_url,
+            youtube_subscribers: stats.subscribers || prev.youtube_subscribers
+          }))
+        } else if (platform === 'snapchat') {
+          setFormData(prev => ({
+            ...prev,
+            snapchat_url: stats.url || prev.snapchat_url,
+            snapchat_subscribers: stats.subscribers || prev.snapchat_subscribers
+          }))
+        }
+
+        setSyncNotice(`✨ ${platform.toUpperCase()} synced successfully! (${stats.followers || stats.subscribers || 0} followers/subscribers updated)`)
+        await refreshProfile()
+      }
+    } catch (err) {
+      console.error(`Error syncing ${platform}:`, err)
+      setErrorMsg(err.message || `Failed to sync ${platform} account.`)
+    } finally {
+      setSyncingPlatform(null)
+    }
+  }
+
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -122,14 +186,18 @@ export default function ProfileManagementPage() {
         updatePayload.influencer_profile = {
           niche: formData.niche,
           bio: formData.bio,
-          followers_count: Number(formData.instagram_followers || 0),
+          followers_count: Number(formData.instagram_followers || 0) + Number(formData.youtube_subscribers || 0) + Number(formData.snapchat_subscribers || 0),
           reel_price: Number(formData.reel_price || 0),
           story_price: Number(formData.story_price || 0),
           post_price: Number(formData.post_price || 0),
           instagram_handle: formData.instagram_handle.trim(),
+          instagram_url: formData.instagram_url.trim(),
           instagram_followers: Number(formData.instagram_followers || 0),
           facebook_followers: Number(formData.facebook_followers || 0),
+          youtube_url: formData.youtube_url.trim(),
           youtube_subscribers: Number(formData.youtube_subscribers || 0),
+          snapchat_url: formData.snapchat_url.trim(),
+          snapchat_subscribers: Number(formData.snapchat_subscribers || 0),
           other_platform: formData.other_platform.trim(),
           other_followers: Number(formData.other_followers || 0)
         }
@@ -306,13 +374,33 @@ export default function ProfileManagementPage() {
               }}
             >
               <div style={{ marginBottom: '18px', borderBottom: '1px solid var(--color-border)', paddingBottom: '12px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Social Media & Audience Reach</h2>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Social Media Accounts & Sync</h2>
                 <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px', margin: 0 }}>
-                  Update your followers and handles across platforms so brands can evaluate your profile.
+                  Enter your social media URLs or handles and click <strong>Sync & Verify</strong> to auto-pull live stats and feature clickable social badges on your creator card.
                 </p>
               </div>
 
-              <div className="form-row-2">
+              {syncNotice && (
+                <div
+                  style={{
+                    background: '#f0fdf4',
+                    color: '#15803d',
+                    border: '1px solid #bbf7d0',
+                    padding: '12px 16px',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span>{syncNotice}</span>
+                </div>
+              )}
+
+              <div style={{ marginBottom: '18px' }}>
                 <label className="field">
                   <span className="field-label">Content Niche</span>
                   <div className="field-input-wrap">
@@ -334,24 +422,157 @@ export default function ProfileManagementPage() {
                     </select>
                   </div>
                 </label>
-
-                <Input
-                  label="Instagram Handle"
-                  placeholder="@yourhandle"
-                  value={formData.instagram_handle}
-                  onChange={(e) => setFormData({ ...formData, instagram_handle: e.target.value })}
-                />
               </div>
 
-              <div className="form-row-3" style={{ marginTop: '12px' }}>
-                <Input
-                  label="Instagram Followers"
-                  type="number"
-                  placeholder="e.g. 25000"
-                  value={formData.instagram_followers}
-                  onChange={(e) => setFormData({ ...formData, instagram_followers: e.target.value })}
-                />
+              {/* 📸 INSTAGRAM SYNC BLOCK */}
+              <div
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '18px',
+                  marginBottom: '16px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '15px' }}>
+                    <span style={{ fontSize: '18px' }}>📸</span> Instagram Account
+                  </div>
+                  <Badge variant="neutral" style={{ fontSize: '11px' }}>Meta Graph API</Badge>
+                </div>
 
+                <div className="form-row-2">
+                  <Input
+                    label="Instagram URL or Handle"
+                    placeholder="https://instagram.com/yourhandle or @yourhandle"
+                    value={formData.instagram_url || formData.instagram_handle}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setFormData({ ...formData, instagram_url: val, instagram_handle: val })
+                    }}
+                  />
+
+                  <Input
+                    label="Followers Count"
+                    type="number"
+                    placeholder="e.g. 25000"
+                    value={formData.instagram_followers}
+                    onChange={(e) => setFormData({ ...formData, instagram_followers: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    loading={syncingPlatform === 'instagram'}
+                    disabled={syncingPlatform === 'instagram'}
+                    onClick={() => handleSyncSocial('instagram', formData.instagram_url || formData.instagram_handle, formData.instagram_followers)}
+                  >
+                    {syncingPlatform === 'instagram' ? 'Syncing Instagram…' : '🔄 Sync & Verify Instagram'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* ▶️ YOUTUBE SYNC BLOCK */}
+              <div
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '18px',
+                  marginBottom: '16px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '15px' }}>
+                    <span style={{ fontSize: '18px' }}>▶️</span> YouTube Channel
+                  </div>
+                  <Badge variant="neutral" style={{ fontSize: '11px' }}>YouTube Data API v3</Badge>
+                </div>
+
+                <div className="form-row-2">
+                  <Input
+                    label="YouTube Channel URL or Handle"
+                    placeholder="https://youtube.com/@yourchannel or @yourchannel"
+                    value={formData.youtube_url}
+                    onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                  />
+
+                  <Input
+                    label="Subscribers Count"
+                    type="number"
+                    placeholder="e.g. 50000"
+                    value={formData.youtube_subscribers}
+                    onChange={(e) => setFormData({ ...formData, youtube_subscribers: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    loading={syncingPlatform === 'youtube'}
+                    disabled={syncingPlatform === 'youtube'}
+                    onClick={() => handleSyncSocial('youtube', formData.youtube_url, formData.youtube_subscribers)}
+                  >
+                    {syncingPlatform === 'youtube' ? 'Syncing YouTube…' : '🔄 Sync & Verify YouTube'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* 👻 SNAPCHAT SYNC BLOCK */}
+              <div
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '18px',
+                  marginBottom: '16px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '15px' }}>
+                    <span style={{ fontSize: '18px' }}>👻</span> Snapchat Public Profile
+                  </div>
+                  <Badge variant="neutral" style={{ fontSize: '11px' }}>Public Profile Scraper</Badge>
+                </div>
+
+                <div className="form-row-2">
+                  <Input
+                    label="Snapchat Public Profile URL or Handle"
+                    placeholder="https://www.snapchat.com/add/yourhandle"
+                    value={formData.snapchat_url}
+                    onChange={(e) => setFormData({ ...formData, snapchat_url: e.target.value })}
+                  />
+
+                  <Input
+                    label="Subscribers Count"
+                    type="number"
+                    placeholder="e.g. 15000"
+                    value={formData.snapchat_subscribers}
+                    onChange={(e) => setFormData({ ...formData, snapchat_subscribers: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    loading={syncingPlatform === 'snapchat'}
+                    disabled={syncingPlatform === 'snapchat'}
+                    onClick={() => handleSyncSocial('snapchat', formData.snapchat_url, formData.snapchat_subscribers)}
+                  >
+                    {syncingPlatform === 'snapchat' ? 'Syncing Snapchat…' : '🔄 Sync & Verify Snapchat'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* OTHER SOCIAL PLATFORMS */}
+              <div className="form-row-3" style={{ marginTop: '16px' }}>
                 <Input
                   label="Facebook Followers"
                   type="number"
@@ -361,23 +582,14 @@ export default function ProfileManagementPage() {
                 />
 
                 <Input
-                  label="YouTube Subscribers"
-                  type="number"
-                  placeholder="e.g. 5000"
-                  value={formData.youtube_subscribers}
-                  onChange={(e) => setFormData({ ...formData, youtube_subscribers: e.target.value })}
-                />
-              </div>
-
-              <div className="form-row-2" style={{ marginTop: '12px' }}>
-                <Input
-                  label="Other Platform (e.g. Twitter / LinkedIn)"
+                  label="Other Platform (Twitter / LinkedIn)"
                   placeholder="e.g. Twitter / X"
                   value={formData.other_platform}
                   onChange={(e) => setFormData({ ...formData, other_platform: e.target.value })}
                 />
+
                 <Input
-                  label="Other Platform Followers"
+                  label="Other Followers"
                   type="number"
                   placeholder="e.g. 3500"
                   value={formData.other_followers}

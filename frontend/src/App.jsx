@@ -8,7 +8,7 @@ import { ProtectedRoute, RoleProtectedRoute, AdminRoute } from './components/Pro
 import LandingPage from './pages/LandingPage'
 import { LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage } from './pages/auth/AuthPages'
 import RoleSelectionPage from './pages/RoleSelectionPage'
-import { BrandOnboardingPage } from './pages/brand/BrandPages'
+import { BrandOnboardingPage, BrandDiscoveryPage, BrandProfilePage } from './pages/brand/BrandPages'
 import { InfluencerOnboardingPage, DiscoveryPage, InfluencerProfilePage } from './pages/influencer/InfluencerPages'
 import { CampaignDiscoveryPage, CampaignDetailPage, BrandCampaignsPage } from './pages/campaign/CampaignPages'
 import DashboardPage from './pages/DashboardPage'
@@ -46,12 +46,15 @@ export default function App() {
         <Route path="/contact" element={<LandingPage />} />
         <Route path="/discover" element={<DiscoveryPage />} />
         <Route path="/creators" element={<DiscoveryPage />} />
+        <Route path="/creators/:id" element={<InfluencerProfilePage />} />
+        <Route path="/influencers" element={<DiscoveryPage />} />
+        <Route path="/influencers/:id" element={<InfluencerProfilePage />} />
+        <Route path="/brands" element={<BrandDiscoveryPage />} />
+        <Route path="/brands/:id" element={<BrandProfilePage />} />
         <Route path="/brand-deals" element={<CampaignDiscoveryPage />} />
         <Route path="/how-it-works" element={<LandingPage />} />
         <Route path="/for-brands" element={<LandingPage />} />
         <Route path="/for-influencers" element={<LandingPage />} />
-        <Route path="/influencers" element={<DiscoveryPage />} />
-        <Route path="/influencers/:id" element={<InfluencerProfilePage />} />
         <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
         <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
         <Route path="/login" element={<Navigate to="/auth/login" replace />} />
