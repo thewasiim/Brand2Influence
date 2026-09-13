@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import ProfileCard from './ProfileCard/ProfileCard'
 
 /**
  * Brand2Influence Reusable UI Primitives
@@ -320,10 +321,10 @@ export function MetricCard({
 }
 export const StatsCard = MetricCard
 
-// 12. InfluencerCard (Asymmetric layout: large, medium, compact)
+// 12. InfluencerCard (Renders ReactBits ProfileCard with 3D tilt & rich image backdrop)
 export function InfluencerCard({
   creator,
-  size = 'medium', // 'large' | 'medium' | 'compact'
+  size = 'medium',
   onSelect = null,
   onMessage = null,
   className = '',
@@ -352,123 +353,22 @@ export function InfluencerCard({
 
   const reelRate = rateCard?.reel || creator.budget || 2500
 
-  if (size === 'compact') {
-    return (
-      <article className={`creator-card creator-card--compact ${className}`}>
-        <Avatar name={name} src={profileImageUrl} size="sm" tone="secondary" />
-        <div className="creator-card-main">
-          <h4>{name}</h4>
-          <p>{niche} · {location}</p>
-        </div>
-        <div className="creator-card-rate">
-          <b>₹{Number(reelRate).toLocaleString()}</b>
-          <small>/ reel</small>
-        </div>
-        <Link to={`/influencers/${id}`} className="ui-button ui-btn--ghost ui-btn--sm">
-          View
-        </Link>
-      </article>
-    )
-  }
-
-  if (size === 'large') {
-    return (
-      <article className={`creator-card creator-card--large ${className}`}>
-        <div className="creator-card-badge-row">
-          <Badge variant="accent">Featured Creator</Badge>
-          <span className="creator-card-available">Available</span>
-        </div>
-        <div className="creator-card-header">
-          <Avatar name={name} src={profileImageUrl} size="lg" tone="secondary" />
-          <div>
-            <h3>{name} <span className="verified-check" title="Verified Creator">✓</span></h3>
-            <p className="creator-handle">{handle}</p>
-            <div className="creator-meta-pills">
-              <span className="meta-pill">{niche}</span>
-              <span className="meta-pill">{location}</span>
-            </div>
-          </div>
-        </div>
-
-        {bio && <p className="creator-bio">{bio}</p>}
-
-        <div className="creator-card-metrics">
-          <div>
-            <b>{formattedFollowers}</b>
-            <small>Followers</small>
-          </div>
-          <div>
-            <b>{engagementRate}%</b>
-            <small>Engagement</small>
-          </div>
-          <div>
-            <b>₹{Number(reelRate).toLocaleString()}</b>
-            <small>Starting / Reel</small>
-          </div>
-        </div>
-
-        <div className="creator-card-actions">
-          <Link to={`/influencers/${id}`} className="ui-button ui-btn--secondary ui-btn--sm">
-            View Profile
-          </Link>
-          <button
-            type="button"
-            className="ui-button ui-btn--primary ui-btn--sm"
-            onClick={() => onMessage ? onMessage(creator) : onSelect ? onSelect(creator) : null}
-          >
-            Message
-          </button>
-        </div>
-      </article>
-    )
-  }
-
-  // Medium (Default)
   return (
-    <article className={`creator-card creator-card--medium ${className}`}>
-      <div className="creator-card-header">
-        <Avatar name={name} src={profileImageUrl} size="md" tone="secondary" />
-        <div>
-          <h3>{name} <span className="verified-check">✓</span></h3>
-          <p className="creator-handle">{handle}</p>
-        </div>
-        <span className="creator-card-pill">{niche}</span>
-      </div>
-
-      <div className="creator-card-metrics">
-        <div>
-          <b>{formattedFollowers}</b>
-          <small>Followers</small>
-        </div>
-        <div>
-          <b>{engagementRate}%</b>
-          <small>Engagement</small>
-        </div>
-        <div>
-          <b>₹{Number(reelRate).toLocaleString()}</b>
-          <small>Reel</small>
-        </div>
-      </div>
-
-      <div className="creator-card-footer">
-        <span className="creator-location">{location}</span>
-        <div className="creator-card-actions">
-          <Link to={`/influencers/${id}`} className="ui-button ui-btn--ghost ui-btn--sm">
-            Profile
-          </Link>
-          <button
-            type="button"
-            className="ui-button ui-btn--outline ui-btn--sm"
-            onClick={() => onMessage ? onMessage(creator) : onSelect ? onSelect(creator) : null}
-          >
-            Connect
-          </button>
-        </div>
-      </div>
-    </article>
+    <ProfileCard
+      name={name}
+      niche={niche}
+      handle={handle}
+      location={location}
+      avatarUrl={profileImageUrl}
+      followersCount={formattedFollowers}
+      engagementRate={`${engagementRate}%`}
+      rate={`₹${Number(reelRate).toLocaleString()}`}
+      contactText="Connect"
+      onContactClick={() => (onMessage ? onMessage(creator) : onSelect ? onSelect(creator) : null)}
+      className={className}
+    />
   )
 }
-export const ProfileCard = InfluencerCard
 
 // 13. SectionHeading
 export function SectionHeading({

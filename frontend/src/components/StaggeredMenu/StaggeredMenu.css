@@ -1,0 +1,459 @@
+/* ==========================================================================
+   StaggeredMenu — ReactBits Modern GSAP Staggered Drawer Menu CSS
+   ========================================================================== */
+
+.staggered-menu-wrapper {
+  position: relative;
+  z-index: 9999;
+}
+
+.staggered-menu-wrapper.fixed-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.staggered-menu-wrapper[data-open="true"] {
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Header & Toggle Button
+   -------------------------------------------------------------------------- */
+.staggered-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+}
+
+.staggered-menu-wrapper.fixed-wrapper .staggered-menu-header {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  z-index: 10002;
+}
+
+.sm-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sm-logo-img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sm-toggle {
+  background: var(--color-primary, #2C3015);
+  border: 1px solid rgba(44, 48, 21, 0.2);
+  border-radius: 9999px;
+  padding: 0.55rem 1.15rem;
+  color: var(--color-canvas, #FDFAE2);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  outline: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  user-select: none;
+  position: relative;
+  z-index: 10002;
+  min-height: 40px;
+}
+
+.sm-toggle:hover {
+  transform: scale(1.02);
+}
+
+.sm-toggle:active {
+  transform: scale(0.98);
+}
+
+.sm-toggle-textWrap {
+  position: relative;
+  display: inline-block;
+  height: 1.2em;
+  overflow: hidden;
+  min-width: 44px;
+  text-align: left;
+}
+
+.sm-toggle-textInner {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2em;
+  will-change: transform;
+}
+
+.sm-toggle-line {
+  display: flex;
+  align-items: center;
+  height: 1.2em;
+  line-height: 1.2em;
+}
+
+.sm-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  shrink: 0;
+  will-change: transform;
+}
+
+.sm-icon-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.sm-icon-line-v {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* --------------------------------------------------------------------------
+   Dimmed Backdrop Shadow (Rest of Page)
+   -------------------------------------------------------------------------- */
+.sm-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.staggered-menu-wrapper[data-open="true"] .sm-backdrop {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Pre-layers (Offscreen handled by GSAP)
+   -------------------------------------------------------------------------- */
+.sm-prelayers {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 85vw;
+  max-width: 420px;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.staggered-menu-wrapper[data-position="left"] .sm-prelayers {
+  left: 0;
+  right: auto;
+}
+
+.staggered-menu-wrapper[data-open="true"] .sm-prelayers {
+  visibility: visible !important;
+}
+
+.sm-prelayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+   Drawer Panel (Offscreen handled by GSAP)
+   -------------------------------------------------------------------------- */
+.staggered-menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 85vw;
+  max-width: 420px;
+  height: 100vh;
+  background: var(--sm-bg, #2C3015);
+  color: var(--sm-text, #FDFAE2);
+  z-index: 10000;
+  box-sizing: border-box;
+  padding: 5.5rem 2.25rem 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: none;
+  visibility: hidden;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.35);
+  will-change: transform;
+}
+
+.staggered-menu-wrapper[data-position="left"] .staggered-menu-panel {
+  left: 0;
+  right: auto;
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.35);
+}
+
+.staggered-menu-wrapper[data-open="true"] .staggered-menu-panel {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.sm-panel-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-height: max-content;
+  gap: 2rem;
+}
+
+/* Navigation Links List */
+.sm-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sm-panel-itemWrap {
+  display: block;
+}
+
+.sm-panel-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  text-decoration: none;
+  color: var(--sm-text, #FDFAE2) !important;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  transition: color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.sm-panel-item:hover {
+  color: var(--sm-accent, #7C3AED) !important;
+  transform: translateX(6px);
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item {
+  position: relative;
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item::before {
+  content: "0" attr(data-index);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  opacity: var(--sm-num-opacity, 1);
+  color: var(--sm-accent, #7C3AED);
+  transition: opacity 0.3s ease;
+}
+
+.sm-panel-itemLabel {
+  display: inline-block;
+  color: inherit;
+  opacity: 1;
+  transform: none;
+  will-change: transform, opacity;
+}
+
+/* Social Links Section */
+.sm-socials {
+  margin-top: auto;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--sm-border, rgba(253, 250, 226, 0.12));
+}
+
+.sm-socials-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--sm-text-muted, rgba(253, 250, 226, 0.5));
+  margin: 0 0 0.85rem 0;
+}
+
+.sm-socials-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.sm-socials-item {
+  display: inline-block;
+}
+
+.sm-socials-link {
+  color: var(--sm-text, #FDFAE2) !important;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.85;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  display: inline-block;
+}
+
+.sm-socials-link:hover {
+  color: var(--sm-accent, #7C3AED) !important;
+  opacity: 1;
+}
+
+/* Action Buttons (Login / Signup) */
+.sm-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.sm-btn-secondary {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--sm-btn-sec-border, rgba(253, 250, 226, 0.25));
+  background: var(--sm-btn-sec-bg, transparent);
+  color: var(--sm-btn-sec-text, #FDFAE2) !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sm-btn-secondary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.sm-btn-primary {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  border: none;
+  background: var(--sm-accent, #7C3AED);
+  color: #FFFFFF !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  transition: all 0.2s ease;
+}
+
+.sm-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Mobile & Tablet Adjustments (Full Width Drawer on Mobile)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+
+  .sm-prelayers,
+  .staggered-menu-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+  }
+
+  .staggered-menu-panel {
+    padding: 5rem 1.5rem 2rem 1.5rem !important;
+    box-shadow: none !important;
+  }
+
+  .sm-panel-inner {
+    gap: 1.5rem;
+  }
+
+  .sm-toggle {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .sm-panel-list {
+    gap: 1rem;
+  }
+
+  .sm-panel-item {
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    gap: 0.65rem;
+  }
+
+  .sm-socials {
+    padding-top: 1.25rem;
+  }
+
+  .sm-socials-list {
+    gap: 1rem;
+  }
+
+  .sm-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .sm-btn-secondary,
+  .sm-btn-primary {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .staggered-menu-panel {
+    padding: 4.5rem 1.25rem 1.5rem 1.25rem !important;
+  }
+
+  .sm-panel-item {
+    font-size: 1.35rem;
+    gap: 0.55rem;
+  }
+
+  .sm-socials-list {
+    gap: 0.75rem;
+  }
+}

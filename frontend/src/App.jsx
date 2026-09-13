@@ -15,17 +15,47 @@ import DashboardPage from './pages/DashboardPage'
 import ProfileManagementPage from './pages/ProfileManagementPage'
 import { ConversationsPage, ConversationThreadPage } from './pages/ConversationsPage'
 import { AdminDashboardPage, AdminUsersPage, AdminCampaignsPage, ReportsPage, SettingsPage } from './pages/admin/AdminPages'
+import GlowCursor from './components/GlowCursor/GlowCursor'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-
+    <GlowCursor
+      color="#67E8F9"
+      secondaryColor="#8B5CF6"
+      trailLength={45}
+      trailWidth={14}
+      trailTaper={0.7}
+      followSpeed={0.2}
+      glowIntensity={2.8}
+      glowSpread={1.6}
+      hotspot={0.75}
+      brightness={1.5}
+      opacity={1}
+      pulseSpeed={1.2}
+      noiseStrength={0.02}
+      idleFade={false}
+      idleTimeout={2000}
+      fadeDuration={800}
+      blendMode="normal"
+    >
+      <Routes>
       <Route element={<PublicLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<LandingPage />} />
+        <Route path="/projects" element={<CampaignDiscoveryPage />} />
+        <Route path="/contact" element={<LandingPage />} />
+        <Route path="/discover" element={<DiscoveryPage />} />
+        <Route path="/creators" element={<DiscoveryPage />} />
+        <Route path="/brand-deals" element={<CampaignDiscoveryPage />} />
+        <Route path="/how-it-works" element={<LandingPage />} />
+        <Route path="/for-brands" element={<LandingPage />} />
+        <Route path="/for-influencers" element={<LandingPage />} />
         <Route path="/influencers" element={<DiscoveryPage />} />
         <Route path="/influencers/:id" element={<InfluencerProfilePage />} />
         <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
         <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
+        <Route path="/login" element={<Navigate to="/auth/login" replace />} />
+        <Route path="/signup" element={<Navigate to="/auth/signup" replace />} />
       </Route>
 
       <Route element={<AuthLayout />}>
@@ -71,7 +101,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </GlowCursor>
   )
 }
-
-

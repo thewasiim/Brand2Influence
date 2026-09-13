@@ -11,6 +11,9 @@ import {
   StaggerContainer,
   StaggerItem,
 } from '../components/ui'
+import BrandCard from '../components/ProfileCard/BrandCard'
+import PixelCard from '../components/PixelCard/PixelCard'
+import GlowCursor from '../components/GlowCursor/GlowCursor'
 
 // Curated Showcase Creators for Bento Showcase & Dynamic Filtering
 const SHOWCASE_CREATORS = [
@@ -24,6 +27,7 @@ const SHOWCASE_CREATORS = [
     engagementRate: 4.8,
     rateCard: { reel: 4500 },
     budget: 4500,
+    profileImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
     bio: 'Sustainable fashion stylist and editorial creator based in Mumbai. Helping homegrown labels build cult followings.',
     featured: true,
   },
@@ -37,6 +41,7 @@ const SHOWCASE_CREATORS = [
     engagementRate: 5.4,
     rateCard: { reel: 3800 },
     budget: 3800,
+    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800',
     bio: 'Regional street food archivist & micro-brewery storyteller across Delhi, Lucknow, and Jaipur.',
     featured: false,
   },
@@ -50,6 +55,7 @@ const SHOWCASE_CREATORS = [
     engagementRate: 6.2,
     rateCard: { reel: 2800 },
     budget: 2800,
+    profileImageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
     bio: 'Dermatologist & science-backed skincare advocate. Zero fluff, ingredient-first reviews.',
     featured: false,
   },
@@ -63,6 +69,7 @@ const SHOWCASE_CREATORS = [
     engagementRate: 4.2,
     rateCard: { reel: 3500 },
     budget: 3500,
+    profileImageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800',
     bio: 'Calisthenics athlete and high-performance nutrition coach. Championing natural athleticism.',
     featured: false,
   },
@@ -76,6 +83,7 @@ const SHOWCASE_CREATORS = [
     engagementRate: 5.1,
     rateCard: { reel: 4200 },
     budget: 4200,
+    profileImageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800',
     bio: 'Slow-travel photographer and boutique homestay reviewer across South Asia.',
     featured: false,
   },
@@ -89,6 +97,7 @@ const SHOWCASE_CREATORS = [
     engagementRate: 6.8,
     rateCard: { reel: 2200 },
     budget: 2200,
+    profileImageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=800',
     bio: 'Minimalist living, coffee brewing rituals, and desk setup aesthetician.',
     featured: false,
   }
@@ -176,88 +185,6 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page-root">
-      {/* 1. STICKY / FLOATING NAVBAR */}
-      <header className={`navbar ${mobileMenuOpen ? 'menu-open' : ''}`}>
-        <Link to="/" className="brand" onClick={() => { setMobileMenuOpen(false); scrollTo('top'); }}>
-          Brand2Influence
-        </Link>
-
-        {mobileMenuOpen && (
-          <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} />
-        )}
-
-        <div className="nav-actions">
-          <UserAvatarMenu />
-          <button
-            type="button"
-            className="menu"
-            aria-label="Toggle navigation"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {mobileMenuOpen ? (
-                <>
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </>
-              ) : (
-                <>
-                  <line x1="4" y1="7" x2="20" y2="7" />
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                  <line x1="4" y1="17" x2="20" y2="17" />
-                </>
-              )}
-            </svg>
-          </button>
-
-          {mobileMenuOpen && (
-            <nav className="open">
-              <div className="nav-drawer-header">
-                <span className="nav-drawer-title">Navigation</span>
-                <button
-                  type="button"
-                  className="nav-drawer-close"
-                  onClick={() => setMobileMenuOpen(false)}
-                  aria-label="Close menu"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-
-              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('marketplace'); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
-                Discover Creators
-              </button>
-              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('brand-deals'); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-                Brand Deals
-              </button>
-              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('how-it-works'); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-                How It Works
-              </button>
-              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-                For Brands
-              </button>
-              <button type="button" onClick={() => { setMobileMenuOpen(false); scrollTo('roles-bento'); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" /></svg>
-                For Influencers
-              </button>
-              <button type="button" className="nav-login" onClick={() => { setMobileMenuOpen(false); navigate('/auth/login'); }}>
-                Log In
-              </button>
-              <button type="button" className="nav-join" onClick={() => { setMobileMenuOpen(false); navigate('/auth/signup'); }}>
-                Get Started
-              </button>
-            </nav>
-          )}
-        </div>
-      </header>
-
       <main>
         {/* 2. BENTO HERO */}
         <section className="bento-hero" id="top" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', width: '100%', maxWidth: '1240px', margin: '0 auto', padding: '60px 24px 40px' }}>
@@ -518,15 +445,17 @@ export default function LandingPage() {
 
           <StaggerContainer className="workflow-grid" staggerDelay={0.09}>
             {[
-              { step: '01', title: 'Discover', desc: 'Search independent creators by niche, location, audience demographics, and upfront rates.' },
-              { step: '02', title: 'Filter', desc: 'Drill down by verified engagement rates and transparent pricing to find the perfect fit.' },
-              { step: '03', title: 'Compare', desc: 'Inspect portfolio reels, past collaboration examples, and audience insight cards.' },
-              { step: '04', title: 'Connect', desc: 'Start a direct conversation thread with clear deliverables and agreed timelines.' }
-            ].map(({ step, title, desc }) => (
-              <StaggerItem key={step} className="workflow-card" as="article">
-                <span className="workflow-step">{step}</span>
-                <h3>{title}</h3>
-                <p>{desc}</p>
+              { step: '01', title: 'Discover', desc: 'Search independent creators by niche, location, audience demographics, and upfront rates.', variant: 'purple' },
+              { step: '02', title: 'Filter', desc: 'Drill down by verified engagement rates and transparent pricing to find the perfect fit.', variant: 'blue' },
+              { step: '03', title: 'Compare', desc: 'Inspect portfolio reels, past collaboration examples, and audience insight cards.', variant: 'yellow' },
+              { step: '04', title: 'Connect', desc: 'Start a direct conversation thread with clear deliverables and agreed timelines.', variant: 'pink' }
+            ].map(({ step, title, desc, variant }) => (
+              <StaggerItem key={step}>
+                <PixelCard variant={variant} className="workflow-card" style={{ padding: '24px 20px', minHeight: '220px', width: '100%', height: '100%' }}>
+                  <span className="workflow-step">{step}</span>
+                  <h3 style={{ marginTop: '12px', fontSize: '20px', fontWeight: 700 }}>{title}</h3>
+                  <p style={{ marginTop: '8px', fontSize: '13.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{desc}</p>
+                </PixelCard>
               </StaggerItem>
             ))}
           </StaggerContainer>
@@ -589,28 +518,34 @@ export default function LandingPage() {
                 id: 'samp-1',
                 title: 'Specialty Coffee & Cold Brew Aesthetic Reels',
                 brand: 'Blue Tokai Coffee Roasters',
+                brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
+                brandImageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=800',
                 niche: 'Food & Beverage',
                 platform: 'Instagram',
                 budget: '₹6,000–₹12,000',
                 location: 'Mumbai / Delhi NCR',
-                deliverables: ['1 Reel (30-60s)', '2 Stories with Link'],
+                deliverables: ['1 Reel (30-60s)', '2 Stories'],
                 desc: 'Looking for food, lifestyle, and coffee enthusiast creators to create aesthetic morning routine reels showcasing our new Cold Brew cans.',
               },
               {
                 id: 'samp-2',
                 title: 'Weekend Travel & Cabin Bag Unboxing',
                 brand: 'Mokobara Luggage',
+                brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
+                brandImageUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=800',
                 niche: 'Travel & Lifestyle',
                 platform: 'Instagram',
                 budget: '₹12,000–₹25,000',
                 location: 'Remote / Pan-India',
-                deliverables: ['1 Travel Vlog Reel', '3 Stories', 'Unboxing'],
+                deliverables: ['1 Travel Vlog Reel', '3 Stories'],
                 desc: 'Mokobara is partnering with travel bloggers and aesthetic lifestyle creators for our Transit Backpack & Carry-on Suitcase collection.',
               },
               {
                 id: 'samp-3',
                 title: 'Clean Beauty GRWM & Lip Lacquer Review',
                 brand: 'Kiro Beauty & Skincare',
+                brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
+                brandImageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800',
                 niche: 'Beauty & Skincare',
                 platform: 'Instagram',
                 budget: '₹5,000–₹10,000',
@@ -619,67 +554,20 @@ export default function LandingPage() {
                 desc: 'Looking for beauty & skincare creators who champion clean, botanical-infused cosmetics. Show a Get Ready With Me featuring our Super Butter Lip Lacquer.',
               },
             ].map((c) => (
-              <StaggerItem
-                key={c.id}
-                className="bento-card bento-card--elevated"
-                style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '24px' }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      <Badge variant="primary">{c.platform}</Badge>
-                      <Badge variant="accent">{c.niche}</Badge>
-                    </div>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-secondary)' }}>
-                      {c.budget}
-                    </span>
-                  </div>
-
-                  <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px', lineHeight: 1.3 }}>
-                    {c.title}
-                  </h3>
-
-                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <b>{c.brand}</b>
-                    <span>•</span>
-                    <span>📍 {c.location}</span>
-                  </div>
-
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
-                    {c.desc}
-                  </p>
-
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                    {c.deliverables.map((d, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: '11px',
-                          background: 'var(--color-surface-3)',
-                          border: '1px solid var(--color-border)',
-                          padding: '3px 8px',
-                          borderRadius: 'var(--radius-sm)',
-                          color: 'var(--color-neutral-subtle)',
-                        }}
-                      >
-                        ✓ {d}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                    Verified Ad Brief
-                  </span>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => navigate('/campaigns')}
-                  >
-                    View Brief & Pitch →
-                  </Button>
-                </div>
+              <StaggerItem key={c.id}>
+                <BrandCard
+                  title={c.title}
+                  brand={c.brand}
+                  brandLogoUrl={c.brandLogoUrl}
+                  brandImageUrl={c.brandImageUrl}
+                  niche={c.niche}
+                  platform={c.platform}
+                  budget={c.budget}
+                  location={c.location}
+                  deliverables={c.deliverables}
+                  desc={c.desc}
+                  onApplyClick={() => navigate('/campaigns')}
+                />
               </StaggerItem>
             ))}
           </StaggerContainer>
@@ -703,14 +591,16 @@ export default function LandingPage() {
 
           <StaggerContainer className="bento-grid bento-grid--4" style={{ marginTop: '40px' }} staggerDelay={0.08}>
             {[
-              { title: 'Zero Cold DMs', desc: 'Stop sending Instagram DMs that get lost in request folders. Creators here are actively seeking partnerships.' },
-              { title: 'Upfront Pricing', desc: 'Know reel and story starting rates before sending an inquiry. No guessing games or awkward budget mismatches.' },
-              { title: 'Verified Audience', desc: 'Engagement rates and audience geographic distribution verified directly to protect marketing spend.' },
-              { title: 'Dedicated Messages', desc: 'Unified inbox for brief discussions, deliverable approvals, and conversation history.' }
-            ].map(({ title, desc }) => (
-              <StaggerItem key={title} className="bento-card bento-card--elevated bento-pad--md">
-                <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>{title}</h4>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{desc}</p>
+              { title: 'Zero Cold DMs', desc: 'Stop sending Instagram DMs that get lost in request folders. Creators here are actively seeking partnerships.', variant: 'pink' },
+              { title: 'Upfront Pricing', desc: 'Know reel and story starting rates before sending an inquiry. No guessing games or awkward budget mismatches.', variant: 'yellow' },
+              { title: 'Verified Audience', desc: 'Engagement rates and audience geographic distribution verified directly to protect marketing spend.', variant: 'blue' },
+              { title: 'Dedicated Messages', desc: 'Unified inbox for brief discussions, deliverable approvals, and conversation history.', variant: 'purple' }
+            ].map(({ title, desc, variant }) => (
+              <StaggerItem key={title}>
+                <PixelCard variant={variant} className="bento-card bento-card--elevated" style={{ padding: '24px 20px', minHeight: '190px', width: '100%', height: '100%' }}>
+                  <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{title}</h4>
+                  <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{desc}</p>
+                </PixelCard>
               </StaggerItem>
             ))}
           </StaggerContainer>

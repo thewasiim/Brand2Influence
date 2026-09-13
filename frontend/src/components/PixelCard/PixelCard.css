@@ -1,0 +1,62 @@
+/* ==========================================================================
+   ReactBits PixelCard — Interactive HTML5 Canvas Shimmer Pixel Hover Card
+   ========================================================================== */
+
+.pixel-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--pixel-card-border, rgba(44, 48, 21, 0.12));
+  background: var(--pixel-card-background, #FFFFFF);
+  border-radius: 20px;
+  isolation: isolate;
+  transition: border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.pixel-card:hover {
+  border-color: rgba(44, 48, 21, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(44, 48, 21, 0.08);
+}
+
+.pixel-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 20px;
+}
+
+.pixel-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, var(--pixel-card-active-color, rgba(124, 58, 237, 0.08)), transparent 85%);
+  opacity: 0;
+  transition: opacity 800ms cubic-bezier(0.5, 1, 0.89, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pixel-card:hover::before,
+.pixel-card:focus-within::before {
+  opacity: 1;
+}
+
+.pixel-card-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
