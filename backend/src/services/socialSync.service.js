@@ -41,9 +41,10 @@ export async function fetchYouTubeStats(urlOrHandle) {
       platform: 'youtube',
       handle: handle ? `@${handle}` : 'Channel',
       url: urlOrHandle.startsWith('http') ? urlOrHandle : `https://youtube.com/@${handle}`,
-      subscribers: 320000,
+      subscribers: 0,
+      followers: 0,
       verified: false,
-      note: 'API key pending. Using extracted handle.'
+      note: 'YouTube API key not configured. Please enter subscribers manually.'
     }
   }
 
@@ -55,12 +56,14 @@ export async function fetchYouTubeStats(urlOrHandle) {
     if (data.items && data.items.length > 0) {
       const item = data.items[0]
       const stats = item.statistics || {}
+      const subs = parseInt(stats.subscriberCount, 10) || 0
       return {
         platform: 'youtube',
         handle: `@${handle}`,
         url: `https://youtube.com/@${handle}`,
         channelId: item.id,
-        subscribers: parseInt(stats.subscriberCount, 10) || 0,
+        subscribers: subs,
+        followers: subs,
         videoCount: parseInt(stats.videoCount, 10) || 0,
         viewCount: parseInt(stats.viewCount, 10) || 0,
         title: item.snippet?.title || handle,
@@ -75,74 +78,121 @@ export async function fetchYouTubeStats(urlOrHandle) {
     platform: 'youtube',
     handle: `@${handle}`,
     url: urlOrHandle.startsWith('http') ? urlOrHandle : `https://youtube.com/@${handle}`,
-    subscribers: 5000,
+    subscribers: 0,
+    followers: 0,
     verified: false
   }
 }
 
 /**
- * Fetch Instagram Statistics via Meta Graph API or Handle Extraction
+ * Fetch Instagram Statistics via Apify Instagram Scraper or Meta Graph API
  */
 export async function fetchInstagramStats(urlOrHandle) {
   const handle = extractHandle(urlOrHandle, 'instagram')
+  const apifyToken = process.env.APIFY_TOKEN
   const appId = process.env.INSTAGRAM_APP_ID
   const appSecret = process.env.INSTAGRAM_APP_SECRET
 
-  // Graceful fallback when Meta API keys are not yet configured in .env
-  if (!appId || appId === 'your_meta_app_id_here' || !appSecret || appSecret === 'your_meta_app_secret_here') {
-    return {
-      platform: 'instagram',
-      handle: handle ? `@${handle}` : 'Creator',
-      url: urlOrHandle.startsWith('http') ? urlOrHandle : `https://instagram.com/${handle}`,
-      followers: 185000,
-      verified: false,
-      note: 'Meta Graph API key pending. Using extracted handle.'
+  // 1. Primary: Live Apify Instagram Profile Scraper
+  if (apifyToken && !apifyToken.includes('your_')) {
+    try {
+      const apifyUrl = `https://api.apify.com/v2/acts/apify~instagram-profile-scraper/run-sync-get-dataset-items?token=${apifyToken}`
+      const res = await fetch(apifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usernames: [handle] })
+      })
+      const items = await res.json()
+      if (Array.isArray(items) && items.length > 0) {
+        const item = items[0]
+        const count = item.followersCount ?? 0
+        return {
+          platform: 'instagram',
+          handle: `@${item.username || handle}`,
+          url: item.url || `https://instagram.com/${handle}`,
+          followers: count,
+          subscribers: count,
+          bio: item.biography || '',
+          fullName: item.fullName || '',
+          verified: item.verified || false
+        }
+      }
+    } catch (err) {
+      console.warn('Apify Instagram fetch warning:', err.message)
     }
   }
 
-  try {
-    // Meta App Token fetch or Graph API Query
-    const tokenRes = await fetch(`https://graph.facebook.com/oauth/access_token?client_id=${appId}&client_secret=${appSecret}&grant_type=client_credentials`)
-    const tokenData = await tokenRes.json()
-    if (tokenData.access_token) {
-      const queryRes = await fetch(`https://graph.facebook.com/v19.0/${handle}?fields=followers_count,media_count,username&access_token=${tokenData.access_token}`)
-      const queryData = await queryRes.json()
-      if (queryData.followers_count !== undefined) {
+  // 2. Secondary: Meta Graph API / Access Token
+  if (appSecret && (appSecret.startsWith('IG') || appSecret.length > 60)) {
+    try {
+      const igRes = await fetch(`https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=${appSecret}`)
+      const igData = await igRes.json()
+      if (igData && igData.username && igData.username.toLowerCase() === handle.toLowerCase()) {
         return {
           platform: 'instagram',
-          handle: `@${queryData.username || handle}`,
-          url: `https://instagram.com/${queryData.username || handle}`,
-          followers: queryData.followers_count || 0,
-          mediaCount: queryData.media_count || 0,
+          handle: `@${igData.username}`,
+          url: `https://instagram.com/${igData.username}`,
+          followers: 0,
+          subscribers: 0,
+          mediaCount: igData.media_count || 0,
           verified: true
         }
       }
+    } catch (e) {
+      console.warn('Instagram Graph API warning:', e.message)
     }
-  } catch (err) {
-    console.warn('Instagram API fetch warning:', err.message)
   }
 
   return {
     platform: 'instagram',
     handle: `@${handle}`,
     url: urlOrHandle.startsWith('http') ? urlOrHandle : `https://instagram.com/${handle}`,
-    followers: 10000,
+    followers: 0,
+    subscribers: 0,
     verified: false
   }
 }
 
 /**
- * Fetch Snapchat Statistics via Public Profile Parsing
+ * Fetch Snapchat Statistics via Public Profile Parsing or Apify
  */
 export async function fetchSnapchatStats(urlOrHandle) {
   const handle = extractHandle(urlOrHandle, 'snapchat')
   const profileUrl = urlOrHandle.startsWith('http') ? urlOrHandle : `https://www.snapchat.com/add/${handle}`
 
   try {
-    const res = await fetch(profileUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } })
+    const res = await fetch(profileUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    })
     const html = await res.text()
+    
+    // Parse Next.js data or JSON-LD embedded in Snapchat profile page
+    const nextMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s)
+    if (nextMatch && nextMatch[1]) {
+      try {
+        const nextData = JSON.parse(nextMatch[1])
+        const pubInfo = nextData?.props?.pageProps?.userProfile?.publicProfileInfo
+        if (pubInfo) {
+          const subs = parseInt(pubInfo.subscriberCount, 10) || 0
+          return {
+            platform: 'snapchat',
+            handle: pubInfo.username || handle,
+            url: profileUrl,
+            subscribers: subs,
+            followers: subs,
+            title: pubInfo.title || '',
+            verified: pubInfo.badge > 0
+          }
+        }
+      } catch (parseErr) {
+        // Fallback to regex
+      }
+    }
+
     const match = html.match(/subscriberCount["']:\s*["']?(\d+)["']?/i) || html.match(/(\d+k?m?)\s*subscribers/i)
-    let subscribers = 95000
+    let subscribers = 0
     if (match && match[1]) {
       const val = match[1].toLowerCase()
       if (val.includes('k')) subscribers = parseFloat(val) * 1000
@@ -154,8 +204,9 @@ export async function fetchSnapchatStats(urlOrHandle) {
       platform: 'snapchat',
       handle: handle,
       url: profileUrl,
-      subscribers: subscribers || 95000,
-      verified: true
+      subscribers: subscribers,
+      followers: subscribers,
+      verified: subscribers > 0
     }
   } catch (err) {
     console.warn('Snapchat fetch warning:', err.message)
@@ -165,16 +216,48 @@ export async function fetchSnapchatStats(urlOrHandle) {
     platform: 'snapchat',
     handle: handle,
     url: profileUrl,
-    subscribers: 25000,
+    subscribers: 0,
+    followers: 0,
     verified: false
   }
+}
+
+/**
+ * Public helper to fetch social metrics without requiring authenticated session (for signup/preview)
+ */
+export async function fetchSocialPublic({ platform, urlOrHandle, manualFollowers }) {
+  if (!urlOrHandle || !String(urlOrHandle).trim()) {
+    throw new ApiError(400, 'Please provide a valid profile handle or URL', 'VALIDATION_ERROR')
+  }
+
+  let stats = {}
+  if (platform === 'youtube') {
+    stats = await fetchYouTubeStats(urlOrHandle)
+  } else if (platform === 'instagram') {
+    stats = await fetchInstagramStats(urlOrHandle)
+  } else if (platform === 'snapchat') {
+    stats = await fetchSnapchatStats(urlOrHandle)
+  } else {
+    throw new ApiError(400, 'Unsupported platform. Choose Instagram, YouTube, or Snapchat.', 'VALIDATION_ERROR')
+  }
+
+  const count = Number(stats.followers ?? stats.subscribers ?? 0)
+  stats.followers = count
+  stats.subscribers = count
+
+  if (manualFollowers && !isNaN(manualFollowers)) {
+    stats.followers = Number(manualFollowers)
+    stats.subscribers = Number(manualFollowers)
+  }
+
+  return stats
 }
 
 /**
  * Controller service to sync social links to database
  */
 export async function syncSocialAccount(user, { platform, urlOrHandle, manualFollowers }) {
-  if (user.role !== 'influencer') {
+  if (user.role !== 'influencer' && user.role !== 'admin') {
     throw new ApiError(403, 'Only influencer profiles can sync social accounts', 'FORBIDDEN')
   }
 

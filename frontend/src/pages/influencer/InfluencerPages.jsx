@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { influencersService } from '../../services/influencers'
 import { supabase } from '../../lib/supabase'
 import { conversationsService } from '../../services/conversations'
+import { api } from '../../services/api'
 import {
   Button,
   EmptyState,
@@ -47,8 +48,46 @@ export function InfluencerOnboardingPage() {
     profileImage: null,
     status: 'published',
   })
+  const [syncPlatform, setSyncPlatform] = useState('instagram')
+  const [socialInput, setSocialInput] = useState('')
+  const [fetchingSocial, setFetchingSocial] = useState(false)
+  const [syncMsg, setSyncMsg] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+
+  const handleFetchSocial = async () => {
+    if (!socialInput.trim()) {
+      setError(`Please enter your ${syncPlatform} username, handle, or profile URL`)
+      return
+    }
+    setFetchingSocial(true)
+    setError('')
+    setSyncMsg('')
+    try {
+      const res = await api('/influencers/social-sync', {
+        method: 'POST',
+        body: JSON.stringify({
+          platform: syncPlatform,
+          urlOrHandle: socialInput.trim()
+        })
+      })
+      if (res?.stats) {
+        const count = res.stats.followers || res.stats.subscribers || 0
+        setForm(prev => ({
+          ...prev,
+          followersCount: count || prev.followersCount,
+          portfolioLinks: prev.portfolioLinks
+            ? `${res.stats.url}, ${prev.portfolioLinks}`
+            : res.stats.url
+        }))
+        setSyncMsg(`✓ Connected ${res.stats.handle || syncPlatform}! ${Number(count).toLocaleString()} audience auto-filled.`)
+      }
+    } catch (err) {
+      setError(err.message || `Could not fetch ${syncPlatform} details`)
+    } finally {
+      setFetchingSocial(false)
+    }
+  }
 
   const save = async (status) => {
     setBusy(true)
@@ -85,10 +124,80 @@ export function InfluencerOnboardingPage() {
       <div className="overline">
         <i /> Creator Profile Setup
       </div>
-      <h1 style={{ marginTop: '8px' }}>Make your media kit discoverable.</h1>
-      <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
-        Complete your creator profile with transparent rates and past portfolio links.
-      </p>
+
+      {/* Multi-Platform Social Auto-Fetch Banner */}
+      <div
+        style={{
+          background: 'var(--color-surface-2)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '16px 18px',
+          marginBottom: '20px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '18px' }}>⚡</span>
+            <b style={{ fontSize: '13.5px' }}>Auto-Fetch Creator Stats (Optional)</b>
+          </div>
+          {/* Platform Switcher */}
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {[
+              { id: 'instagram', label: '📸 Instagram' },
+              { id: 'youtube', label: '▶️ YouTube' },
+              { id: 'snapchat', label: '👻 Snapchat' },
+            ].map(p => (
+              <button
+                key={p.id}
+                type="button"
+                className={`chip ${syncPlatform === p.id ? 'chip--active' : ''}`}
+                style={{ fontSize: '11px', padding: '3px 9px' }}
+                onClick={() => {
+                  setSyncPlatform(p.id)
+                  setSyncMsg('')
+                  setError('')
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>
+          Connect your {syncPlatform === 'instagram' ? 'Instagram' : syncPlatform === 'youtube' ? 'YouTube' : 'Snapchat'} to automatically fetch and verify audience metrics.
+        </p>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            className="field-input"
+            style={{ flex: 1, minWidth: '200px' }}
+            placeholder={
+              syncPlatform === 'instagram'
+                ? '@yourhandle or instagram.com/username'
+                : syncPlatform === 'youtube'
+                ? '@channelHandle or youtube.com/@channel'
+                : 'snapchat.com/add/yourhandle'
+            }
+            value={socialInput}
+            onChange={(e) => setSocialInput(e.target.value)}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            loading={fetchingSocial}
+            onClick={handleFetchSocial}
+          >
+            {fetchingSocial ? 'Fetching…' : 'Fetch Live Stats'}
+          </Button>
+        </div>
+        {syncMsg && (
+          <p style={{ color: 'var(--color-secondary)', fontSize: '12px', marginTop: '8px', fontWeight: 600 }}>
+            {syncMsg}
+          </p>
+        )}
+      </div>
 
       <form onSubmit={(e) => { e.preventDefault(); save('published') }}>
         <Input

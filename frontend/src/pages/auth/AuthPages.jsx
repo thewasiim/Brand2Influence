@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/auth'
+import { api } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { Button, ErrorState, Input, Textarea, Badge } from '../../components/ui'
 
@@ -79,7 +80,7 @@ export function LoginPage() {
           {busy ? 'Signing in…' : 'Log in'}
         </Button>
       </form>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px', fontSize: '13px' }}>
+      <div className="auth-card-links">
         <Link to="/auth/forgot-password">Forgot password?</Link>
         <Link to="/auth/signup" style={{ fontWeight: 600 }}>Create an account</Link>
       </div>
@@ -110,9 +111,14 @@ export function SignupPage() {
   const [influencerData, setInfluencerData] = useState({
     niche: 'Fashion & Lifestyle',
     instagram_handle: '',
+    instagram_url: '',
     instagram_followers: '',
-    facebook_followers: '',
+    youtube_url: '',
     youtube_subscribers: '',
+    snapchat_url: '',
+    snapchat_subscribers: '',
+    facebook_url: '',
+    facebook_followers: '',
     other_platform: '',
     other_followers: '',
     reel_price: '',
@@ -120,6 +126,89 @@ export function SignupPage() {
     post_price: '',
     bio: ''
   })
+
+  // Social Fetch State (Live Auto-Fetch from Meta, YouTube, Snapchat)
+  const [fetchingSocial, setFetchingSocial] = useState(null) // 'instagram' | 'youtube' | 'snapchat' | null
+  const [fetchMsg, setFetchMsg] = useState({}) // { [platform]: { type: 'success' | 'error', text: string } }
+
+  const handleFetchSocial = async (platform) => {
+    let inputVal = ''
+    if (platform === 'instagram') {
+      inputVal = influencerData.instagram_url || influencerData.instagram_handle
+    } else if (platform === 'youtube') {
+      inputVal = influencerData.youtube_url
+    } else if (platform === 'snapchat') {
+      inputVal = influencerData.snapchat_url
+    }
+
+    if (!inputVal || !inputVal.trim()) {
+      setFetchMsg((prev) => ({
+        ...prev,
+        [platform]: { type: 'error', text: `Please enter a ${platform} handle or profile URL first.` }
+      }))
+      return
+    }
+
+    setFetchingSocial(platform)
+    setFetchMsg((prev) => ({ ...prev, [platform]: null }))
+
+    try {
+      const res = await api('/influencers/fetch-social', {
+        method: 'POST',
+        body: JSON.stringify({
+          platform,
+          urlOrHandle: inputVal.trim()
+        })
+      })
+
+      const data = res?.data || res?.stats || res
+      if (data) {
+        const count = data.followers ?? data.subscribers ?? 0
+        if (platform === 'instagram') {
+          setInfluencerData((prev) => ({
+            ...prev,
+            instagram_followers: count !== undefined ? String(count) : prev.instagram_followers,
+            instagram_handle: data.handle || prev.instagram_handle || inputVal.replace(/^@/, ''),
+            instagram_url: data.url || prev.instagram_url || (inputVal.startsWith('http') ? inputVal : `https://instagram.com/${inputVal.replace(/^@/, '')}`)
+          }))
+          setFetchMsg((prev) => ({
+            ...prev,
+            instagram: { type: 'success', text: `✓ Fetched: ${Number(count).toLocaleString()} followers` }
+          }))
+        } else if (platform === 'youtube') {
+          setInfluencerData((prev) => ({
+            ...prev,
+            youtube_subscribers: count !== undefined ? String(count) : prev.youtube_subscribers,
+            youtube_url: data.url || prev.youtube_url || (inputVal.startsWith('http') ? inputVal : `https://youtube.com/@${inputVal.replace(/^@/, '')}`)
+          }))
+          setFetchMsg((prev) => ({
+            ...prev,
+            youtube: { type: 'success', text: `✓ Fetched: ${Number(count).toLocaleString()} subscribers` }
+          }))
+        } else if (platform === 'snapchat') {
+          setInfluencerData((prev) => ({
+            ...prev,
+            snapchat_subscribers: count !== undefined ? String(count) : prev.snapchat_subscribers,
+            snapchat_url: data.url || prev.snapchat_url || (inputVal.startsWith('http') ? inputVal : `https://snapchat.com/add/${inputVal.replace(/^@/, '')}`)
+          }))
+          setFetchMsg((prev) => ({
+            ...prev,
+            snapchat: { type: 'success', text: `✓ Fetched: ${Number(count).toLocaleString()} subscribers` }
+          }))
+        }
+      }
+    } catch (err) {
+      setFetchMsg((prev) => ({
+        ...prev,
+        [platform]: {
+          type: 'error',
+          text: err.message ? `${err.message} (You can enter follower count manually below)` : 'Could not auto-fetch. Please enter count manually.'
+        }
+      }))
+    } finally {
+      setFetchingSocial(null)
+    }
+  }
 
   // Brand details state
   const [brandData, setBrandData] = useState({
@@ -173,9 +262,15 @@ export function SignupPage() {
         role,
         roleData: role === 'influencer' ? {
           ...influencerData,
+          instagram_handle: influencerData.instagram_handle || (influencerData.instagram_url ? influencerData.instagram_url.split('/').filter(Boolean).pop() : ''),
+          instagram_url: influencerData.instagram_url,
           instagram_followers: Number(influencerData.instagram_followers || 0),
-          facebook_followers: Number(influencerData.facebook_followers || 0),
+          youtube_url: influencerData.youtube_url,
           youtube_subscribers: Number(influencerData.youtube_subscribers || 0),
+          snapchat_url: influencerData.snapchat_url,
+          snapchat_subscribers: Number(influencerData.snapchat_subscribers || 0),
+          facebook_url: influencerData.facebook_url,
+          facebook_followers: Number(influencerData.facebook_followers || 0),
           reel_price: Number(influencerData.reel_price || 0),
           story_price: Number(influencerData.story_price || 0),
           post_price: Number(influencerData.post_price || 0)
@@ -342,8 +437,8 @@ export function SignupPage() {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-            <Button type="button" variant="secondary" onClick={() => setStep(1)} style={{ flex: '0 0 auto' }}>
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)} style={{ flex: '0 0 auto' }}>
               ← Back
             </Button>
             <Button type="submit" size="lg" style={{ flex: '1 1 auto' }}>
@@ -358,9 +453,9 @@ export function SignupPage() {
         <form onSubmit={handleFinalSubmit}>
           {role === 'influencer' ? (
             <>
-              <div className="form-row-2">
+              <div style={{ marginBottom: '16px' }}>
                 <label className="field">
-                  <span className="field-label">Content Niche</span>
+                  <span className="field-label">Primary Content Niche</span>
                   <div className="field-input-wrap">
                     <select
                       className="field-input"
@@ -380,42 +475,233 @@ export function SignupPage() {
                     </select>
                   </div>
                 </label>
-
-                <Input
-                  label="Instagram Handle"
-                  required
-                  placeholder="@yourhandle"
-                  value={influencerData.instagram_handle}
-                  onChange={(e) => setInfluencerData({ ...influencerData, instagram_handle: e.target.value })}
-                />
               </div>
 
-              <div className="form-row-3">
-                <Input
-                  label="Instagram Followers"
-                  type="number"
-                  required
-                  placeholder="e.g. 25000"
-                  value={influencerData.instagram_followers}
-                  onChange={(e) => setInfluencerData({ ...influencerData, instagram_followers: e.target.value })}
-                />
-                <Input
-                  label="Facebook Followers"
-                  type="number"
-                  placeholder="e.g. 5000"
-                  value={influencerData.facebook_followers}
-                  onChange={(e) => setInfluencerData({ ...influencerData, facebook_followers: e.target.value })}
-                />
-                <Input
-                  label="YouTube Subscribers"
-                  type="number"
-                  placeholder="e.g. 10000"
-                  value={influencerData.youtube_subscribers}
-                  onChange={(e) => setInfluencerData({ ...influencerData, youtube_subscribers: e.target.value })}
-                />
+              {/* SOCIAL ACCOUNTS & LIVE SYNC SECTION */}
+              <div
+                style={{
+                  background: 'var(--color-surface, #f8fafc)',
+                  border: '1px solid var(--color-border, #e2e8f0)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px'
+                }}
+              >
+                <div>
+                  <div className="social-card-header">
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--color-text, #0f172a)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>🔗</span> Social Media Accounts & Reach
+                    </h3>
+                    <span style={{ fontSize: '11px', color: '#475569', background: '#e2e8f0', padding: '2px 8px', borderRadius: '999px', fontWeight: 600 }}>
+                      ⚡ Auto-Fetch or Manual
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                    Enter your username or profile URL and click <strong>Fetch</strong> to auto-sync follower stats. If fetch isn't available for an account, you can manually type follower counts.
+                  </p>
+                </div>
+
+                {/* 1. INSTAGRAM */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                  <div className="social-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
+                      <span style={{ fontSize: '15px' }}>📸</span> Instagram Profile
+                    </div>
+                    <span style={{ fontSize: '11px', color: '#6366f1', fontWeight: 600 }}>Meta API</span>
+                  </div>
+
+                  <div className="social-fetch-row">
+                    <Input
+                      label="Instagram Handle or URL"
+                      placeholder="e.g. @username or https://instagram.com/username"
+                      value={influencerData.instagram_url || influencerData.instagram_handle}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setInfluencerData((prev) => ({
+                          ...prev,
+                          instagram_handle: val.startsWith('http') ? (val.split('/').filter(Boolean).pop() || val) : val,
+                          instagram_url: val
+                        }))
+                      }}
+                    />
+                    <div className="social-fetch-btn-wrap">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        loading={fetchingSocial === 'instagram'}
+                        disabled={fetchingSocial === 'instagram'}
+                        onClick={() => handleFetchSocial('instagram')}
+                        style={{ whiteSpace: 'nowrap', height: '40px', padding: '0 12px' }}
+                      >
+                        ⚡ Fetch
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '8px' }}>
+                    <Input
+                      label="Instagram Followers"
+                      type="number"
+                      required
+                      placeholder="e.g. 25000"
+                      value={influencerData.instagram_followers}
+                      onChange={(e) => setInfluencerData({ ...influencerData, instagram_followers: e.target.value })}
+                    />
+                  </div>
+
+                  {fetchMsg.instagram && (
+                    <div
+                      style={{
+                        marginTop: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: fetchMsg.instagram.type === 'success' ? '#059669' : '#d97706'
+                      }}
+                    >
+                      {fetchMsg.instagram.text}
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. YOUTUBE */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                  <div className="social-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
+                      <span style={{ fontSize: '15px' }}>▶️</span> YouTube Channel
+                    </div>
+                    <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }}>YouTube API</span>
+                  </div>
+
+                  <div className="social-fetch-row">
+                    <Input
+                      label="YouTube Handle or Channel URL"
+                      placeholder="e.g. @channel or https://youtube.com/@channel"
+                      value={influencerData.youtube_url}
+                      onChange={(e) => setInfluencerData({ ...influencerData, youtube_url: e.target.value })}
+                    />
+                    <div className="social-fetch-btn-wrap">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        loading={fetchingSocial === 'youtube'}
+                        disabled={fetchingSocial === 'youtube'}
+                        onClick={() => handleFetchSocial('youtube')}
+                        style={{ whiteSpace: 'nowrap', height: '40px', padding: '0 12px' }}
+                      >
+                        ⚡ Fetch
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '8px' }}>
+                    <Input
+                      label="YouTube Subscribers"
+                      type="number"
+                      placeholder="e.g. 10000"
+                      value={influencerData.youtube_subscribers}
+                      onChange={(e) => setInfluencerData({ ...influencerData, youtube_subscribers: e.target.value })}
+                    />
+                  </div>
+
+                  {fetchMsg.youtube && (
+                    <div
+                      style={{
+                        marginTop: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: fetchMsg.youtube.type === 'success' ? '#059669' : '#d97706'
+                      }}
+                    >
+                      {fetchMsg.youtube.text}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. SNAPCHAT */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                  <div className="social-card-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
+                      <span style={{ fontSize: '15px' }}>👻</span> Snapchat Profile
+                    </div>
+                    <span style={{ fontSize: '11px', color: '#eab308', fontWeight: 600 }}>Snap Scraper / API</span>
+                  </div>
+
+                  <div className="social-fetch-row">
+                    <Input
+                      label="Snapchat Username or Profile URL"
+                      placeholder="e.g. username or https://snapchat.com/add/username"
+                      value={influencerData.snapchat_url}
+                      onChange={(e) => setInfluencerData({ ...influencerData, snapchat_url: e.target.value })}
+                    />
+                    <div className="social-fetch-btn-wrap">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        loading={fetchingSocial === 'snapchat'}
+                        disabled={fetchingSocial === 'snapchat'}
+                        onClick={() => handleFetchSocial('snapchat')}
+                        style={{ whiteSpace: 'nowrap', height: '40px', padding: '0 12px' }}
+                      >
+                        ⚡ Fetch
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '8px' }}>
+                    <Input
+                      label="Snapchat Subscribers / Audience"
+                      type="number"
+                      placeholder="e.g. 15000"
+                      value={influencerData.snapchat_subscribers}
+                      onChange={(e) => setInfluencerData({ ...influencerData, snapchat_subscribers: e.target.value })}
+                    />
+                  </div>
+
+                  {fetchMsg.snapchat && (
+                    <div
+                      style={{
+                        marginTop: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: fetchMsg.snapchat.type === 'success' ? '#059669' : '#d97706'
+                      }}
+                    >
+                      {fetchMsg.snapchat.text}
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. FACEBOOK */}
+                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '15px' }}>📘</span> Facebook Page / Profile (Optional)
+                  </div>
+                  <div className="form-row-2">
+                    <Input
+                      label="Facebook Page URL"
+                      placeholder="https://facebook.com/yourpage"
+                      value={influencerData.facebook_url}
+                      onChange={(e) => setInfluencerData({ ...influencerData, facebook_url: e.target.value })}
+                    />
+                    <Input
+                      label="Facebook Followers"
+                      type="number"
+                      placeholder="e.g. 5000"
+                      value={influencerData.facebook_followers}
+                      onChange={(e) => setInfluencerData({ ...influencerData, facebook_followers: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div style={{ marginTop: '8px', marginBottom: '12px' }}>
+              {/* PRICING & RATE CARD */}
+              <div style={{ marginTop: '8px', marginBottom: '14px' }}>
                 <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-neutral)', marginBottom: '8px' }}>
                   Pricing & Rate Card (₹ INR)
                 </p>
@@ -520,8 +806,8 @@ export function SignupPage() {
             </>
           )}
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-            <Button type="button" variant="secondary" onClick={() => setStep(2)} disabled={busy} style={{ flex: '0 0 auto' }}>
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(2)} disabled={busy} style={{ flex: '0 0 auto' }}>
               ← Back
             </Button>
             <Button type="submit" size="lg" disabled={busy} loading={busy} style={{ flex: '1 1 auto' }}>

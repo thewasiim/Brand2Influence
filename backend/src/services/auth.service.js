@@ -76,28 +76,51 @@ export async function register(payload) {
   const locStr = [location?.trim(), pincode?.trim()].filter(Boolean).join(' - ') || 'India'
 
   if (role === 'influencer') {
-    const igFollowers = Number(roleData?.instagram_followers || roleData?.followers_count || 1000)
+    const igFollowers = Number(roleData?.instagram_followers || 0)
+    const ytSubscribers = Number(roleData?.youtube_subscribers || 0)
+    const snapSubscribers = Number(roleData?.snapchat_subscribers || 0)
+    const fbFollowers = Number(roleData?.facebook_followers || 0)
+
+    const totalFollowers = igFollowers || ytSubscribers || snapSubscribers || Number(roleData?.followers_count) || 1000
+
+    const portfolioLinks = [
+      roleData?.instagram_url,
+      roleData?.youtube_url,
+      roleData?.snapchat_url,
+      ...(Array.isArray(roleData?.portfolio_links) ? roleData.portfolio_links : [])
+    ].filter(Boolean)
+
     const rateCard = {
       reel: Number(roleData?.reel_price || roleData?.rate_card?.reel || 0),
       story: Number(roleData?.story_price || roleData?.rate_card?.story || 0),
       post: Number(roleData?.post_price || roleData?.rate_card?.post || 0),
       instagram_handle: roleData?.instagram_handle || '',
+      instagram_url: roleData?.instagram_url || (roleData?.instagram_handle ? `https://instagram.com/${roleData.instagram_handle.replace('@', '')}` : ''),
       instagram_followers: igFollowers,
-      facebook_followers: Number(roleData?.facebook_followers || 0),
-      youtube_subscribers: Number(roleData?.youtube_subscribers || 0),
+      youtube_url: roleData?.youtube_url || '',
+      youtube_subscribers: ytSubscribers,
+      snapchat_url: roleData?.snapchat_url || '',
+      snapchat_subscribers: snapSubscribers,
+      facebook_followers: fbFollowers,
+      facebook_url: roleData?.facebook_url || '',
       other_platform: roleData?.other_platform || '',
       other_followers: Number(roleData?.other_followers || 0),
       city: location?.trim() || '',
-      pincode: pincode?.trim() || ''
+      pincode: pincode?.trim() || '',
+      social_links: {
+        instagram: { handle: roleData?.instagram_handle || '', url: roleData?.instagram_url || '', followers: igFollowers },
+        youtube: { url: roleData?.youtube_url || '', subscribers: ytSubscribers },
+        snapchat: { url: roleData?.snapchat_url || '', subscribers: snapSubscribers }
+      }
     }
 
     const { error: infError } = await db.from('influencer_profiles').upsert({
       user_id: userId,
       niche: roleData?.niche || 'Lifestyle',
-      followers_count: igFollowers,
+      followers_count: totalFollowers,
       engagement_rate: Number(roleData?.engagement_rate) || 4.5,
       rate_card: rateCard,
-      portfolio_links: Array.isArray(roleData?.portfolio_links) ? roleData.portfolio_links : [],
+      portfolio_links: portfolioLinks,
       location: locStr,
       bio: roleData?.bio || `Content creator specializing in ${roleData?.niche || 'Lifestyle'}.`,
       status: 'published'

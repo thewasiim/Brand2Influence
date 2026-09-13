@@ -2172,6 +2172,75 @@ p {
   gap: 14px;
 }
 
+.full,
+.ui-button.full {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.social-fetch-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.social-fetch-btn-wrap {
+  display: flex;
+  align-items: flex-end;
+}
+
+.social-fetch-btn-wrap > .ui-button,
+.social-fetch-btn-wrap > button {
+  height: 44px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.social-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.auth-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.auth-card-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+/* Remove number stepper arrows for consistent pricing inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 @media (max-width: 640px) {
 
   .form-row-2,
@@ -2181,7 +2250,35 @@ p {
   }
 
   .auth-card--wide {
-    padding: 28px 20px;
+    padding: 24px 18px;
+  }
+
+  .auth-actions-row {
+    flex-direction: column-reverse;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .auth-actions-row > .ui-button,
+  .auth-actions-row > button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .social-fetch-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .social-fetch-btn-wrap {
+    width: 100%;
+  }
+
+  .social-fetch-btn-wrap > .ui-button,
+  .social-fetch-btn-wrap > button {
+    width: 100% !important;
   }
 }
 
@@ -2191,6 +2288,26 @@ p {
   justify-content: center;
   gap: 8px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .step-indicator {
+    gap: 4px;
+    margin-bottom: 18px;
+  }
+
+  .step-item {
+    font-size: 11px;
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .step-number {
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
 }
 
 .step-item {
