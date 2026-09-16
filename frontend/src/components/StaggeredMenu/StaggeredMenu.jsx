@@ -21,17 +21,17 @@ const checkIsLightColor = colorStr => {
 
 export const StaggeredMenu = ({
   position = 'right',
-  colors = ['#3B401C', '#2C3015'],
+  colors = ['#18181B', '#09090B'],
   items = [],
   socialItems = [],
   displaySocials = true,
   displayItemNumbering = true,
   className,
   logoUrl,
-  menuButtonColor,
-  openMenuButtonColor = '#FDFAE2',
-  accentColor = '#7C3AED',
-  panelBg = '#2C3015',
+  menuButtonColor = '#FFFFFF',
+  openMenuButtonColor = '#FFFFFF',
+  accentColor = '#FFFFFF',
+  panelBg = '#09090B',
   changeMenuColorOnOpen = true,
   isFixed = false,
   closeOnClickAway = true,
@@ -95,8 +95,8 @@ export const StaggeredMenu = ({
     if (plusV) gsap.set(plusV, { rotate: 90 });
     if (icon) gsap.set(icon, { rotate: 0 });
     if (textInner) gsap.set(textInner, { yPercent: 0 });
-    if (toggleBtnRef.current && menuButtonColor) {
-      gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+    if (toggleBtnRef.current) {
+      gsap.set(toggleBtnRef.current, { color: menuButtonColor || '#FFFFFF' });
     }
   }, [position, menuButtonColor]);
 
@@ -198,8 +198,8 @@ export const StaggeredMenu = ({
     }
 
     // 8. Toggle button color
-    if (btn && changeMenuColorOnOpen && openMenuButtonColor) {
-      tl.to(btn, { color: openMenuButtonColor, duration: 0.3 }, 0);
+    if (btn && changeMenuColorOnOpen) {
+      tl.to(btn, { color: openMenuButtonColor || '#FFFFFF', duration: 0.3 }, 0);
     }
 
     tlRef.current = tl;
@@ -254,8 +254,8 @@ export const StaggeredMenu = ({
     }
 
     // 6. Button color back
-    if (btn && changeMenuColorOnOpen && menuButtonColor) {
-      tl.to(btn, { color: menuButtonColor, duration: 0.3 }, 0);
+    if (btn && changeMenuColorOnOpen) {
+      tl.to(btn, { color: menuButtonColor || '#FFFFFF', duration: 0.3 }, 0);
     }
 
     tlRef.current = tl;
@@ -353,14 +353,14 @@ export const StaggeredMenu = ({
 
   // Dynamic CSS Variables based on panelBg lightness
   const panelStyle = {
-    '--sm-bg': panelBg || '#2C3015',
-    '--sm-text': isLightPanel ? '#1D1D1F' : '#FDFAE2',
-    '--sm-text-muted': isLightPanel ? '#5F604F' : 'rgba(253, 250, 226, 0.6)',
-    '--sm-border': isLightPanel ? 'rgba(44, 48, 21, 0.15)' : 'rgba(253, 250, 226, 0.15)',
-    '--sm-btn-sec-bg': isLightPanel ? 'rgba(44, 48, 21, 0.05)' : 'transparent',
-    '--sm-btn-sec-text': isLightPanel ? '#1D1D1F' : '#FDFAE2',
-    '--sm-btn-sec-border': isLightPanel ? 'rgba(44, 48, 21, 0.2)' : 'rgba(253, 250, 226, 0.25)',
-    ['--sm-accent']: accentColor || '#7C3AED'
+    '--sm-bg': panelBg || '#09090B',
+    '--sm-text': isLightPanel ? '#0A0A0A' : '#FFFFFF',
+    '--sm-text-muted': isLightPanel ? '#71717A' : 'rgba(255, 255, 255, 0.6)',
+    '--sm-border': isLightPanel ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.15)',
+    '--sm-btn-sec-bg': isLightPanel ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+    '--sm-btn-sec-text': isLightPanel ? '#0A0A0A' : '#FFFFFF',
+    '--sm-btn-sec-border': isLightPanel ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.25)',
+    ['--sm-accent']: accentColor || '#FFFFFF'
   };
 
   return (
@@ -381,7 +381,7 @@ export const StaggeredMenu = ({
       {/* Pre-layers constrained strictly to drawer panel width */}
       <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
         {(() => {
-          const raw = colors && colors.length ? colors.slice(0, 4) : ['#3B401C', '#2C3015'];
+          const raw = colors && colors.length ? colors.slice(0, 4) : ['#18181B', '#09090B'];
           let arr = [...raw];
           if (arr.length >= 3) {
             const mid = Math.floor(arr.length / 2);

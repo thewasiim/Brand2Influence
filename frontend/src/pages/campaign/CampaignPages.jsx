@@ -7,6 +7,8 @@ import {
   Card,
   Badge,
   Input,
+  Select,
+  Textarea,
   LoadingState,
   ErrorState,
   EmptyState,
@@ -751,31 +753,33 @@ export function BrandCampaignsPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {items?.map((c) => (
-            <Card key={c.id} variant="elevated" padding="md">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+            <Card key={c.id} variant="elevated" padding="lg">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ flex: 1, minWidth: '280px' }}>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                    <Badge variant={c.status === 'active' ? 'secondary' : 'outline'}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                    <Badge variant={c.status === 'active' ? 'primary' : 'outline'}>
                       {c.status.toUpperCase()}
                     </Badge>
-                    <Badge variant="primary">{c.platform}</Badge>
+                    <Badge variant="outline">{c.platform}</Badge>
                     <Badge variant="accent">{c.niche}</Badge>
                   </div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>{c.title}</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '12px' }}>
+                  <h3 style={{ fontSize: '19px', fontWeight: 700, letterSpacing: '-0.02em', marginBottom: '8px', color: 'var(--color-text-primary)' }}>
+                    {c.title}
+                  </h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '14px' }}>
                     {c.description}
                   </p>
 
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '12px', color: 'var(--color-neutral-subtle)' }}>
-                    <span>💰 <b>Budget:</b> {c.budget_range}</span>
-                    <span>📍 <b>Location:</b> {c.location}</span>
-                    <span>👥 <b>Min Followers:</b> {c.target_followers_min || 'None'}</span>
+                  <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '12.5px', color: 'var(--color-text-secondary)', padding: '10px 14px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                    <span>💰 <strong style={{ color: 'var(--color-text-primary)' }}>Budget:</strong> {c.budget_range}</span>
+                    <span>📍 <strong style={{ color: 'var(--color-text-primary)' }}>Location:</strong> {c.location}</span>
+                    <span>👥 <strong style={{ color: 'var(--color-text-primary)' }}>Min Followers:</strong> {c.target_followers_min ? Number(c.target_followers_min).toLocaleString() : 'None'}</span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <Link to={`/campaigns/${c.id}`} className="ui-button ui-btn--secondary ui-btn--sm">
-                    Preview Brief
+                    Preview Brief →
                   </Link>
                   <Button
                     variant="outline"
@@ -785,7 +789,7 @@ export function BrandCampaignsPage() {
                     {c.status === 'active' ? 'Pause Ad' : 'Activate Ad'}
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     style={{ color: 'var(--color-error)' }}
                     onClick={() => handleDelete(c.id)}
@@ -802,47 +806,33 @@ export function BrandCampaignsPage() {
       {/* CREATE ADVERTISEMENT MODAL */}
       {modalOpen && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px',
+          className="modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setModalOpen(false)
           }}
         >
-          <div
-            style={{
-              background: 'var(--color-surface-1)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-xl)',
-              maxWidth: '620px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '28px',
-              boxShadow: 'var(--shadow-xl)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '20px' }}>Post New Brand Advertisement</h2>
+          <div className="modal-container">
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <h2>Post New Brand Advertisement</h2>
+                <p>
+                  Fill in the advertisement specifications. Creators matching your niche and target audience will view this brief and reach out to you.
+                </p>
+              </div>
               <button
                 type="button"
+                className="modal-close-btn"
                 onClick={() => setModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: '20px' }}
+                aria-label="Close modal"
               >
-                ✕
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
 
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
-              Fill in the advertisement specifications. Creators matching your niche and target audience will view this brief and reach out to you.
-            </p>
-
-            <form onSubmit={handleCreate}>
+            <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Input
                 label="Campaign / Ad Title"
                 required
@@ -852,57 +842,41 @@ export function BrandCampaignsPage() {
               />
 
               <div className="form-row-2">
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-secondary)' }}>
-                    Category / Niche *
-                  </label>
-                  <select
-                    className="ui-input"
-                    value={form.niche}
-                    onChange={(e) => setForm({ ...form, niche: e.target.value })}
-                    style={{ width: '100%' }}
-                  >
-                    {NICHES.filter((x) => x !== 'All Niches').map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-secondary)' }}>
-                    Primary Platform *
-                  </label>
-                  <select
-                    className="ui-input"
-                    value={form.platform}
-                    onChange={(e) => setForm({ ...form, platform: e.target.value })}
-                    style={{ width: '100%' }}
-                  >
-                    {PLATFORMS.filter((x) => x !== 'All Platforms').map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--color-text-secondary)' }}>
-                  Detailed Brief / Requirements *
-                </label>
-                <textarea
+                <Select
+                  label="Category / Niche"
                   required
-                  rows={4}
-                  className="ui-input"
-                  style={{ width: '100%', resize: 'vertical', fontFamily: 'inherit', fontSize: '13px' }}
-                  placeholder="Explain the campaign goals, tone of voice, visual aesthetic, what creators should highlight, and any specific do's and don'ts..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
+                  value={form.niche}
+                  onChange={(e) => setForm({ ...form, niche: e.target.value })}
+                >
+                  {NICHES.filter((x) => x !== 'All Niches').map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </Select>
+
+                <Select
+                  label="Primary Platform"
+                  required
+                  value={form.platform}
+                  onChange={(e) => setForm({ ...form, platform: e.target.value })}
+                >
+                  {PLATFORMS.filter((x) => x !== 'All Platforms').map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </Select>
               </div>
+
+              <Textarea
+                label="Detailed Brief / Requirements"
+                required
+                rows={4}
+                placeholder="Explain the campaign goals, tone of voice, visual aesthetic, what creators should highlight, and any specific do's and don'ts..."
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
 
               <Input
                 label="Deliverables (comma-separated)"
@@ -938,7 +912,7 @@ export function BrandCampaignsPage() {
 
               {formError && <ErrorState error={formError} />}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+              <div className="modal-footer">
                 <Button variant="secondary" type="button" onClick={() => setModalOpen(false)}>
                   Cancel
                 </Button>

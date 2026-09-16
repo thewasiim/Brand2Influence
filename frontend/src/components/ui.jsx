@@ -49,14 +49,18 @@ export function Button({
 }
 
 // 2. Input
-export function Input({ label, error, hint, icon, className = '', id, ...props }) {
+export function Input({ label, error, hint, icon, className = '', id, required, ...props }) {
   const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined)
   return (
     <label className={`field ${error ? 'has-error' : ''} ${className}`} htmlFor={inputId}>
-      {label && <span className="field-label">{label}</span>}
+      {label && (
+        <span className="field-label">
+          {label} {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
+        </span>
+      )}
       <div className="field-input-wrap">
         {icon && <span className="field-icon">{icon}</span>}
-        <input id={inputId} className={`field-input ${icon ? 'has-icon' : ''}`} {...props} />
+        <input id={inputId} required={required} className={`field-input ${icon ? 'has-icon' : ''}`} {...props} />
       </div>
       {hint && !error && <small className="field-hint">{hint}</small>}
       {error && <small className="field-error" role="alert">{error}</small>}
@@ -65,12 +69,42 @@ export function Input({ label, error, hint, icon, className = '', id, ...props }
 }
 
 // 3. Textarea
-export function Textarea({ label, error, hint, className = '', id, ...props }) {
+export function Textarea({ label, error, hint, className = '', id, required, ...props }) {
   const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined)
   return (
     <label className={`field ${error ? 'has-error' : ''} ${className}`} htmlFor={inputId}>
-      {label && <span className="field-label">{label}</span>}
-      <textarea id={inputId} className="field-input field-textarea" {...props} />
+      {label && (
+        <span className="field-label">
+          {label} {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
+        </span>
+      )}
+      <textarea id={inputId} required={required} className="field-input field-textarea" {...props} />
+      {hint && !error && <small className="field-hint">{hint}</small>}
+      {error && <small className="field-error" role="alert">{error}</small>}
+    </label>
+  )
+}
+
+// 3.5 Select
+export function Select({ label, error, hint, className = '', id, required, children, ...props }) {
+  const selectId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined)
+  return (
+    <label className={`field ${error ? 'has-error' : ''} ${className}`} htmlFor={selectId}>
+      {label && (
+        <span className="field-label">
+          {label} {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
+        </span>
+      )}
+      <div className="field-select-wrap">
+        <select id={selectId} required={required} className="field-input field-select" {...props}>
+          {children}
+        </select>
+        <div className="field-select-arrow" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+      </div>
       {hint && !error && <small className="field-hint">{hint}</small>}
       {error && <small className="field-error" role="alert">{error}</small>}
     </label>

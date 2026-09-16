@@ -323,7 +323,7 @@ export function SignupPage() {
 
       {error && <div style={{ marginBottom: '16px' }}><ErrorState error={error} /></div>}
       {successMsg && (
-        <div className="state" style={{ background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', marginBottom: '16px' }}>
+        <div className="state" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', marginBottom: '16px' }}>
           {successMsg}
         </div>
       )}
@@ -505,12 +505,12 @@ export function SignupPage() {
                 </div>
 
                 {/* 1. INSTAGRAM */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
                   <div className="social-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
                       <span style={{ fontSize: '15px' }}>📸</span> Instagram Profile
                     </div>
-                    <span style={{ fontSize: '11px', color: '#6366f1', fontWeight: 600 }}>Meta API</span>
+                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: '999px', padding: '2px 8px', fontWeight: 600 }}>Meta API</span>
                   </div>
 
                   <div className="social-fetch-row">
@@ -559,7 +559,7 @@ export function SignupPage() {
                         marginTop: '6px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        color: fetchMsg.instagram.type === 'success' ? '#059669' : '#d97706'
+                        color: 'var(--color-text-secondary)'
                       }}
                     >
                       {fetchMsg.instagram.text}
@@ -568,12 +568,12 @@ export function SignupPage() {
                 </div>
 
                 {/* 2. YOUTUBE */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
                   <div className="social-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
                       <span style={{ fontSize: '15px' }}>▶️</span> YouTube Channel
                     </div>
-                    <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }}>YouTube API</span>
+                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: '999px', padding: '2px 8px', fontWeight: 600 }}>YouTube API</span>
                   </div>
 
                   <div className="social-fetch-row">
@@ -614,7 +614,7 @@ export function SignupPage() {
                         marginTop: '6px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        color: fetchMsg.youtube.type === 'success' ? '#059669' : '#d97706'
+                        color: 'var(--color-text-secondary)'
                       }}
                     >
                       {fetchMsg.youtube.text}
@@ -623,12 +623,12 @@ export function SignupPage() {
                 </div>
 
                 {/* 3. SNAPCHAT */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#ffffff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
                   <div className="social-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
                       <span style={{ fontSize: '15px' }}>👻</span> Snapchat Profile
                     </div>
-                    <span style={{ fontSize: '11px', color: '#eab308', fontWeight: 600 }}>Snap Scraper / API</span>
+                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: '999px', padding: '2px 8px', fontWeight: 600 }}>Snap Scraper / API</span>
                   </div>
 
                   <div className="social-fetch-row">

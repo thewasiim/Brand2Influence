@@ -123,7 +123,7 @@ export default function ReviewSlider() {
                 right: '-40px',
                 width: '180px',
                 height: '180px',
-                background: 'radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(124, 58, 237, 0) 70%)',
+                background: 'radial-gradient(circle, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0) 70%)',
                 pointerEvents: 'none',
               }}
             />
@@ -131,7 +131,7 @@ export default function ReviewSlider() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
               {/* Star Rating & Type */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ display: 'flex', color: '#FBBF24', fontSize: '18px', letterSpacing: '2px' }}>
+                <div style={{ display: 'flex', color: '#0A0A0A', fontSize: '18px', letterSpacing: '2px' }}>
                   {'★'.repeat(review.rating)}
                 </div>
                 <Badge variant={review.type === 'Brand Partner' ? 'primary' : 'accent'}>

@@ -5,9 +5,9 @@ import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import StaggeredMenu from '../components/StaggeredMenu/StaggeredMenu'
 
 const menuItems = [
-  { label: 'Search Influencers / Creators', ariaLabel: 'Find and browse creator profiles', link: '/influencers' },
+  { label: 'Search Influencers', ariaLabel: 'Find and browse creator profiles', link: '/influencers' },
   { label: 'Search Brands', ariaLabel: 'Find and explore brand profiles', link: '/brands' },
-  { label: 'Brand Deals & Campaigns', ariaLabel: 'View open sponsorship briefs', link: '/campaigns' },
+  { label: 'Brand Campaigns', ariaLabel: 'View open sponsorship briefs', link: '/campaigns' },
   { label: 'How It Works', ariaLabel: 'Learn how the platform works', link: '/how-it-works' },
   { label: 'For Brands', ariaLabel: 'Info for brands', link: '/for-brands' },
   { label: 'For Influencers', ariaLabel: 'Info for influencers', link: '/for-influencers' }
@@ -36,10 +36,11 @@ export function PublicLayout() {
             socialItems={socialItems}
             displaySocials={true}
             displayItemNumbering={true}
-            colors={['#3B401C', '#7C3AED', '#2C3015']}
-            panelBg="#2C3015"
-            accentColor="#7C3AED"
-            openMenuButtonColor="#FDFAE2"
+            colors={['#18181B', '#27272A', '#09090B']}
+            panelBg="#09090B"
+            accentColor="#FFFFFF"
+            menuButtonColor="#FFFFFF"
+            openMenuButtonColor="#FFFFFF"
             loginLabel={user ? 'Dashboard' : 'Log In'}
             loginLink={user ? '/dashboard' : '/login'}
             ctaLabel={user ? 'My Profile' : 'Get Started'}

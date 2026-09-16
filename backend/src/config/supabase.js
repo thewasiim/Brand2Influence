@@ -17,3 +17,4 @@ export function authClient() {
   return createClient(env.supabaseUrl, env.supabaseAnonKey, { auth: { persistSession: false } })
 }
 
+

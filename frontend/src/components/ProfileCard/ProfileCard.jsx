@@ -348,18 +348,18 @@ const ProfileCardComponent = ({
                 {(instagramUrl || youtubeUrl || snapchatUrl) && (
                   <div className="pc-social-links-row" style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                     {instagramUrl && (
-                      <a href={instagramUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#E1306C', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '10px' }} onClick={e => e.stopPropagation()}>
-                        📸 Instagram
+                      <a href={instagramUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '10px' }} onClick={e => e.stopPropagation()}>
+                        Instagram
                       </a>
                     )}
                     {youtubeUrl && (
-                      <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FF0000', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '10px' }} onClick={e => e.stopPropagation()}>
-                        ▶️ YouTube
+                      <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '10px' }} onClick={e => e.stopPropagation()}>
+                        YouTube
                       </a>
                     )}
                     {snapchatUrl && (
-                      <a href={snapchatUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FFFC00', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.12)', padding: '2px 8px', borderRadius: '10px' }} onClick={e => e.stopPropagation()}>
-                        👻 Snapchat
+                      <a href={snapchatUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', padding: '2px 8px', borderRadius: '10px' }} onClick={e => e.stopPropagation()}>
+                        Snapchat
                       </a>
                     )}
                   </div>

@@ -96,41 +96,41 @@ const VARIANTS = {
     activeColor: null,
     gap: 5,
     speed: 35,
-    colors: '#3b401c,#2c3015,#7c3aed',
+    colors: '#18181b,#27272a,#71717a,#a1a1aa',
     noFocus: false
   },
   blue: {
-    activeColor: '#e0f2fe',
+    activeColor: '#f4f4f5',
     gap: 10,
     speed: 25,
-    colors: '#e0f2fe,#7dd3fc,#0ea5e9',
+    colors: '#09090b,#27272a,#52525b,#a1a1aa',
     noFocus: false
   },
   yellow: {
-    activeColor: '#fef08a',
+    activeColor: '#f4f4f5',
     gap: 3,
     speed: 20,
-    colors: '#fef08a,#fde047,#eab308',
+    colors: '#18181b,#3f3f46,#71717a,#d4d4d8',
     noFocus: false
   },
   pink: {
-    activeColor: '#fecdd3',
+    activeColor: '#f4f4f5',
     gap: 6,
     speed: 80,
-    colors: '#fecdd3,#fda4af,#e11d48',
+    colors: '#09090b,#18181b,#52525b,#71717a',
     noFocus: true
   },
   purple: {
-    activeColor: '#f3e8ff',
+    activeColor: '#f4f4f5',
     gap: 6,
     speed: 50,
-    colors: '#c084fc,#a855f7,#7e22ce',
+    colors: '#09090b,#27272a,#71717a,#a1a1aa',
     noFocus: true
   }
 };
 
 export default function PixelCard({
-  variant = 'purple',
+  variant = 'default',
   gap,
   speed,
   colors,

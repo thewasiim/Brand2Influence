@@ -190,26 +190,25 @@ export default function LandingPage() {
     <div className="landing-page-root">
       <main>
         {/* 2. BENTO HERO */}
-        <section className="bento-hero" id="top" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', width: '100%', maxWidth: '1240px', margin: '0 auto', padding: '60px 24px 40px' }}>
-          <div className="bento-hero-left" style={{ maxWidth: '720px', width: '100%', textAlign: 'left', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: 0 }}>
+        <section className="bento-hero" id="top">
+          <div className="bento-hero-content">
             <FadeIn delay={0.05} distance={16}>
-              <div className="hero-badge" style={{ justifyContent: 'flex-start', textAlign: 'left' }}>
+              <div className="hero-badge">
                 <i /> INDIA'S CREATOR & BRAND MARKETPLACE
               </div>
             </FadeIn>
             <FadeIn delay={0.12} distance={22}>
-              <h1 className="hero-title" style={{ fontSize: 'clamp(40px, 5.5vw, 64px)', lineHeight: 1.15, marginBottom: '20px', textAlign: 'left' }}>
-                Make work that<br />
-                <em>moves people.</em>
+              <h1 className="hero-title">
+                Make work that <em>moves people.</em>
               </h1>
             </FadeIn>
             <FadeIn delay={0.2} distance={20}>
-              <p className="hero-desc" style={{ maxWidth: '620px', margin: '0 0 28px 0', fontSize: '16px', lineHeight: 1.6, textAlign: 'left' }}>
+              <p className="hero-desc">
                 Discover independent creators who truly understand your brand, and explore verified sponsorship campaigns. Direct messaging, upfront rates, zero middleman markups.
               </p>
             </FadeIn>
             <FadeIn delay={0.28} distance={18}>
-              <div className="hero-cta-group" style={{ justifyContent: 'flex-start', gap: '14px', width: '100%' }}>
+              <div className="hero-cta-group">
                 <Button size="lg" variant="primary" onClick={() => scrollTo('marketplace')}>
                   Explore Creators
                 </Button>
@@ -219,45 +218,10 @@ export default function LandingPage() {
               </div>
             </FadeIn>
             <FadeIn delay={0.34} distance={14}>
-              <p className="quiet" style={{ marginTop: '20px', textAlign: 'left' }}>
+              <p className="quiet" style={{ marginTop: '16px' }}>
                 Are you a creator? <b onClick={() => navigate('/auth/signup')} style={{ cursor: 'pointer' }}>Join the community →</b>
               </p>
             </FadeIn>
-
-            {/* Clean Platform Trust Indicators */}
-            <StaggerContainer
-              delay={0.4}
-              staggerDelay={0.09}
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-start',
-                gap: '40px',
-                flexWrap: 'wrap',
-                marginTop: '44px',
-                paddingTop: '28px',
-                borderTop: '1px solid var(--color-border)',
-                width: '100%',
-                maxWidth: '680px',
-                textAlign: 'left',
-              }}
-            >
-              <StaggerItem>
-                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>
-                  <CountUp from={0} to={500} duration={1.8} separator="," suffix="+" />
-                </b>
-                <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Verified Creators</small>
-              </StaggerItem>
-              <StaggerItem>
-                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>
-                  <CountUp from={0} to={100} duration={1.6} suffix="%" />
-                </b>
-                <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Upfront Rates</small>
-              </StaggerItem>
-              <StaggerItem>
-                <b style={{ display: 'block', fontSize: '22px', fontWeight: 700 }}>Direct</b>
-                <small style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>Brand Messaging</small>
-              </StaggerItem>
-            </StaggerContainer>
           </div>
         </section>
 
@@ -345,38 +309,106 @@ export default function LandingPage() {
           </FadeIn>
 
           <StaggerContainer className="roles-bento-grid" staggerDelay={0.12}>
+            {/* Card 1: For Brands */}
             <StaggerItem className="role-bento-card role-bento-card--brand" as="article">
-              <div className="role-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-                  <path d="M3 6h18" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
+              <div className="role-card-top">
+                <div className="role-icon-box">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                    <path d="M3 6h18" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                  </svg>
+                </div>
+                <span className="role-tag">For Growing Brands</span>
               </div>
-              <Badge variant="secondary">For Growing Brands</Badge>
+
               <h3>Find Voices That Convert</h3>
-              <p>
+              <p className="role-card-desc">
                 Filter by verified engagement rate, starting reel rate, and exact city. Reach creators directly and coordinate deliverables in one place.
               </p>
-              <Button variant="secondary" size="md" onClick={() => navigate('/brands')}>
-                Search Brands & Deals →
-              </Button>
+
+              <ul className="role-features-list">
+                <li>
+                  <span className="role-feature-check">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span><strong>Audience Demographics:</strong> Filter by verified engagement & city hubs</span>
+                </li>
+                <li>
+                  <span className="role-feature-check">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span><strong>Transparent Rates:</strong> Upfront starting pricing for reels & stories</span>
+                </li>
+                <li>
+                  <span className="role-feature-check">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span><strong>Direct Deal Inbox:</strong> Direct brand communication with 0% hidden fees</span>
+                </li>
+              </ul>
+
+              <div className="role-card-footer">
+                <Button variant="secondary" size="md" onClick={() => navigate('/brands')}>
+                  Search Brands & Deals →
+                </Button>
+              </div>
             </StaggerItem>
 
+            {/* Card 2: For Creators */}
             <StaggerItem className="role-bento-card role-bento-card--creator" as="article">
-              <div className="role-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" />
-                </svg>
+              <div className="role-card-top">
+                <div className="role-icon-box">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" />
+                  </svg>
+                </div>
+                <span className="role-tag">For Independent Creators</span>
               </div>
-              <Badge variant="accent">For Independent Creators</Badge>
+
               <h3>Get Discovered On Your Terms</h3>
-              <p>
+              <p className="role-card-desc">
                 Set your upfront reel rates, showcase your portfolio links, and receive qualified collaboration requests from brands that value your creative voice.
               </p>
-              <Button variant="primary" size="md" onClick={() => navigate('/influencers')}>
-                Search Verified Creators →
-              </Button>
+
+              <ul className="role-features-list">
+                <li>
+                  <span className="role-feature-check">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span><strong>100% Rate Control:</strong> Keep your full asking rate with 0% commission cuts</span>
+                </li>
+                <li>
+                  <span className="role-feature-check">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span><strong>Verified Insights:</strong> Auto-synced audience metrics for Instagram & YouTube</span>
+                </li>
+                <li>
+                  <span className="role-feature-check">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span><strong>Direct Inquiries:</strong> Inbound sponsorship briefs from vetted businesses</span>
+                </li>
+              </ul>
+
+              <div className="role-card-footer">
+                <Button variant="primary" size="md" onClick={() => navigate('/influencers')}>
+                  Search Verified Creators →
+                </Button>
+              </div>
             </StaggerItem>
           </StaggerContainer>
         </section>
@@ -468,6 +500,55 @@ export default function LandingPage() {
           </StaggerContainer>
         </section>
 
+        {/* 6.5 PLATFORM METRICS & TRUST INDICATORS (CENTERED MIDDLE SECTION) */}
+        <section className="section" style={{ paddingTop: '10px', paddingBottom: '30px' }}>
+          <FadeIn distance={20} duration={0.65}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '32px',
+                padding: '36px 32px',
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-2xl)',
+                textAlign: 'center',
+                boxShadow: 'var(--shadow-bento)',
+                width: '100%',
+              }}
+            >
+              <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                <b style={{ display: 'block', fontSize: 'clamp(32px, 3.8vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-neutral)', lineHeight: 1.1 }}>
+                  <CountUp from={0} to={500} duration={1.8} separator="," suffix="+" />
+                </b>
+                <span style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
+                  Verified Creators
+                </span>
+              </div>
+
+              <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                <b style={{ display: 'block', fontSize: 'clamp(32px, 3.8vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-neutral)', lineHeight: 1.1 }}>
+                  <CountUp from={0} to={100} duration={1.6} suffix="%" />
+                </b>
+                <span style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
+                  Upfront Rates
+                </span>
+              </div>
+
+              <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
+                <b style={{ display: 'block', fontSize: 'clamp(32px, 3.8vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-neutral)', lineHeight: 1.1 }}>
+                  Direct
+                </b>
+                <span style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
+                  Brand Messaging
+                </span>
+              </div>
+            </div>
+          </FadeIn>
+        </section>
+
         {/* 7. MARKETPLACE PREVIEW */}
         <section className="section">
           <FadeIn className="page-heading">
@@ -513,67 +594,52 @@ export default function LandingPage() {
         <section className="section" id="brand-deals">
           <FadeIn className="page-heading">
             <div>
-              <span className="eyebrow">Active Sponsorships</span>
-              <h2>Featured Brand Advertisements</h2>
+              <span className="eyebrow">Verified Partners</span>
+              <h2>Featured Brands & Collaborations</h2>
             </div>
-            <p>Explore open campaign briefs posted by verified brands looking for creators.</p>
+            <p>Explore verified brands offering active sponsorship budgets. Click any brand to view campaign briefs and deliverables.</p>
           </FadeIn>
 
           <StaggerContainer className="bento-grid bento-grid--3" style={{ marginTop: '24px' }} staggerDelay={0.09}>
             {[
               {
                 id: 'samp-1',
-                title: 'Specialty Coffee & Cold Brew Aesthetic Reels',
                 brand: 'Blue Tokai Coffee Roasters',
                 brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
-                brandImageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=800',
                 niche: 'Food & Beverage',
                 platform: 'Instagram',
                 budget: '₹6,000–₹12,000',
                 location: 'Mumbai / Delhi NCR',
-                deliverables: ['1 Reel (30-60s)', '2 Stories'],
-                desc: 'Looking for food, lifestyle, and coffee enthusiast creators to create aesthetic morning routine reels showcasing our new Cold Brew cans.',
               },
               {
                 id: 'samp-2',
-                title: 'Weekend Travel & Cabin Bag Unboxing',
                 brand: 'Mokobara Luggage',
                 brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
-                brandImageUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=800',
                 niche: 'Travel & Lifestyle',
                 platform: 'Instagram',
                 budget: '₹12,000–₹25,000',
                 location: 'Remote / Pan-India',
-                deliverables: ['1 Travel Vlog Reel', '3 Stories'],
-                desc: 'Mokobara is partnering with travel bloggers and aesthetic lifestyle creators for our Transit Backpack & Carry-on Suitcase collection.',
               },
               {
                 id: 'samp-3',
-                title: 'Clean Beauty GRWM & Lip Lacquer Review',
                 brand: 'Kiro Beauty & Skincare',
                 brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
-                brandImageUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800',
                 niche: 'Beauty & Skincare',
                 platform: 'Instagram',
                 budget: '₹5,000–₹10,000',
                 location: 'Pan-India',
-                deliverables: ['1 GRWM Makeup Reel', '1 Texture Story'],
-                desc: 'Looking for beauty & skincare creators who champion clean, botanical-infused cosmetics. Show a Get Ready With Me featuring our Super Butter Lip Lacquer.',
               },
             ].map((c) => (
               <StaggerItem key={c.id}>
                 <BrandCard
-                  title={c.title}
+                  id={c.id}
                   brand={c.brand}
                   brandLogoUrl={c.brandLogoUrl}
-                  brandImageUrl={c.brandImageUrl}
                   niche={c.niche}
                   platform={c.platform}
                   budget={c.budget}
                   location={c.location}
-                  deliverables={c.deliverables}
-                  desc={c.desc}
-                  onApplyClick={() => navigate('/campaigns')}
+                  onClick={() => navigate('/campaigns')}
                 />
               </StaggerItem>
             ))}
@@ -666,18 +732,17 @@ export default function LandingPage() {
       </main>
 
       {/* 11. FOOTER */}
-      <FadeIn as="footer" distance={16} delay={0.1}>
-        <div>
-          <div>
-            <Link to="/" className="brand">
+      <FadeIn as="footer" className="landing-footer" distance={16} delay={0.1}>
+        <div className="footer-main">
+          <div className="footer-brand-col">
+            <Link to="/" className="footer-brand-logo">
               Brand2Influence
             </Link>
-            <p style={{ marginTop: '12px' }}>
+            <p className="footer-brand-desc">
               India’s premier marketplace for independent creators and forward-thinking brands.
             </p>
           </div>
-          <div />
-          <nav>
+          <nav className="footer-nav">
             <button type="button" onClick={() => scrollTo('marketplace')}>Discover</button>
             <button type="button" onClick={() => scrollTo('reviews')}>Reviews</button>
             <button type="button" onClick={() => scrollTo('faq')}>FAQ</button>
@@ -686,26 +751,20 @@ export default function LandingPage() {
             <button type="button" onClick={() => navigate('/auth/login')}>Log in</button>
           </nav>
         </div>
-        <small style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <div className="footer-bottom">
           <span>© 2026 Brand2Influence. All rights reserved.</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <span className="footer-credit">
             Made by{' '}
             <a
               href="https://www.instagram.com/thewasiim/"
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: 'var(--color-secondary)',
-                fontWeight: 600,
-                textDecoration: 'underline',
-                cursor: 'pointer',
-              }}
             >
               thewasiim
             </a>
           </span>
-          <i>Designed for meaningful creator partnerships.</i>
-        </small>
+          <span className="footer-tagline">Designed for meaningful creator partnerships.</span>
+        </div>
       </FadeIn>
     </div>
   )

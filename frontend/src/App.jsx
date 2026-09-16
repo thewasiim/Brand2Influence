@@ -20,16 +20,16 @@ import GlowCursor from './components/GlowCursor/GlowCursor'
 export default function App() {
   return (
     <GlowCursor
-      color="#67E8F9"
-      secondaryColor="#8B5CF6"
-      trailLength={45}
-      trailWidth={14}
+      color="#18181B"
+      secondaryColor="#71717A"
+      trailLength={35}
+      trailWidth={10}
       trailTaper={0.7}
       followSpeed={0.2}
-      glowIntensity={2.8}
-      glowSpread={1.6}
-      hotspot={0.75}
-      brightness={1.5}
+      glowIntensity={1.4}
+      glowSpread={1.2}
+      hotspot={0.5}
+      brightness={1.0}
       opacity={1}
       pulseSpeed={1.2}
       noiseStrength={0.02}

@@ -277,9 +277,9 @@ export default function ProfileManagementPage() {
         <div
           className="state"
           style={{
-            background: '#ecfdf5',
-            color: '#065f46',
-            border: '1px solid #a7f3d0',
+            background: 'var(--color-surface-2)',
+            color: 'var(--color-text-primary)',
+            border: '1px solid var(--color-border)',
             padding: '14px 18px',
             borderRadius: 'var(--radius-lg)',
             marginBottom: '20px',
