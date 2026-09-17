@@ -6,7 +6,7 @@ import { UserLayout } from './layouts/UserLayout'
 import { AdminLayout } from './layouts/AdminLayout'
 import { ProtectedRoute, RoleProtectedRoute, AdminRoute } from './components/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
-import { LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage } from './pages/auth/AuthPages'
+import { LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage } from './pages/auth/AuthPages'
 import RoleSelectionPage from './pages/RoleSelectionPage'
 import { BrandOnboardingPage, BrandDiscoveryPage, BrandProfilePage } from './pages/brand/BrandPages'
 import { InfluencerOnboardingPage, DiscoveryPage, InfluencerProfilePage } from './pages/influencer/InfluencerPages'
@@ -64,11 +64,13 @@ export default function App() {
       <Route element={<AuthLayout />}>
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
+        <Route path="/role-select" element={<RoleSelectionPage />} />
         <Route element={<OnboardingLayout />}>
           <Route path="/onboarding/role" element={<RoleSelectionPage />} />
           <Route element={<RoleProtectedRoute roles={['brand']} />}>

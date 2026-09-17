@@ -34,4 +34,18 @@ export const authService = {
     body: JSON.stringify(data)
   }),
   chooseRole: role => api('/auth/role', { method: 'POST', body: JSON.stringify({ role }) }),
+  signInWithGoogle: (role = '') => {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+    window.location.href = `${backendUrl}/auth/google${role ? `?role=${encodeURIComponent(role)}` : ''}`
+  },
+  verifyOtpToken: async ({ email, token }) => {
+    const { data, error } = await requireSupabase().auth.verifyOtp({
+      email,
+      token,
+      type: 'magiclink'
+    })
+    if (error) throw error
+    return data
+  },
 }
+

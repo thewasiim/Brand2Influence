@@ -1,5 +1,7 @@
 import { adminDb } from '../config/supabase.js'
 import { ApiError } from '../utils/api-error.js'
+import { env } from '../config/env.js'
+
 
 export async function getMe(auth) {
   const { data, error } = await adminDb().from('users').select('id,name,email,role,phone,is_disabled,profile_status,created_at').eq('id', auth.id).maybeSingle()
@@ -256,3 +258,138 @@ export async function updateProfile(auth, payload) {
 
   return await getProfile(auth)
 }
+
+export function getGoogleAuthUrl(role = '') {
+  if (!env.google.clientId) {
+    throw new ApiError(500, 'Google OAuth is not configured on the server. Please check GOOGLE_CLIENT_ID.', 'CONFIG_ERROR')
+  }
+
+  const params = new URLSearchParams({
+    client_id: env.google.clientId,
+    redirect_uri: env.google.callbackUrl,
+    response_type: 'code',
+    scope: 'openid email profile',
+    access_type: 'offline',
+    prompt: 'select_account',
+    state: JSON.stringify({ role: role || '' })
+  })
+
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+}
+
+export async function handleGoogleCallback(code, stateStr) {
+  if (!code) {
+    throw new ApiError(400, 'Authorization code missing from Google callback', 'VALIDATION_ERROR')
+  }
+
+  let role = ''
+  try {
+    if (stateStr) {
+      const parsed = JSON.parse(stateStr)
+      role = parsed.role || ''
+    }
+  } catch (e) {
+    // ignore state parse errors
+  }
+
+  // 1. Exchange code for tokens with Google
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: env.google.clientId,
+      client_secret: env.google.clientSecret,
+      redirect_uri: env.google.callbackUrl,
+      grant_type: 'authorization_code',
+    })
+  })
+
+  const tokenData = await tokenRes.json()
+  if (!tokenRes.ok || !tokenData.access_token) {
+    console.error('Google token error:', tokenData)
+    throw new ApiError(400, tokenData.error_description || 'Failed to exchange token with Google', 'OAUTH_ERROR')
+  }
+
+  // 2. Fetch User Profile from Google
+  const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${tokenData.access_token}` }
+  })
+  const googleUser = await userRes.json()
+  if (!userRes.ok || !googleUser.email) {
+    throw new ApiError(400, 'Failed to fetch user details from Google', 'OAUTH_ERROR')
+  }
+
+  const email = googleUser.email.toLowerCase().trim()
+  const name = googleUser.name || googleUser.given_name || email.split('@')[0]
+  const picture = googleUser.picture || null
+
+  const db = adminDb()
+
+  // 3. Find existing user in public.users or auth.users
+  const { data: existingUser } = await db.from('users').select('*').eq('email', email).maybeSingle()
+
+  let userId = existingUser?.id
+
+  if (!userId) {
+    // Generate secure password for Supabase auth user
+    const randomPassword = `G_${Math.random().toString(36).slice(2)}_${Date.now()}!Aa`
+
+    const { data: authCreated, error: createError } = await db.auth.admin.createUser({
+      email,
+      password: randomPassword,
+      email_confirm: true,
+      user_metadata: {
+        name,
+        picture,
+        provider: 'google'
+      }
+    })
+
+    if (createError) {
+      // If user already exists in auth.users, fetch by email
+      const { data: usersList } = await db.auth.admin.listUsers()
+      const match = (usersList?.users || []).find(u => u.email?.toLowerCase() === email)
+      if (match) {
+        userId = match.id
+      } else {
+        throw new ApiError(400, createError.message, 'AUTH_PROVISION_FAILED')
+      }
+    } else {
+      userId = authCreated.user.id
+    }
+  }
+
+  const assignedRole = existingUser?.role || (['influencer', 'brand'].includes(role) ? role : null)
+
+  // 4. Upsert into public.users
+  await db.from('users').upsert({
+    id: userId,
+    email,
+    name: existingUser?.name || name,
+    role: assignedRole,
+    profile_status: 'active'
+  }, { onConflict: 'id' })
+
+  // 5. Generate magic link login token from Supabase
+  const { data: linkData, error: linkError } = await db.auth.admin.generateLink({
+    type: 'magiclink',
+    email
+  })
+
+  const hashedToken = linkData?.properties?.hashed_token || ''
+  const emailOtp = linkData?.properties?.email_otp || ''
+  const redirectTo = linkData?.properties?.redirect_to || ''
+
+  return {
+    userId,
+    email,
+    name,
+    role: assignedRole,
+    picture,
+    hashedToken,
+    emailOtp,
+    frontendRedirectUrl: `${env.frontendOrigin}/auth/callback?email=${encodeURIComponent(email)}&token=${encodeURIComponent(hashedToken || emailOtp)}&role=${encodeURIComponent(assignedRole || '')}`
+  }
+}
+
