@@ -13,6 +13,7 @@ import {
   CountUp,
   ReviewSlider,
   FaqAccordion,
+  FocusCardSlider,
 } from '../components/ui'
 import BrandCard from '../components/ProfileCard/BrandCard'
 import PixelCard from '../components/PixelCard/PixelCard'
@@ -104,6 +105,45 @@ const SHOWCASE_CREATORS = [
     bio: 'Minimalist living, coffee brewing rituals, and desk setup aesthetician.',
     featured: false,
   }
+]
+
+const SHOWCASE_BRANDS = [
+  {
+    id: 'b-1',
+    brand: 'Blue Tokai Coffee Roasters',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
+    budget: '₹15,000–₹50,000',
+  },
+  {
+    id: 'b-2',
+    brand: 'Kiro Clean Beauty',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
+    budget: '₹20,000–₹60,000',
+  },
+  {
+    id: 'b-3',
+    brand: 'Mokobara Luggage',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
+    budget: '₹30,000–₹1,00,000',
+  },
+  {
+    id: 'b-4',
+    brand: 'Sleepy Owl Coffee',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=300',
+    budget: '₹18,000–₹45,000',
+  },
+  {
+    id: 'b-5',
+    brand: 'Pilgrim Beauty Secrets',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=300',
+    budget: '₹25,000–₹70,000',
+  },
+  {
+    id: 'b-6',
+    brand: 'Supertails Pet Care',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=300',
+    budget: '₹12,000–₹35,000',
+  },
 ]
 
 const CATEGORY_TABS = [
@@ -433,23 +473,21 @@ export default function LandingPage() {
           </FadeIn>
 
           {filteredCreators.length > 0 ? (
-            <StaggerContainer
-              key={activeTab + searchNiche + searchLocation + searchFollowers + searchBudget + searchQuery}
-              className="bento-grid bento-grid--3"
-              style={{ marginTop: '28px' }}
-              staggerDelay={0.06}
-            >
-              {filteredCreators.map((creator, index) => (
-                <StaggerItem key={creator.id}>
+            <div style={{ marginTop: '28px' }}>
+              <FocusCardSlider
+                key={activeTab + searchNiche + searchLocation + searchFollowers + searchBudget + searchQuery}
+                items={filteredCreators}
+                cardWidth={330}
+                cardGap={26}
+                renderItem={(creator) => (
                   <InfluencerCard
                     creator={creator}
-                    size={index === 0 ? 'large' : index > 3 ? 'compact' : 'medium'}
                     onSelect={() => navigate(`/influencers/${creator.id}`)}
                     onMessage={() => navigate(`/influencers/${creator.id}`)}
                   />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
+                )}
+              />
+            </div>
           ) : (
             <div style={{ gridColumn: '1 / -1', padding: '60px 20px', textAlign: 'center' }}>
               <p>No creators match your current filter criteria.</p>
@@ -600,50 +638,22 @@ export default function LandingPage() {
             <p>Explore verified brands offering active sponsorship budgets. Click any brand to view campaign briefs and deliverables.</p>
           </FadeIn>
 
-          <StaggerContainer className="bento-grid bento-grid--3" style={{ marginTop: '24px' }} staggerDelay={0.09}>
-            {[
-              {
-                id: 'samp-1',
-                brand: 'Blue Tokai Coffee Roasters',
-                brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
-                niche: 'Food & Beverage',
-                platform: 'Instagram',
-                budget: '₹6,000–₹12,000',
-                location: 'Mumbai / Delhi NCR',
-              },
-              {
-                id: 'samp-2',
-                brand: 'Mokobara Luggage',
-                brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
-                niche: 'Travel & Lifestyle',
-                platform: 'Instagram',
-                budget: '₹12,000–₹25,000',
-                location: 'Remote / Pan-India',
-              },
-              {
-                id: 'samp-3',
-                brand: 'Kiro Beauty & Skincare',
-                brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
-                niche: 'Beauty & Skincare',
-                platform: 'Instagram',
-                budget: '₹5,000–₹10,000',
-                location: 'Pan-India',
-              },
-            ].map((c) => (
-              <StaggerItem key={c.id}>
+          <div style={{ marginTop: '24px' }}>
+            <FocusCardSlider
+              items={SHOWCASE_BRANDS}
+              cardWidth={330}
+              cardGap={26}
+              renderItem={(brand) => (
                 <BrandCard
-                  id={c.id}
-                  brand={c.brand}
-                  brandLogoUrl={c.brandLogoUrl}
-                  niche={c.niche}
-                  platform={c.platform}
-                  budget={c.budget}
-                  location={c.location}
-                  onClick={() => navigate('/campaigns')}
+                  id={brand.id}
+                  brand={brand.brand}
+                  brandLogoUrl={brand.brandLogoUrl}
+                  budget={brand.budget}
+                  onClick={() => navigate(`/brands/${brand.id}`)}
                 />
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+              )}
+            />
+          </div>
 
           <FadeIn delay={0.2} style={{ textAlign: 'center', marginTop: '28px' }}>
             <Button variant="secondary" size="md" onClick={() => navigate('/campaigns')}>

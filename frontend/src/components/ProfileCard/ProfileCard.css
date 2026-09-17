@@ -330,8 +330,8 @@
   width: 100%;
   background: #FFFFFF;
   border: 1px solid var(--color-border);
-  border-radius: 20px;
-  padding: 24px;
+  border-radius: 24px;
+  padding: 28px 24px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -347,44 +347,7 @@
 .brand-showcase-card:hover {
   transform: translateY(-4px);
   border-color: var(--color-primary);
-  box-shadow: 0 18px 36px -8px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--color-primary);
-}
-
-.brand-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.brand-category-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
-  padding: 3px 10px;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
-.brand-platform-tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #09090B;
-  background: #F4F4F5;
-  border: 1px solid #E4E4E7;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  white-space: nowrap;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--color-primary);
 }
 
 .brand-card-identity {
@@ -392,28 +355,28 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   width: 100%;
 }
 
 .brand-logo-frame {
-  width: 72px;
-  height: 72px;
-  border-radius: 18px;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
   overflow: hidden;
   border: 1px solid var(--color-border);
   background: var(--color-surface-2);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .brand-showcase-card:hover .brand-logo-frame {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
 .brand-logo-frame img {
@@ -432,7 +395,7 @@
 }
 
 .brand-card-title {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
