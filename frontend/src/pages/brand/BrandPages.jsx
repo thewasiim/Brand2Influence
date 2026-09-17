@@ -47,6 +47,9 @@ export function BrandOnboardingPage() {
     businessType: '',
     budgetRange: '',
     location: '',
+    website: '',
+    deckLink: '',
+    description: '',
   })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -72,7 +75,7 @@ export function BrandOnboardingPage() {
       </div>
       <h1 style={{ marginTop: '8px' }}>Tell creators about your brand.</h1>
       <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
-        This profile helps creators understand your industry, target aesthetic, and collaboration scale.
+        This profile helps creators discover your company, visit your store/website, and review your campaign expectations.
       </p>
 
       <form onSubmit={submit}>
@@ -108,6 +111,28 @@ export function BrandOnboardingPage() {
             onChange={(e) => setForm({ ...form, location: e.target.value })}
           />
         </div>
+
+        <div className="form-row-2">
+          <Input
+            label="Official Website URL"
+            placeholder="https://yourbrand.com"
+            value={form.website}
+            onChange={(e) => setForm({ ...form, website: e.target.value })}
+          />
+          <Input
+            label="Pitch Deck / Brief / Upload Link"
+            placeholder="https://drive.google.com/... or brand deck link"
+            value={form.deckLink}
+            onChange={(e) => setForm({ ...form, deckLink: e.target.value })}
+          />
+        </div>
+
+        <Input
+          label="Brand Story / Overview"
+          placeholder="Tell creators what makes your brand unique, your visual aesthetic, and what you look for in creators..."
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
 
         {error && <ErrorState error={error} />}
 
@@ -384,6 +409,7 @@ export function BrandProfilePage() {
   const { user } = useAuth()
   const [brand, setBrand] = useState(null)
   const [error, setError] = useState('')
+  const [actionNotice, setActionNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
 
@@ -401,14 +427,23 @@ export function BrandProfilePage() {
       navigate('/auth/login')
       return
     }
+    if (user.id === brand?.userId || user.id === brand?.id) {
+      setActionNotice('ℹ️ This is your own brand profile.')
+      return
+    }
+    if (user.role === 'brand') {
+      setActionNotice('ℹ️ Switch to a creator account to message brand sponsorship opportunities.')
+      return
+    }
     if (!brand?.userId) return
 
     setBusy(true)
+    setActionNotice('')
     try {
       const c = await conversationsService.create(brand.userId)
       navigate(`/conversations/${c.id}`)
     } catch (e) {
-      setError(e.message)
+      setActionNotice(`⚠️ ${e.message || 'Could not start conversation'}`)
     } finally {
       setBusy(false)
     }
@@ -445,48 +480,64 @@ export function BrandProfilePage() {
       </div>
 
       {/* Brand Hero Bento Banner */}
-      <Card variant="glass" padding="lg" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+      <Card variant="glass" padding="lg" className="profile-hero-card">
+        <div className="profile-hero-inner">
+          <div className="profile-hero-left">
             <Avatar
               name={brand.businessName}
               size="xl"
               tone="secondary"
             />
-            <div style={{ minWidth: '240px' }}>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '4px' }}>
-                <h1 style={{ fontSize: '28px', fontWeight: 700 }}>{brand.businessName}</h1>
+            <div className="profile-hero-info">
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap' }}>
+                <h1 className="profile-name-title">{brand.businessName}</h1>
                 <Badge variant="accent">Verified Brand</Badge>
               </div>
-              <p style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600 }}>
+              <p style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600, margin: '0 0 6px 0' }}>
                 {brand.businessType}
               </p>
-              <p style={{ marginTop: '6px', fontSize: '13.5px', color: 'var(--color-text-secondary)' }}>
+              <p style={{ marginTop: '4px', fontSize: '13.5px', color: 'var(--color-text-secondary)' }}>
                 📍 Headquarters: {brand.location}
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="profile-hero-actions">
             {brand.website && (
               <a
                 href={brand.website.startsWith('http') ? brand.website : `https://${brand.website}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ui-button ui-btn--secondary ui-btn--lg"
+                className="ui-button ui-btn--secondary ui-btn--md"
               >
-                Visit Website ↗
+                🌐 Visit Website ↗
               </a>
             )}
-            <Button size="lg" variant="primary" loading={busy} onClick={handleMessageBrand}>
+            {brand.deckLink && (
+              <a
+                href={brand.deckLink.startsWith('http') ? brand.deckLink : `https://${brand.deckLink}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ui-button ui-btn--secondary ui-btn--md"
+              >
+                📄 Pitch Deck / Brief ↗
+              </a>
+            )}
+            <Button size="md" variant="primary" loading={busy} onClick={handleMessageBrand}>
               💬 Message Brand
             </Button>
+            {actionNotice && (
+              <div style={{ width: '100%', fontSize: '12.5px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-3)', border: '1px solid var(--color-border)', padding: '8px 12px', borderRadius: 'var(--radius-md)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{actionNotice}</span>
+                <button type="button" onClick={() => setActionNotice('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)', fontSize: '13px', marginLeft: '6px' }}>✕</button>
+              </div>
+            )}
           </div>
         </div>
       </Card>
 
       {/* Brand Metrics Row */}
-      <BentoGrid cols={3} gap="md" style={{ marginBottom: '28px' }}>
+      <div className="brand-metrics-grid">
         <MetricCard
           label="Collaboration Budget Scale"
           value={brand.budgetRange || 'Flexible'}
@@ -502,7 +553,7 @@ export function BrandProfilePage() {
           value={brand.location || 'Pan-India'}
           subtext="Target collaboration geography"
         />
-      </BentoGrid>
+      </div>
 
       {/* Brand About & Overview */}
       {brand.description && (

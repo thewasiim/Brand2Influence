@@ -12,4 +12,5 @@ export const influencersService = {
   list: filters => api(`/influencers?${new URLSearchParams(Object.entries(filters).filter(([, value]) => value !== '' && value != null))}`),
   get: id => api(`/influencers/${id}`),
   saveProfile: payload => api('/influencers/profile', { method: 'POST', body: JSON.stringify(payload) }),
+  addPost: payload => api('/influencers/posts', { method: 'POST', body: JSON.stringify(payload) }),
 }

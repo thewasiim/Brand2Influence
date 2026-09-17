@@ -444,8 +444,8 @@ export default function LandingPage() {
                   <InfluencerCard
                     creator={creator}
                     size={index === 0 ? 'large' : index > 3 ? 'compact' : 'medium'}
-                    onSelect={() => navigate('/auth/signup')}
-                    onMessage={() => navigate('/auth/signup')}
+                    onSelect={() => navigate(`/influencers/${creator.id}`)}
+                    onMessage={() => navigate(`/influencers/${creator.id}`)}
                   />
                 </StaggerItem>
               ))}

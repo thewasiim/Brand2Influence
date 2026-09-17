@@ -329,12 +329,6 @@ const ProfileCardComponent = ({
             <div className="pc-shine" />
             <div className="pc-glare" />
 
-            {/* Top Bar (Niche + Reel Rate) */}
-            <div className="pc-top-bar">
-              <span className="pc-niche-tag">{niche}</span>
-              <span className="pc-rate-tag">{rate}</span>
-            </div>
-
             {/* Bottom Overlay User Info */}
             <div className="pc-bottom-info">
               <div className="pc-user-text-main">

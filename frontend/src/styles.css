@@ -3877,3 +3877,346 @@ footer,
     gap: 24px;
   }
 }
+
+/* ==========================================================================
+   Creator Profile & Brand Profile Responsive Design
+   ========================================================================== */
+
+/* Profile Header Bento */
+.profile-hero-card {
+  margin-bottom: 24px;
+}
+
+.profile-hero-inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.profile-hero-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.profile-hero-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-name-title {
+  font-size: clamp(22px, 3.5vw, 28px);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Metrics Bento Grid */
+.creator-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.brand-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+/* Instagram-Style Content Tabs */
+.creator-tabs-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.creator-tabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.creator-tab-btn {
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.creator-tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.creator-tab-btn.is-active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.creator-tab-badge {
+  font-size: 11.5px;
+  background: var(--color-surface-3);
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* Photos Grid */
+.creator-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.creator-photo-card {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+
+.creator-photo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.creator-photo-card:hover img {
+  transform: scale(1.04);
+}
+
+.creator-photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, transparent 55%);
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+  color: #FFFFFF;
+  font-size: 13px;
+  opacity: 0.95;
+}
+
+/* Videos / Reels Grid */
+.creator-videos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.creator-video-card {
+  position: relative;
+  aspect-ratio: 9 / 14;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  background: #09090B;
+}
+
+.creator-video-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.creator-video-card:hover img {
+  transform: scale(1.04);
+}
+
+.creator-video-play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.creator-video-card:hover .creator-video-play-icon {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.creator-video-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, transparent 55%);
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+  color: #FFFFFF;
+  font-size: 13px;
+}
+
+/* Modals Mobile Styles */
+.creator-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.creator-modal-box {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & Tablet Breakpoints
+   -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .profile-hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .profile-hero-left {
+    width: 100%;
+  }
+
+  .profile-hero-actions {
+    width: 100%;
+  }
+
+  .profile-hero-actions button,
+  .profile-hero-actions a {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .creator-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .brand-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-hero-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .creator-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .creator-tabs-nav {
+    justify-content: flex-start;
+    gap: 6px;
+    padding-left: 4px;
+  }
+
+  .creator-tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* 2-Column Instagram-Style Feed on Mobile */
+  .creator-photos-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .creator-photo-overlay {
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  .creator-videos-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .creator-video-overlay {
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  .creator-video-play-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .creator-modal-box {
+    padding: 18px 14px;
+    border-radius: var(--radius-xl);
+  }
+}
+
+@media (max-width: 380px) {
+  .creator-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .creator-tab-btn {
+    padding: 8px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+}

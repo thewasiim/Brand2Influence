@@ -394,13 +394,11 @@ export function InfluencerCard({
   return (
     <ProfileCard
       name={name}
-      niche={niche}
       handle={handle}
       location={location}
       avatarUrl={profileImageUrl}
       followersCount={formattedFollowers}
       engagementRate={`${engagementRate}%`}
-      rate={`₹${Number(reelRate).toLocaleString()}`}
       contactText="Connect"
       instagramUrl={instagramUrl}
       youtubeUrl={youtubeUrl}

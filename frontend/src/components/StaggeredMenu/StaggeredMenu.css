@@ -343,43 +343,71 @@
 
 .sm-btn-secondary {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.75rem 1.25rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill) !important;
   border: 1px solid var(--sm-btn-sec-border, rgba(255, 255, 255, 0.25));
-  background: var(--sm-btn-sec-bg, transparent);
+  background: var(--sm-btn-sec-bg, transparent) !important;
   color: var(--sm-btn-sec-text, #FFFFFF) !important;
+  font-family: inherit;
   font-weight: 600;
   font-size: 0.95rem;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  user-select: none;
 }
 
 .sm-btn-secondary:hover {
   opacity: 0.9;
+  border-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.08) !important;
   transform: translateY(-1px);
+}
+
+.sm-btn-secondary .sm-btn-label {
+  color: var(--sm-btn-sec-text, #FFFFFF) !important;
+  display: inline-block;
 }
 
 .sm-btn-primary {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.75rem 1.25rem;
-  border-radius: 9999px;
-  border: none;
-  background: var(--sm-accent, #FFFFFF);
-  color: #FFFFFF !important;
-  font-weight: 600;
+  border-radius: var(--radius-pill) !important;
+  border: 1px solid transparent;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #09090B !important;
+  font-family: inherit;
+  font-weight: 700;
   font-size: 0.95rem;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   transition: all 0.2s ease;
+  user-select: none;
 }
 
 .sm-btn-primary:hover {
+  background: #E4E4E7 !important;
+  background-color: #E4E4E7 !important;
+  color: #000000 !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+}
+
+.sm-btn-primary .sm-btn-label,
+.sm-btn-primary span {
+  color: #09090B !important;
+  font-weight: 700;
+  display: inline-block;
 }
 
 /* --------------------------------------------------------------------------

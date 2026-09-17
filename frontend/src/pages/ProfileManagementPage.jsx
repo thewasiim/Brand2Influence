@@ -42,7 +42,10 @@ export default function ProfileManagementPage() {
     // Brand specific
     business_name: '',
     business_type: 'E-commerce & Retail',
-    budget_range: '₹25,000 – ₹1,00,000'
+    budget_range: '₹25,000 – ₹1,00,000',
+    website: '',
+    deck_link: '',
+    description: ''
   })
 
   useEffect(() => {
@@ -98,7 +101,10 @@ export default function ProfileManagementPage() {
             // Brand
             business_name: br.business_name || res.name || '',
             business_type: br.business_type || 'E-commerce & Retail',
-            budget_range: br.budget_range || '₹25,000 – ₹1,00,000'
+            budget_range: br.budget_range || '₹25,000 – ₹1,00,000',
+            website: br.website || '',
+            deck_link: br.deck_link || '',
+            description: br.description || ''
           })
         }
       } catch (err) {
@@ -205,7 +211,10 @@ export default function ProfileManagementPage() {
         updatePayload.brand_profile = {
           business_name: formData.business_name.trim(),
           business_type: formData.business_type.trim(),
-          budget_range: formData.budget_range.trim()
+          budget_range: formData.budget_range.trim(),
+          website: formData.website.trim(),
+          deck_link: formData.deck_link.trim(),
+          description: formData.description.trim()
         }
       }
 
@@ -700,6 +709,31 @@ export default function ProfileManagementPage() {
                   </select>
                 </div>
               </label>
+            </div>
+
+            <div className="form-row-2" style={{ marginTop: '12px' }}>
+              <Input
+                label="Official Website URL"
+                placeholder="https://yourbrand.com"
+                value={formData.website}
+                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+              />
+              <Input
+                label="Pitch Deck / Brief / Upload Link"
+                placeholder="https://drive.google.com/... or brand deck link"
+                value={formData.deck_link}
+                onChange={(e) => setFormData({ ...formData, deck_link: e.target.value })}
+              />
+            </div>
+
+            <div style={{ marginTop: '12px' }}>
+              <Textarea
+                label="Brand Overview & Story"
+                rows={3}
+                placeholder="Tell creators about your brand mission, target customer demographic, and collaboration focus..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
             </div>
 
             <div style={{ marginTop: '12px' }}>

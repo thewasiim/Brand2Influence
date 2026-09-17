@@ -352,6 +352,7 @@ export const StaggeredMenu = ({
   };
 
   // Dynamic CSS Variables based on panelBg lightness
+  const isLightAccent = checkIsLightColor(accentColor || '#FFFFFF');
   const panelStyle = {
     '--sm-bg': panelBg || '#09090B',
     '--sm-text': isLightPanel ? '#0A0A0A' : '#FFFFFF',
@@ -360,7 +361,9 @@ export const StaggeredMenu = ({
     '--sm-btn-sec-bg': isLightPanel ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
     '--sm-btn-sec-text': isLightPanel ? '#0A0A0A' : '#FFFFFF',
     '--sm-btn-sec-border': isLightPanel ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.25)',
-    ['--sm-accent']: accentColor || '#FFFFFF'
+    '--sm-accent': accentColor || '#FFFFFF',
+    '--sm-btn-pri-bg': accentColor || '#FFFFFF',
+    '--sm-btn-pri-text': isLightAccent ? '#09090B' : '#FFFFFF'
   };
 
   return (
@@ -479,18 +482,60 @@ export const StaggeredMenu = ({
                     <a
                       href={loginLink || '#'}
                       className="sm-btn-secondary"
+                      style={{
+                        color: isLightPanel ? '#0A0A0A' : '#FFFFFF',
+                        borderColor: isLightPanel ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.25)',
+                        borderWidth: '1px',
+                        borderStyle: 'solid',
+                        borderRadius: 'var(--radius-pill, 9999px)',
+                        padding: '0.75rem 1.25rem',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none'
+                      }}
                       onClick={e => handleActionClick(e, loginLink, onLoginClick)}
                     >
-                      {loginLabel}
+                      <span
+                        className="sm-btn-label"
+                        style={{
+                          color: isLightPanel ? '#0A0A0A' : '#FFFFFF',
+                          fontWeight: 600,
+                          fontSize: '0.95rem'
+                        }}
+                      >
+                        {loginLabel}
+                      </span>
                     </a>
                   )}
                   {ctaLabel && (
                     <a
                       href={ctaLink || '#'}
                       className="sm-btn-primary"
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        color: '#09090B',
+                        border: '1px solid rgba(255, 255, 255, 0.9)',
+                        borderRadius: 'var(--radius-pill, 9999px)',
+                        padding: '0.75rem 1.25rem',
+                        fontWeight: 700,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textDecoration: 'none'
+                      }}
                       onClick={e => handleActionClick(e, ctaLink, onCtaClick)}
                     >
-                      {ctaLabel}
+                      <span
+                        className="sm-btn-label"
+                        style={{
+                          color: '#09090B',
+                          fontWeight: 700,
+                          fontSize: '0.95rem'
+                        }}
+                      >
+                        {ctaLabel}
+                      </span>
                     </a>
                   )}
                 </div>

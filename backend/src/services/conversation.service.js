@@ -8,10 +8,17 @@ async function participants(id) {
   return data
 }
 
+const IS_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function create(user, participantId, campaignId = null) {
   if (!participantId || participantId === user.id) {
     throw new ApiError(400, 'Choose a valid participant', 'VALIDATION_ERROR')
   }
+
+  if (!IS_UUID.test(participantId)) {
+    throw new ApiError(400, 'Messaging is available with active registered accounts.', 'VALIDATION_ERROR')
+  }
+
   const db = adminDb()
   const { data: other, error: otherError } = await db.from('users').select('id,role').eq('id', participantId).maybeSingle()
   if (otherError) throw otherError
