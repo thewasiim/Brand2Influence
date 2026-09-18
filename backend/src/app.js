@@ -7,6 +7,7 @@ import { campaignRouter } from './routes/campaign.routes.js'
 import { conversationRouter } from './routes/conversation.routes.js'
 import { messageRouter } from './routes/message.routes.js'
 import { adminRouter } from './routes/admin.routes.js'
+import { socialRouter } from './routes/social.routes.js'
 import { notFound } from './middleware/not-found.js'
 import { errorHandler } from './middleware/error-handler.js'
 
@@ -30,6 +31,7 @@ app.use('/api/campaigns', campaignRouter)
 app.use('/api/conversations', conversationRouter)
 app.use('/api/messages', messageRouter)
 app.use('/api/admin', adminRouter)
+app.use('/api/social', socialRouter)
 
 app.use(notFound)
 app.use(errorHandler)

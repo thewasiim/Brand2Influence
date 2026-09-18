@@ -1,7 +1,7 @@
 import { adminDb } from '../config/supabase.js'
 import { ApiError, boundedText, required } from '../utils/api-error.js'
 
-const CURATED_CREATORS = [
+export const CURATED_CREATORS = [
   {
     id: 'c-1',
     userId: '806f7e5d-754c-4c74-8bba-e03f34164a70',

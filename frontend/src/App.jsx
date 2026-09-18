@@ -16,6 +16,8 @@ import ProfileManagementPage from './pages/ProfileManagementPage'
 import { ConversationsPage, ConversationThreadPage } from './pages/ConversationsPage'
 import { AdminDashboardPage, AdminUsersPage, AdminCampaignsPage, ReportsPage, SettingsPage } from './pages/admin/AdminPages'
 import GlowCursor from './components/GlowCursor/GlowCursor'
+import ExplorePage from './pages/social/ExplorePage'
+import SearchPage from './pages/social/SearchPage'
 
 export default function App() {
   return (
@@ -89,6 +91,8 @@ export default function App() {
           <Route element={<RoleProtectedRoute roles={['brand', 'admin']} />}>
             <Route path="/brand/campaigns" element={<BrandCampaignsPage />} />
           </Route>
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Route>
 
         <Route element={<AdminRoute />}>

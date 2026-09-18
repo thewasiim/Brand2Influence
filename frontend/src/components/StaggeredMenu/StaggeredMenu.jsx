@@ -1,4 +1,5 @@
 import React, { useCallback, useLayoutEffect, useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import './StaggeredMenu.css';
@@ -64,15 +65,42 @@ export const StaggeredMenu = ({
   const tlRef = useRef(null);
   const isLightPanel = checkIsLightColor(panelBg);
 
-  /* Lock body scroll while menu is open */
+  /* Lock background scrolling when open without resetting sticky positioning */
   useEffect(() => {
-    if (open) {
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = prevOverflow;
-      };
-    }
+    if (!open) return;
+
+    const handleWheel = (e) => {
+      if (panelRef.current && panelRef.current.contains(e.target)) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    const handleTouchMove = (e) => {
+      if (panelRef.current && panelRef.current.contains(e.target)) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    const handleKeyDown = (e) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) {
+        if (panelRef.current && panelRef.current.contains(e.target)) {
+          return;
+        }
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('keydown', handleKeyDown, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [open]);
 
   // Initial layout setup - ensures element is positioned offscreen by GSAP as well
@@ -374,27 +402,6 @@ export const StaggeredMenu = ({
       data-position={position}
       data-open={open || undefined}
     >
-      {/* Translucent backdrop dimming for main page area */}
-      <div
-        ref={backdropRef}
-        className="sm-backdrop"
-        onClick={closeMenu}
-        aria-hidden="true"
-      />
-
-      {/* Pre-layers constrained strictly to drawer panel width */}
-      <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
-        {(() => {
-          const raw = colors && colors.length ? colors.slice(0, 4) : ['#18181B', '#09090B'];
-          let arr = [...raw];
-          if (arr.length >= 3) {
-            const mid = Math.floor(arr.length / 2);
-            arr.splice(mid, 1);
-          }
-          return arr.map((c, i) => <div key={i} className="sm-prelayer" style={{ background: c }} />);
-        })()}
-      </div>
-
       <header className="staggered-menu-header" aria-label="Main navigation header">
         {logoUrl && (
           <div className="sm-logo" aria-label="Logo">
@@ -428,124 +435,170 @@ export const StaggeredMenu = ({
         </button>
       </header>
 
-      <aside
-        id="staggered-menu-panel"
-        ref={panelRef}
-        className="staggered-menu-panel"
-        style={panelStyle}
-        aria-hidden={!open}
-      >
-        <div className="sm-panel-inner">
-          <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
-            {items && items.length ? (
-              items.map((it, idx) => (
-                <li className="sm-panel-itemWrap" key={it.label + idx}>
-                  <a
-                    className="sm-panel-item"
-                    href={it.link || '#'}
-                    aria-label={it.ariaLabel || it.label}
-                    data-index={idx + 1}
-                    onClick={e => handleItemClick(e, it)}
-                  >
-                    <span className="sm-panel-itemLabel">{it.label}</span>
-                  </a>
-                </li>
-              ))
-            ) : (
-              <li className="sm-panel-itemWrap" aria-hidden="true">
-                <span className="sm-panel-item">
-                  <span className="sm-panel-itemLabel">No items</span>
-                </span>
-              </li>
-            )}
-          </ul>
+      {createPortal(
+        <div
+          className="staggered-menu-portal-root"
+          data-open={open || undefined}
+          data-position={position}
+          style={{ ['--sm-accent']: accentColor }}
+        >
+          {/* Translucent backdrop dimming for main page area */}
+          <div
+            ref={backdropRef}
+            className="sm-backdrop"
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
 
-          {(displaySocials && socialItems && socialItems.length > 0) || (loginLabel || ctaLabel) ? (
-            <div className="sm-socials" aria-label="Social links & actions">
-              {displaySocials && socialItems && socialItems.length > 0 && (
-                <>
-                  <h3 className="sm-socials-title">Socials</h3>
-                  <ul className="sm-socials-list" role="list">
-                    {socialItems.map((s, i) => (
-                      <li key={s.label + i} className="sm-socials-item">
-                        <a href={s.link} target="_blank" rel="noopener noreferrer" className="sm-socials-link">
-                          {s.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
+          {/* Pre-layers constrained strictly to drawer panel width */}
+          <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
+            {(() => {
+              const raw = colors && colors.length ? colors.slice(0, 4) : ['#18181B', '#09090B'];
+              let arr = [...raw];
+              if (arr.length >= 3) {
+                const mid = Math.floor(arr.length / 2);
+                arr.splice(mid, 1);
+              }
+              return arr.map((c, i) => <div key={i} className="sm-prelayer" style={{ background: c }} />);
+            })()}
+          </div>
 
-              {(loginLabel || ctaLabel) && (
-                <div className="sm-actions">
-                  {loginLabel && (
-                    <a
-                      href={loginLink || '#'}
-                      className="sm-btn-secondary"
-                      style={{
-                        color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
-                        borderColor: isLightPanel ? (textColor || '#1D4ED8') : 'rgba(255, 255, 255, 0.25)',
-                        backgroundColor: isLightPanel ? '#FFFFFF' : 'transparent',
-                        borderWidth: '1.5px',
-                        borderStyle: 'solid',
-                        borderRadius: 'var(--radius-pill, 9999px)',
-                        padding: '0.75rem 1.25rem',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        textDecoration: 'none'
-                      }}
-                      onClick={e => handleActionClick(e, loginLink, onLoginClick)}
-                    >
-                      <span
-                        className="sm-btn-label"
-                        style={{
-                          color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
-                          fontWeight: 600,
-                          fontSize: '0.95rem'
-                        }}
+          <aside
+            id="staggered-menu-panel"
+            ref={panelRef}
+            className="staggered-menu-panel"
+            style={panelStyle}
+            aria-hidden={!open}
+          >
+            <div className="sm-panel-inner">
+              <div className="sm-panel-top-bar">
+                <span className="sm-panel-top-title">Navigation</span>
+                <button
+                  type="button"
+                  className="sm-panel-close-btn"
+                  onClick={closeMenu}
+                  aria-label="Close menu"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
+                {items && items.length ? (
+                  items.map((it, idx) => (
+                    <li className="sm-panel-itemWrap" key={it.label + idx}>
+                      <a
+                        className="sm-panel-item"
+                        href={it.link || '#'}
+                        aria-label={it.ariaLabel || it.label}
+                        data-index={idx + 1}
+                        onClick={e => handleItemClick(e, it)}
                       >
-                        {loginLabel}
-                      </span>
-                    </a>
+                        <span className="sm-panel-itemLabel">{it.label}</span>
+                      </a>
+                    </li>
+                  ))
+                ) : (
+                  <li className="sm-panel-itemWrap" aria-hidden="true">
+                    <span className="sm-panel-item">
+                      <span className="sm-panel-itemLabel">No items</span>
+                    </span>
+                  </li>
+                )}
+              </ul>
+
+              {(displaySocials && socialItems && socialItems.length > 0) || (loginLabel || ctaLabel) ? (
+                <div className="sm-socials" aria-label="Social links & actions">
+                  {displaySocials && socialItems && socialItems.length > 0 && (
+                    <>
+                      <h3 className="sm-socials-title">Socials</h3>
+                      <ul className="sm-socials-list" role="list">
+                        {socialItems.map((s, i) => (
+                          <li key={s.label + i} className="sm-socials-item">
+                            <a href={s.link} target="_blank" rel="noopener noreferrer" className="sm-socials-link">
+                              {s.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
                   )}
-                  {ctaLabel && (
-                    <a
-                      href={ctaLink || '#'}
-                      className="sm-btn-primary"
-                      style={{
-                        backgroundColor: '#1D4ED8',
-                        color: '#FFFFFF',
-                        border: '1.5px solid #1D4ED8',
-                        borderRadius: 'var(--radius-pill, 9999px)',
-                        padding: '0.75rem 1.25rem',
-                        fontWeight: 700,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        textDecoration: 'none'
-                      }}
-                      onClick={e => handleActionClick(e, ctaLink, onCtaClick)}
-                    >
-                      <span
-                        className="sm-btn-label"
-                        style={{
-                          color: '#FFFFFF',
-                          fontWeight: 700,
-                          fontSize: '0.95rem'
-                        }}
-                      >
-                        {ctaLabel}
-                      </span>
-                    </a>
+
+                  {(loginLabel || ctaLabel) && (
+                    <div className="sm-actions">
+                      {loginLabel && (
+                        <a
+                          href={loginLink || '#'}
+                          className="sm-btn-secondary"
+                          style={{
+                            color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
+                            borderColor: isLightPanel ? (textColor || '#1D4ED8') : 'rgba(255, 255, 255, 0.25)',
+                            backgroundColor: isLightPanel ? '#FFFFFF' : 'transparent',
+                            borderWidth: '1.5px',
+                            borderStyle: 'solid',
+                            borderRadius: 'var(--radius-pill, 9999px)',
+                            padding: '0.75rem 1.25rem',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            textDecoration: 'none'
+                          }}
+                          onClick={e => handleActionClick(e, loginLink, onLoginClick)}
+                        >
+                          <span
+                            className="sm-btn-label"
+                            style={{
+                              color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
+                              fontWeight: 600,
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {loginLabel}
+                          </span>
+                        </a>
+                      )}
+                      {ctaLabel && (
+                        <a
+                          href={ctaLink || '#'}
+                          className="sm-btn-primary"
+                          style={{
+                            backgroundColor: '#1D4ED8',
+                            color: '#FFFFFF',
+                            border: '1.5px solid #1D4ED8',
+                            borderRadius: 'var(--radius-pill, 9999px)',
+                            padding: '0.75rem 1.25rem',
+                            fontWeight: 700,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            textDecoration: 'none'
+                          }}
+                          onClick={e => handleActionClick(e, ctaLink, onCtaClick)}
+                        >
+                          <span
+                            className="sm-btn-label"
+                            style={{
+                              color: '#FFFFFF',
+                              fontWeight: 700,
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {ctaLabel}
+                          </span>
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
+              ) : null}
             </div>
-          ) : null}
-        </div>
-      </aside>
+          </aside>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

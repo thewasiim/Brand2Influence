@@ -2412,6 +2412,31 @@ p {
   width: 100%;
 }
 
+.portal.portal-ig-layout {
+  display: block;
+  min-height: 100vh;
+  background: var(--color-bg);
+  min-width: 0;
+  width: 100%;
+  position: relative;
+}
+
+.portal.portal-ig-layout .portal-main-section {
+  margin-left: 74px;
+  width: calc(100% - 74px);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .portal.portal-ig-layout .portal-main-section {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 60px;
+    padding-bottom: 72px;
+  }
+}
+
 .portal-mobile-header {
   display: none;
 }
@@ -2422,7 +2447,7 @@ p {
   width: 100%;
 }
 
-.portal>aside,
+.portal:not(.portal-ig-layout)>aside,
 .portal-desktop-aside {
   position: sticky;
   top: 0;
@@ -2438,11 +2463,11 @@ p {
   z-index: 20;
 }
 
-.portal aside .brand {
+.portal:not(.portal-ig-layout) aside .brand {
   margin: 0 0 32px 8px;
 }
 
-.portal aside b {
+.portal:not(.portal-ig-layout) aside b {
   font-size: 11px;
   font-family: var(--font-mono);
   text-transform: uppercase;
@@ -2451,8 +2476,8 @@ p {
   padding: 8px 12px 4px;
 }
 
-.portal aside a:not(.brand),
-.portal aside button {
+.portal:not(.portal-ig-layout) aside a:not(.brand),
+.portal:not(.portal-ig-layout) aside button {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2470,28 +2495,28 @@ p {
   box-sizing: border-box;
 }
 
-.portal aside a:not(.brand):hover,
-.portal aside button:hover {
+.portal:not(.portal-ig-layout) aside a:not(.brand):hover,
+.portal:not(.portal-ig-layout) aside button:hover {
   background: var(--color-surface-2);
   color: var(--color-neutral);
 }
 
-.portal aside a.active {
+.portal:not(.portal-ig-layout) aside a.active {
   background: rgba(0, 0, 0, 0.08);
   color: var(--color-primary);
   border-color: rgba(0, 0, 0, 0.2);
   font-weight: 600;
 }
 
-.portal aside button.portal-logout-btn,
-.portal aside button {
+.portal:not(.portal-ig-layout) aside button.portal-logout-btn,
+.portal:not(.portal-ig-layout) aside button {
   margin-top: auto;
   border-top: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding-top: 16px;
 }
 
-.portal aside button:hover {
+.portal:not(.portal-ig-layout) aside button:hover {
   color: var(--color-primary);
 }
 

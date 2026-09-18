@@ -1,0 +1,771 @@
+/* ==========================================================================
+   Instagram-Style Sidebar Menu — Brand2Influence
+   ========================================================================== */
+
+:root {
+  --ig-sidebar-collapsed-w: 74px;
+  --ig-sidebar-expanded-w: 244px;
+  --ig-bg: #000039;
+  --ig-bg-elevated: #050548;
+  --ig-border: rgba(255, 255, 255, 0.09);
+  --ig-hover-bg: rgba(255, 255, 255, 0.08);
+  --ig-active-bg: rgba(255, 255, 255, 0.14);
+  --ig-text-primary: #FFFFFF;
+  --ig-text-muted: rgba(255, 255, 255, 0.72);
+  --ig-accent-blue: #2563EB;
+}
+
+/* --------------------------------------------------------------------------
+   Desktop Sidebar (<aside>)
+   -------------------------------------------------------------------------- */
+.ig-sidebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 74px;
+  background: #020228 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  z-index: 999;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+  user-select: none;
+  overflow: visible;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-sizing: border-box !important;
+}
+
+.ig-sidebar.is-collapsed {
+  width: 74px;
+}
+
+.ig-sidebar:hover,
+.ig-sidebar.is-expanded {
+  width: 250px !important;
+  box-shadow: 16px 0 48px rgba(0, 0, 0, 0.6) !important;
+  background: #020228 !important;
+}
+
+.ig-sidebar-inner {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 10px 20px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar Header & Brand Logo
+   -------------------------------------------------------------------------- */
+.ig-sidebar-header {
+  padding: 12px 6px 22px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ig-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none !important;
+  width: 100%;
+  color: #FFFFFF !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.ig-brand-icon-wrap {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0 auto;
+}
+
+.ig-brand-monogram {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+  color: #FFFFFF !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  user-select: none;
+}
+
+/* In expanded view, remove icon/monogram so the full Brand2Influence text displays cleanly */
+.ig-sidebar:hover .ig-brand-icon-wrap,
+.ig-sidebar.is-expanded .ig-brand-icon-wrap {
+  display: none;
+}
+
+.ig-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.ig-sidebar.is-collapsed:not(:hover) .ig-brand-text {
+  display: none;
+}
+
+.ig-sidebar:hover .ig-brand-text,
+.ig-sidebar.is-expanded .ig-brand-text {
+  display: flex;
+  padding-left: 8px;
+}
+
+.ig-brand-title {
+  font-family: var(--font-display, inherit);
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+  color: #FFFFFF !important;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ig-brand-badge {
+  font-size: 0.68rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700 !important;
+  color: #93C5FD !important;
+  background: rgba(37, 99, 235, 0.25) !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  width: fit-content;
+}
+
+/* --------------------------------------------------------------------------
+   Navigation Items List
+   -------------------------------------------------------------------------- */
+.ig-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.ig-nav-item {
+  display: flex;
+  align-items: center;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.12s ease;
+  position: relative;
+  box-sizing: border-box !important;
+  text-align: left;
+  margin: 0 !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+}
+
+/* In collapsed state: 48px centered buttons */
+.ig-sidebar.is-collapsed:not(:hover) .ig-nav-item {
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* In expanded state: full width with label */
+.ig-sidebar:hover .ig-nav-item,
+.ig-sidebar.is-expanded .ig-nav-item {
+  width: 100%;
+  padding: 11px 14px;
+  gap: 14px;
+  justify-content: flex-start;
+  border-radius: 12px;
+}
+
+.ig-nav-item:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  transform: translateX(2px);
+}
+
+.ig-nav-item.is-active {
+  background: rgba(37, 99, 235, 0.25) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+.ig-item-icon-box {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.ig-item-icon {
+  width: 24px;
+  height: 24px;
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+  stroke-width: 2.2 !important;
+  transition: transform 0.18s ease;
+  display: block;
+}
+
+.ig-nav-item:hover .ig-item-icon {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
+  transform: scale(1.1);
+}
+
+.ig-nav-item.is-active .ig-item-icon {
+  stroke-width: 2.5 !important;
+  stroke: #60A5FA !important;
+  color: #60A5FA !important;
+  filter: drop-shadow(0 0 8px rgba(96, 165, 250, 0.6));
+}
+
+/* Notification badges */
+.ig-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #EF4444;
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+  animation: igPulse 2s infinite ease-in-out;
+}
+
+.ig-badge-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 7px;
+  height: 7px;
+  background: #EF4444;
+  border-radius: 50%;
+  border: 1.5px solid var(--ig-bg);
+}
+
+@keyframes igPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Text Label Animation on Hover */
+.ig-item-label {
+  white-space: nowrap;
+  color: #FFFFFF !important;
+  font-weight: 500;
+  opacity: 0;
+  display: none !important;
+  transform: translateX(-8px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+  letter-spacing: -0.01em;
+}
+
+.ig-sidebar:hover .ig-item-label,
+.ig-sidebar.is-expanded .ig-item-label {
+  display: block !important;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+/* User Avatar Ring */
+.ig-avatar-ring {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  padding: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ig-nav-item:hover .ig-avatar-ring,
+.ig-nav-item.is-active .ig-avatar-ring {
+  border-color: #3B82F6;
+  transform: scale(1.08);
+}
+
+.ig-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ig-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2563EB, #7C3AED);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 50%;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar Footer & More Popover
+   -------------------------------------------------------------------------- */
+.ig-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  padding-top: 14px;
+  border-top: 1px solid var(--ig-border);
+}
+
+.ig-more-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 8px;
+  width: 220px;
+  background: #050548;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: igFadeSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes igFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ig-popover-header {
+  padding: 10px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ig-popover-name {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.ig-popover-role {
+  color: #93C5FD;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ig-popover-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 4px 0;
+}
+
+.ig-popover-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: var(--ig-text-muted);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.ig-popover-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.ig-popover-logout {
+  color: #F87171 !important;
+}
+
+.ig-popover-logout:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #FCA5A5 !important;
+}
+
+.ig-sidebar-footer button.ig-nav-item,
+.ig-sidebar-footer a.ig-nav-item {
+  margin: 0 !important;
+  margin-top: 0 !important;
+  border-top: none !important;
+}
+
+.ig-sidebar.is-collapsed:not(:hover) .ig-sidebar-footer .ig-nav-item {
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ig-meta-link {
+  color: rgba(255, 255, 255, 0.82) !important;
+  font-size: 0.88rem;
+}
+
+.ig-meta-link:hover {
+  color: #FFFFFF !important;
+}
+
+/* --------------------------------------------------------------------------
+   Flyout Notification Panel
+   -------------------------------------------------------------------------- */
+.ig-flyout-panel {
+  position: fixed;
+  top: 0;
+  left: var(--ig-sidebar-collapsed-w);
+  width: 320px;
+  height: 100vh;
+  background: #020235;
+  border-right: 1px solid var(--ig-border);
+  box-shadow: 16px 0 40px rgba(0, 0, 0, 0.4);
+  z-index: 998;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  animation: igSlideFlyout 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@keyframes igSlideFlyout {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.ig-flyout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ig-border);
+}
+
+.ig-flyout-header h3 {
+  color: #FFFFFF;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.ig-flyout-close {
+  background: transparent;
+  border: none;
+  color: var(--ig-text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.ig-flyout-close:hover {
+  color: #FFFFFF;
+}
+
+.ig-flyout-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ig-notification-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ig-notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3B82F6;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.ig-notif-dot.read {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ig-notif-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ig-notif-text {
+  color: #E2E8F0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.ig-notif-time {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Top & Bottom Navigation (< 768px)
+   -------------------------------------------------------------------------- */
+.ig-mobile-topbar,
+.ig-mobile-bottombar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .ig-sidebar {
+    display: none !important;
+  }
+
+  /* Mobile Top Bar */
+  .ig-mobile-topbar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 54px;
+    background: rgba(0, 0, 57, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--ig-border);
+    padding: 0 16px;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+  }
+
+  .ig-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .ig-mobile-logo-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #FFFFFF;
+  }
+
+  .ig-mobile-role-pill {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #93C5FD;
+    background: rgba(37, 99, 235, 0.25);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .ig-mobile-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ig-mobile-icon-btn {
+    background: transparent;
+    border: none;
+    color: #FFFFFF;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .ig-mobile-badge-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #EF4444;
+  }
+
+  /* Mobile Bottom Navigation Bar — matches screenshot exactly */
+  .ig-mobile-bottombar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: #000;          /* pure black like screenshot */
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    align-items: center;
+    justify-content: space-around;
+    z-index: 1000;
+    padding: 0 4px env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  }
+
+  /* Each tab is a simple flex-center link/button */
+  .ig-mobile-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    height: 100%;
+    transition: color 0.15s ease, transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ig-mobile-tab svg {
+    width: 26px;
+    height: 26px;
+    stroke: currentColor;
+    fill: none;
+    transition: stroke 0.15s ease;
+  }
+
+  /* Active: pure white, slight scale */
+  .ig-mobile-tab.is-active {
+    color: #ffffff;
+  }
+
+  .ig-mobile-tab.is-active svg {
+    stroke: #ffffff;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.35));
+  }
+
+  .ig-mobile-tab:active {
+    transform: scale(0.88);
+  }
+
+  /* Profile avatar tab */
+  .ig-mobile-tab-profile {
+    /* same sizing as others */
+  }
+
+  .ig-mobile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    transition: border-color 0.15s ease, transform 0.12s ease;
+    flex-shrink: 0;
+  }
+
+  .ig-mobile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ig-mobile-tab-profile.is-active .ig-mobile-avatar {
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+  }
+
+  /* Remove old tab-badge-wrap styles — no longer used */
+  .ig-tab-badge-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Keep avatar-ring for desktop sidebar */
+  .ig-avatar-ring.small {
+    width: 24px;
+    height: 24px;
+  }
+}
+
