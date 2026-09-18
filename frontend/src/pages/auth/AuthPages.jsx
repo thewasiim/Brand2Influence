@@ -567,7 +567,7 @@ export function SignupPage() {
                 </div>
 
                 {/* 1. INSTAGRAM */}
-                <div style={{ background: '#ffffff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
                   <div className="social-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
                       <span style={{ fontSize: '15px' }}>📸</span> Instagram Profile
@@ -630,7 +630,7 @@ export function SignupPage() {
                 </div>
 
                 {/* 2. YOUTUBE */}
-                <div style={{ background: '#ffffff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
                   <div className="social-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
                       <span style={{ fontSize: '15px' }}>▶️</span> YouTube Channel
@@ -685,7 +685,7 @@ export function SignupPage() {
                 </div>
 
                 {/* 3. SNAPCHAT */}
-                <div style={{ background: '#ffffff', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid var(--color-border)', borderRadius: '10px', padding: '12px' }}>
                   <div className="social-card-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px' }}>
                       <span style={{ fontSize: '15px' }}>👻</span> Snapchat Profile
@@ -740,7 +740,7 @@ export function SignupPage() {
                 </div>
 
                 {/* 4. FACEBOOK */}
-                <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, fontSize: '13px', marginBottom: '8px' }}>
                     <span style={{ fontSize: '15px' }}>📘</span> Facebook Page / Profile (Optional)
                   </div>

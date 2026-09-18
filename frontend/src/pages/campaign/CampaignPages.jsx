@@ -128,7 +128,7 @@ export function CampaignDiscoveryPage() {
               <span
                 style={{
                   background: 'var(--color-primary)',
-                  color: '#fff',
+                  color: '#FFFFFF',
                   fontSize: '11px',
                   fontWeight: 700,
                   borderRadius: '10px',
@@ -389,25 +389,33 @@ export function CampaignDiscoveryPage() {
                     {item.description}
                   </p>
 
-                  {item.deliverables?.length > 0 && (
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                      {item.deliverables.map((d, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            fontSize: '11px',
-                            background: 'var(--color-surface-3)',
-                            border: '1px solid var(--color-border)',
-                            padding: '3px 8px',
-                            borderRadius: 'var(--radius-sm)',
-                            color: 'var(--color-neutral-subtle)',
-                          }}
-                        >
-                          ✓ {d}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  {(() => {
+                    const delivList = Array.isArray(item.deliverables)
+                      ? item.deliverables
+                      : (typeof item.deliverables === 'string'
+                          ? item.deliverables.split('+').map(s => s.trim()).filter(Boolean)
+                          : [])
+                    if (delivList.length === 0) return null
+                    return (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                        {delivList.map((d, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              fontSize: '11px',
+                              background: 'var(--color-surface-3)',
+                              border: '1px solid var(--color-border)',
+                              padding: '3px 8px',
+                              borderRadius: 'var(--radius-sm)',
+                              color: 'var(--color-neutral-subtle)',
+                            }}
+                          >
+                            ✓ {d}
+                          </span>
+                        ))}
+                      </div>
+                    )
+                  })()}
                 </div>
 
                 <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -534,20 +542,30 @@ export function CampaignDetailPage() {
             <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--color-neutral-subtle)' }}>
               Required Deliverables
             </h3>
-            {item.deliverables?.length > 0 ? (
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {item.deliverables.map((d, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', background: 'var(--color-surface-2)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
-                    <span style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>✓</span>
-                    <span>{d}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
-                Deliverables can be aligned directly with the brand in messages.
-              </p>
-            )}
+            {(() => {
+              const delivList = Array.isArray(item.deliverables)
+                ? item.deliverables
+                : (typeof item.deliverables === 'string'
+                    ? item.deliverables.split('+').map(s => s.trim()).filter(Boolean)
+                    : [])
+              if (delivList.length === 0) {
+                return (
+                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
+                    Deliverables can be aligned directly with the brand in messages.
+                  </p>
+                )
+              }
+              return (
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {delivList.map((d, i) => (
+                    <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', background: 'var(--color-surface-2)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                      <span style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>✓</span>
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              )
+            })()}
           </Card>
         </div>
 

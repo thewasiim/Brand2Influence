@@ -615,14 +615,14 @@ export function BrandProfilePage() {
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                        <Badge variant="primary">{camp.platform}</Badge>
-                        <Badge variant="accent">{camp.niche}</Badge>
+                        <Badge variant="primary">{camp.platform || 'Instagram'}</Badge>
+                        <Badge variant="accent">{camp.niche || brand.businessType || 'General'}</Badge>
                         <Badge variant={camp.status === 'active' ? 'secondary' : 'outline'}>
-                          {camp.status.toUpperCase()}
+                          {(camp.status || 'active').toUpperCase()}
                         </Badge>
                       </div>
                       <b style={{ color: 'var(--color-secondary)', fontSize: '13px' }}>
-                        {camp.budget_range}
+                        {camp.budget_range || (camp.budget ? `₹${Number(camp.budget).toLocaleString()}` : 'Flexible')}
                       </b>
                     </div>
 
@@ -634,25 +634,33 @@ export function BrandProfilePage() {
                       {camp.description}
                     </p>
 
-                    {camp.deliverables?.length > 0 && (
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                        {camp.deliverables.map((d, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              fontSize: '11px',
-                              background: 'var(--color-surface-3)',
-                              border: '1px solid var(--color-border)',
-                              padding: '3px 8px',
-                              borderRadius: 'var(--radius-sm)',
-                              color: 'var(--color-neutral-subtle)',
-                            }}
-                          >
-                            ✓ {d}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {(() => {
+                      const delivList = Array.isArray(camp.deliverables)
+                        ? camp.deliverables
+                        : (typeof camp.deliverables === 'string'
+                            ? camp.deliverables.split('+').map(s => s.trim()).filter(Boolean)
+                            : [])
+                      if (delivList.length === 0) return null
+                      return (
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                          {delivList.map((d, i) => (
+                            <span
+                              key={i}
+                              style={{
+                                fontSize: '11px',
+                                background: 'var(--color-surface-3)',
+                                border: '1px solid var(--color-border)',
+                                padding: '3px 8px',
+                                borderRadius: 'var(--radius-sm)',
+                                color: 'var(--color-neutral-subtle)',
+                              }}
+                            >
+                              ✓ {d}
+                            </span>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

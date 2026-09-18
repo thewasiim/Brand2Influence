@@ -16,8 +16,10 @@ import {
   FocusCardSlider,
 } from '../components/ui'
 import BrandCard from '../components/ProfileCard/BrandCard'
+import CampaignCard from '../components/ProfileCard/CampaignCard'
 import PixelCard from '../components/PixelCard/PixelCard'
 import GlowCursor from '../components/GlowCursor/GlowCursor'
+import VantaCellsBackground from '../components/VantaCellsBackground'
 
 // Curated Showcase Creators for Bento Showcase & Dynamic Filtering
 const SHOWCASE_CREATORS = [
@@ -146,6 +148,87 @@ const SHOWCASE_BRANDS = [
   },
 ]
 
+const SHOWCASE_CAMPAIGNS = [
+  {
+    id: 'camp-1',
+    title: 'Summer Organic Linen & Cotton Capsule',
+    brand: 'The Loom Co.',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
+    niche: 'Fashion',
+    platform: 'Instagram',
+    budget: '₹25,000 – ₹45,000',
+    deliverables: ['2x Reels', '3x Stories'],
+    targetFollowers: '20,000+',
+    location: 'Mumbai / Delhi NCR',
+    description: 'Looking for sustainable fashion stylists for styling reels featuring our handcrafted summer linen collection.',
+  },
+  {
+    id: 'camp-2',
+    title: 'Cold Brew Starter Kit Unboxing & Recipe',
+    brand: 'Blue Tokai Roasters',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
+    niche: 'Food & Beverage',
+    platform: 'Instagram / YouTube',
+    budget: '₹15,000 – ₹35,000',
+    deliverables: ['1x Reel', '1x Carousel'],
+    targetFollowers: '15,000+',
+    location: 'Pan-India',
+    description: 'Seeking food & coffee creators to craft creative iced coffee recipes using our specialty cold brew blends.',
+  },
+  {
+    id: 'camp-3',
+    title: 'Clean Barrier Repair Serum Campaign',
+    brand: 'Kiro Botanicals',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=300',
+    niche: 'Beauty & Skincare',
+    platform: 'Instagram',
+    budget: '₹20,000 – ₹50,000',
+    deliverables: ['1x Reel', '2x Story Highlights'],
+    targetFollowers: '25,000+',
+    location: 'Bengaluru / Mumbai',
+    description: 'Ingredient-first skincare review educating followers on ceramides, hydration, and skin barrier health.',
+  },
+  {
+    id: 'camp-4',
+    title: 'Minimalist Travel Backpack Durability Showcase',
+    brand: 'Mokobara',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
+    niche: 'Travel & Lifestyle',
+    platform: 'YouTube / Instagram',
+    budget: '₹35,000 – ₹80,000',
+    deliverables: ['1x Vlog Integration', '1x Reel'],
+    targetFollowers: '40,000+',
+    location: 'Pan-India',
+    description: 'Calling travel and lifestyle creators to test and showcase transit durability on upcoming weekend trips.',
+  },
+  {
+    id: 'camp-5',
+    title: 'Plant-Based Protein Daily Smoothie Routine',
+    brand: 'Cosmix Wellness',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=300',
+    niche: 'Fitness & Health',
+    platform: 'Instagram',
+    budget: '₹18,000 – ₹40,000',
+    deliverables: ['1x Reel', '2x Stories with Link'],
+    targetFollowers: '15,000+',
+    location: 'Pan-India',
+    description: 'Partnering with fitness enthusiasts and nutritionists to showcase clean gut-friendly daily protein routines.',
+  },
+  {
+    id: 'camp-6',
+    title: 'Workstation Aesthetic & Ergonomic Desk Setup',
+    brand: 'Sleepy Owl Goods',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=300',
+    niche: 'Tech & Lifestyle',
+    platform: 'Instagram / YouTube',
+    budget: '₹20,000 – ₹45,000',
+    deliverables: ['1x Reel', '1x Community Post'],
+    targetFollowers: '30,000+',
+    location: 'Delhi NCR / Bengaluru',
+    description: 'Showcase productivity rituals, desk aesthetics, and slow coffee routines with tech & lifestyle creators.',
+  },
+]
+
 const CATEGORY_TABS = [
   'All',
   'Food',
@@ -231,6 +314,14 @@ export default function LandingPage() {
       <main>
         {/* 2. BENTO HERO */}
         <section className="bento-hero" id="top">
+          <VantaCellsBackground
+            color1={0x000039}
+            color2={0x3b82f6}
+            size={1.5}
+            speed={1.0}
+            className="hero-vanta-bg"
+          />
+          <div className="hero-vanta-overlay" />
           <div className="bento-hero-content">
             <FadeIn delay={0.05} distance={16}>
               <div className="hero-badge">
@@ -364,7 +455,7 @@ export default function LandingPage() {
 
               <h3>Find Voices That Convert</h3>
               <p className="role-card-desc">
-                Filter by verified engagement rate, starting reel rate, and exact city. Reach creators directly and coordinate deliverables in one place.
+                Hire verified creators directly with zero agency markup.
               </p>
 
               <ul className="role-features-list">
@@ -374,7 +465,7 @@ export default function LandingPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </span>
-                  <span><strong>Audience Demographics:</strong> Filter by verified engagement & city hubs</span>
+                  <span><strong>Verified Metrics:</strong> Real engagement & city demographics</span>
                 </li>
                 <li>
                   <span className="role-feature-check">
@@ -382,7 +473,7 @@ export default function LandingPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </span>
-                  <span><strong>Transparent Rates:</strong> Upfront starting pricing for reels & stories</span>
+                  <span><strong>Upfront Rates:</strong> Transparent pricing for reels & stories</span>
                 </li>
                 <li>
                   <span className="role-feature-check">
@@ -390,7 +481,7 @@ export default function LandingPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </span>
-                  <span><strong>Direct Deal Inbox:</strong> Direct brand communication with 0% hidden fees</span>
+                  <span><strong>Direct Inbox:</strong> Chat 1-on-1 with 0% hidden fees</span>
                 </li>
               </ul>
 
@@ -414,7 +505,7 @@ export default function LandingPage() {
 
               <h3>Get Discovered On Your Terms</h3>
               <p className="role-card-desc">
-                Set your upfront reel rates, showcase your portfolio links, and receive qualified collaboration requests from brands that value your creative voice.
+                Set your rates and get inbound sponsorships from top brands.
               </p>
 
               <ul className="role-features-list">
@@ -424,7 +515,7 @@ export default function LandingPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </span>
-                  <span><strong>100% Rate Control:</strong> Keep your full asking rate with 0% commission cuts</span>
+                  <span><strong>Keep 100%:</strong> Zero commission or middleman cuts</span>
                 </li>
                 <li>
                   <span className="role-feature-check">
@@ -432,7 +523,7 @@ export default function LandingPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </span>
-                  <span><strong>Verified Insights:</strong> Auto-synced audience metrics for Instagram & YouTube</span>
+                  <span><strong>Live Insights:</strong> Auto-synced Instagram & YouTube stats</span>
                 </li>
                 <li>
                   <span className="role-feature-check">
@@ -440,7 +531,7 @@ export default function LandingPage() {
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   </span>
-                  <span><strong>Direct Inquiries:</strong> Inbound sponsorship briefs from vetted businesses</span>
+                  <span><strong>Direct Inbound:</strong> Sponsorship briefs from verified brands</span>
                 </li>
               </ul>
 
@@ -510,7 +601,77 @@ export default function LandingPage() {
           )}
         </section>
 
-        {/* 6. HOW IT WORKS (BENTO WORKFLOW) */}
+        {/* 6. FEATURED BRANDS SHOWCASE (DIRECTLY UNDER CREATORS) */}
+        <section className="section" id="brand-deals">
+          <FadeIn className="page-heading">
+            <div>
+              <span className="eyebrow">Verified Partners</span>
+              <h2>Featured Brands & Collaborations</h2>
+            </div>
+            <p>Explore verified businesses offering active sponsorship budgets for creators.</p>
+          </FadeIn>
+
+          <div style={{ marginTop: '24px' }}>
+            <FocusCardSlider
+              items={SHOWCASE_BRANDS}
+              cardWidth={330}
+              cardGap={26}
+              renderItem={(brand) => (
+                <BrandCard
+                  id={brand.id}
+                  brand={brand.brand}
+                  brandLogoUrl={brand.brandLogoUrl}
+                  budget={brand.budget}
+                  onClick={() => navigate(`/brands/${brand.id}`)}
+                />
+              )}
+            />
+          </div>
+        </section>
+
+        {/* 7. OPEN CAMPAIGN BRIEFS & SPONSORSHIPS (DIRECTLY UNDER BRANDS) */}
+        <section className="section" id="campaign-deals">
+          <FadeIn className="page-heading">
+            <div>
+              <span className="eyebrow">Active Sponsorships</span>
+              <h2>Open Brand Campaigns & Briefs</h2>
+            </div>
+            <p>Pitch deliverables directly to brands with approved budgets and clear requirements.</p>
+          </FadeIn>
+
+          <div style={{ marginTop: '24px' }}>
+            <FocusCardSlider
+              items={SHOWCASE_CAMPAIGNS}
+              cardWidth={340}
+              cardGap={24}
+              renderItem={(camp) => (
+                <CampaignCard
+                  key={camp.id}
+                  id={camp.id}
+                  title={camp.title}
+                  brand={camp.brand}
+                  brandLogoUrl={camp.brandLogoUrl}
+                  niche={camp.niche}
+                  platform={camp.platform}
+                  budget={camp.budget}
+                  deliverables={camp.deliverables}
+                  targetFollowers={camp.targetFollowers}
+                  location={camp.location}
+                  description={camp.description}
+                  onSelect={() => navigate(`/campaigns/${camp.id}`)}
+                />
+              )}
+            />
+          </div>
+
+          <FadeIn delay={0.15} style={{ textAlign: 'center', marginTop: '28px' }}>
+            <Button variant="secondary" size="md" onClick={() => navigate('/campaigns')}>
+              Explore All Open Brand Campaigns ({'>'} 6 Available) →
+            </Button>
+          </FadeIn>
+        </section>
+
+        {/* 8. HOW IT WORKS (BENTO WORKFLOW) */}
         <section className="section" id="how-it-works">
           <FadeIn className="page-heading">
             <div>
@@ -538,7 +699,7 @@ export default function LandingPage() {
           </StaggerContainer>
         </section>
 
-        {/* 6.5 PLATFORM METRICS & TRUST INDICATORS (CENTERED MIDDLE SECTION) */}
+        {/* 8.5 PLATFORM METRICS & TRUST INDICATORS (CENTERED MIDDLE SECTION) */}
         <section className="section" style={{ paddingTop: '10px', paddingBottom: '30px' }}>
           <FadeIn distance={20} duration={0.65}>
             <div
@@ -587,7 +748,7 @@ export default function LandingPage() {
           </FadeIn>
         </section>
 
-        {/* 7. MARKETPLACE PREVIEW */}
+        {/* 9. MARKETPLACE PREVIEW */}
         <section className="section">
           <FadeIn className="page-heading">
             <div>
@@ -626,40 +787,6 @@ export default function LandingPage() {
               </div>
             </StaggerItem>
           </StaggerContainer>
-        </section>
-
-        {/* 8. LIVE BRAND ADVERTISEMENTS & DEALS SHOWCASE */}
-        <section className="section" id="brand-deals">
-          <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Verified Partners</span>
-              <h2>Featured Brands & Collaborations</h2>
-            </div>
-            <p>Explore verified brands offering active sponsorship budgets. Click any brand to view campaign briefs and deliverables.</p>
-          </FadeIn>
-
-          <div style={{ marginTop: '24px' }}>
-            <FocusCardSlider
-              items={SHOWCASE_BRANDS}
-              cardWidth={330}
-              cardGap={26}
-              renderItem={(brand) => (
-                <BrandCard
-                  id={brand.id}
-                  brand={brand.brand}
-                  brandLogoUrl={brand.brandLogoUrl}
-                  budget={brand.budget}
-                  onClick={() => navigate(`/brands/${brand.id}`)}
-                />
-              )}
-            />
-          </div>
-
-          <FadeIn delay={0.2} style={{ textAlign: 'center', marginTop: '28px' }}>
-            <Button variant="secondary" size="md" onClick={() => navigate('/campaigns')}>
-              Explore All Open Brand Campaigns ({'>'} 6 Available) →
-            </Button>
-          </FadeIn>
         </section>
 
         {/* 9. VALUE PROPOSITION (4-CARD BENTO GRID) */}

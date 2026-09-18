@@ -36,11 +36,12 @@ export function PublicLayout() {
             socialItems={socialItems}
             displaySocials={true}
             displayItemNumbering={true}
-            colors={['#18181B', '#27272A', '#09090B']}
-            panelBg="#09090B"
-            accentColor="#FFFFFF"
-            menuButtonColor="#FFFFFF"
-            openMenuButtonColor="#FFFFFF"
+            colors={['#EEF2FF', '#DBEAFE', '#FFFFFF']}
+            panelBg="#FFFFFF"
+            textColor="#1D4ED8"
+            accentColor="#2563EB"
+            menuButtonColor="#1D4ED8"
+            openMenuButtonColor="#1D4ED8"
             loginLabel={user ? 'Dashboard' : 'Log In'}
             loginLink={user ? '/dashboard' : '/login'}
             ctaLabel={user ? 'My Profile' : 'Get Started'}

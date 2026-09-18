@@ -21,17 +21,18 @@ const checkIsLightColor = colorStr => {
 
 export const StaggeredMenu = ({
   position = 'right',
-  colors = ['#18181B', '#09090B'],
+  colors = ['#EEF2FF', '#DBEAFE', '#FFFFFF'],
   items = [],
   socialItems = [],
   displaySocials = true,
   displayItemNumbering = true,
   className,
   logoUrl,
-  menuButtonColor = '#FFFFFF',
-  openMenuButtonColor = '#FFFFFF',
-  accentColor = '#FFFFFF',
-  panelBg = '#09090B',
+  menuButtonColor = '#1D4ED8',
+  openMenuButtonColor = '#1D4ED8',
+  accentColor = '#2563EB',
+  panelBg = '#FFFFFF',
+  textColor = '#1D4ED8',
   changeMenuColorOnOpen = true,
   isFixed = false,
   closeOnClickAway = true,
@@ -352,18 +353,18 @@ export const StaggeredMenu = ({
   };
 
   // Dynamic CSS Variables based on panelBg lightness
-  const isLightAccent = checkIsLightColor(accentColor || '#FFFFFF');
+  const isLightAccent = checkIsLightColor(accentColor || '#2563EB');
   const panelStyle = {
-    '--sm-bg': panelBg || '#09090B',
-    '--sm-text': isLightPanel ? '#0A0A0A' : '#FFFFFF',
-    '--sm-text-muted': isLightPanel ? '#71717A' : 'rgba(255, 255, 255, 0.6)',
-    '--sm-border': isLightPanel ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.15)',
-    '--sm-btn-sec-bg': isLightPanel ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
-    '--sm-btn-sec-text': isLightPanel ? '#0A0A0A' : '#FFFFFF',
-    '--sm-btn-sec-border': isLightPanel ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.25)',
-    '--sm-accent': accentColor || '#FFFFFF',
-    '--sm-btn-pri-bg': accentColor || '#FFFFFF',
-    '--sm-btn-pri-text': isLightAccent ? '#09090B' : '#FFFFFF'
+    '--sm-bg': panelBg || '#FFFFFF',
+    '--sm-text': textColor || (isLightPanel ? '#1D4ED8' : '#FFFFFF'),
+    '--sm-text-muted': isLightPanel ? '#3B82F6' : 'rgba(255, 255, 255, 0.6)',
+    '--sm-border': isLightPanel ? 'rgba(29, 78, 216, 0.15)' : 'rgba(255, 255, 255, 0.15)',
+    '--sm-btn-sec-bg': isLightPanel ? '#FFFFFF' : 'transparent',
+    '--sm-btn-sec-text': isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
+    '--sm-btn-sec-border': isLightPanel ? (textColor || '#1D4ED8') : 'rgba(255, 255, 255, 0.25)',
+    '--sm-accent': accentColor || '#2563EB',
+    '--sm-btn-pri-bg': accentColor || '#1D4ED8',
+    '--sm-btn-pri-text': isLightAccent ? '#FFFFFF' : '#FFFFFF'
   };
 
   return (
@@ -483,9 +484,10 @@ export const StaggeredMenu = ({
                       href={loginLink || '#'}
                       className="sm-btn-secondary"
                       style={{
-                        color: isLightPanel ? '#0A0A0A' : '#FFFFFF',
-                        borderColor: isLightPanel ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.25)',
-                        borderWidth: '1px',
+                        color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
+                        borderColor: isLightPanel ? (textColor || '#1D4ED8') : 'rgba(255, 255, 255, 0.25)',
+                        backgroundColor: isLightPanel ? '#FFFFFF' : 'transparent',
+                        borderWidth: '1.5px',
                         borderStyle: 'solid',
                         borderRadius: 'var(--radius-pill, 9999px)',
                         padding: '0.75rem 1.25rem',
@@ -499,7 +501,7 @@ export const StaggeredMenu = ({
                       <span
                         className="sm-btn-label"
                         style={{
-                          color: isLightPanel ? '#0A0A0A' : '#FFFFFF',
+                          color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
                           fontWeight: 600,
                           fontSize: '0.95rem'
                         }}
@@ -513,9 +515,9 @@ export const StaggeredMenu = ({
                       href={ctaLink || '#'}
                       className="sm-btn-primary"
                       style={{
-                        backgroundColor: '#FFFFFF',
-                        color: '#09090B',
-                        border: '1px solid rgba(255, 255, 255, 0.9)',
+                        backgroundColor: '#1D4ED8',
+                        color: '#FFFFFF',
+                        border: '1.5px solid #1D4ED8',
                         borderRadius: 'var(--radius-pill, 9999px)',
                         padding: '0.75rem 1.25rem',
                         fontWeight: 700,
@@ -529,7 +531,7 @@ export const StaggeredMenu = ({
                       <span
                         className="sm-btn-label"
                         style={{
-                          color: '#09090B',
+                          color: '#FFFFFF',
                           fontWeight: 700,
                           fontSize: '0.95rem'
                         }}

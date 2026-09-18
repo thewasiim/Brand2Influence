@@ -16,6 +16,7 @@ export const campaignRouter = Router()
 // Public discovery of active campaign advertisements
 campaignRouter.get('/', list)
 campaignRouter.get('/item/:id', getById)
+campaignRouter.get('/:id', getById)
 
 // Brand operations
 campaignRouter.post('/', authenticate, loadCurrentUser, allowRoles('brand', 'admin'), create)

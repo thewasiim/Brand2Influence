@@ -97,7 +97,7 @@ export default function FaqAccordion() {
                   height: '28px',
                   borderRadius: '50%',
                   background: isOpen ? 'var(--color-secondary)' : 'var(--color-surface-3)',
-                  color: isOpen ? '#fff' : 'var(--color-text-secondary)',
+                  color: isOpen ? '#FFFFFF' : 'var(--color-text-secondary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

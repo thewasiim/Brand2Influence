@@ -314,23 +314,18 @@ export function InfluencerOnboardingPage() {
 export function DiscoveryPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
-  const [filters, setFilters] = useState({
-    niche: '',
-    location: '',
-    followersMin: '',
-    followersMax: '',
-    budget: '',
-  })
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  const load = async () => {
+  const load = async (searchQuery = search) => {
     setLoading(true)
     setError('')
     try {
-      const payload = { ...filters }
-      if (search.trim()) payload.search = search.trim()
+      const payload = {}
+      if (searchQuery && searchQuery.trim()) {
+        payload.search = searchQuery.trim()
+      }
       const res = await influencersService.list(payload)
       setData(res)
     } catch (err) {
@@ -340,13 +335,22 @@ export function DiscoveryPage() {
     }
   }
 
+  // Live real-time search on typing with slight debounce
   useEffect(() => {
-    load()
-  }, [filters.niche])
+    const timer = setTimeout(() => {
+      load(search)
+    }, 200)
+
+    return () => clearTimeout(timer)
+  }, [search])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
-    load()
+    load(search)
+  }
+
+  const handleClear = () => {
+    setSearch('')
   }
 
   return (
@@ -357,121 +361,77 @@ export function DiscoveryPage() {
             <i /> Creator Directory & Discovery
           </div>
           <h1 style={{ marginTop: '6px' }}>Discover Verified Creators</h1>
-          <p>Filter by creative niche, city location, audience scale, and starting reel rates.</p>
+          <p>Search verified creators across industries, niches, and locations.</p>
         </div>
       </FadeIn>
 
-      {/* BENTO SEARCH & FILTER PANEL */}
+      {/* SINGLE SEARCH BAR */}
       <FadeIn delay={0.08} distance={18}>
         <form
-          className="bento-search-panel"
-          style={{ marginBottom: '24px' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            background: '#FFFFFF',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '8px 12px 8px 18px',
+            boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+            marginBottom: '28px',
+            maxWidth: '720px',
+          }}
           onSubmit={handleSearchSubmit}
         >
-          <div className="search-field-item" style={{ flex: 1.5 }}>
-            <label>Search Keyword</label>
-            <input
-              placeholder="Creator name, username, bio..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="search-field-item">
-            <label>Location</label>
-            <input
-              placeholder="City or state"
-              value={filters.location}
-              onChange={(e) => setFilters({ ...filters, location: e.target.value })}
-            />
-          </div>
-
-          <div className="search-field-item">
-            <label>Min Followers</label>
-            <input
-              type="number"
-              placeholder="e.g. 10000"
-              value={filters.followersMin}
-              onChange={(e) => setFilters({ ...filters, followersMin: e.target.value })}
-            />
-          </div>
-
-          <div className="search-field-item">
-            <label>Max Followers</label>
-            <input
-              type="number"
-              placeholder="e.g. 200000"
-              value={filters.followersMax}
-              onChange={(e) => setFilters({ ...filters, followersMax: e.target.value })}
-            />
-          </div>
-
-          <div className="search-field-item">
-            <label>Max Reel Rate (₹)</label>
-            <input
-              type="number"
-              placeholder="e.g. 5000"
-              value={filters.budget}
-              onChange={(e) => setFilters({ ...filters, budget: e.target.value })}
-            />
-          </div>
-
+          <span style={{ fontSize: '16px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}>
+            🔍
+          </span>
+          <input
+            type="text"
+            placeholder="Search creators by name, handle, niche, location, bio..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              fontSize: '15px',
+              fontFamily: 'inherit',
+              color: 'var(--color-text-primary)',
+              outline: 'none',
+              padding: '6px 0',
+            }}
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={handleClear}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontSize: '14px',
+                padding: '4px 8px',
+                borderRadius: '4px',
+              }}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
           <Button type="submit" variant="primary">
             Search
           </Button>
         </form>
       </FadeIn>
 
-      {/* QUICK NICHE PILLS */}
-      <FadeIn delay={0.12} distance={14} style={{ marginBottom: '28px' }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginRight: '4px' }}>
-            Niche:
-          </span>
-          {CREATOR_NICHES.map((n) => {
-            const active = (!filters.niche && n === 'All Niches') || filters.niche.toLowerCase() === n.toLowerCase()
-            return (
-              <button
-                key={n}
-                type="button"
-                className={`chip ${active ? 'chip--active' : ''}`}
-                onClick={() => setFilters({ ...filters, niche: n === 'All Niches' ? '' : n })}
-              >
-                {n}
-              </button>
-            )
-          })}
-          {(filters.niche || filters.location || filters.followersMin || filters.followersMax || filters.budget || search.trim()) && (
-            <button
-              type="button"
-              onClick={() => {
-                setFilters({ niche: '', location: '', followersMin: '', followersMax: '', budget: '' })
-                setSearch('')
-                load()
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--color-secondary)',
-                fontSize: '12px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                textDecoration: 'underline',
-              }}
-            >
-              Reset filters
-            </button>
-          )}
-        </div>
-      </FadeIn>
-
-      {error && <ErrorState error={error} onRetry={load} />}
+      {error && <ErrorState error={error} onRetry={() => load(search)} />}
 
       {loading ? (
         <LoadingState label="Loading creators…" />
       ) : data?.items?.length ? (
         <StaggerContainer
-          key={search + filters.niche + filters.location + filters.followersMin + filters.followersMax + filters.budget}
+          key={search}
           className="bento-grid bento-grid--3"
           staggerDelay={0.07}
         >
@@ -488,22 +448,22 @@ export function DiscoveryPage() {
         </StaggerContainer>
       ) : (
         <EmptyState
-          title="No creators match these filters"
+          title={search ? `No creators match "${search}"` : "No creators found"}
           action={
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                setFilters({ niche: '', location: '', followersMin: '', followersMax: '', budget: '' })
-                setSearch('')
-                load()
-              }}
-            >
-              Reset Filters
-            </Button>
+            search ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleClear}
+              >
+                Clear Search
+              </Button>
+            ) : null
           }
         >
-          Try loosening your filter parameters or exploring other creative categories.
+          {search
+            ? "Try searching with a different keyword, handle, city, or niche."
+            : "No creators are available in the directory at this time."}
         </EmptyState>
       )}
     </main>
