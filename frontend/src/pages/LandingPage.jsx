@@ -358,8 +358,9 @@ export default function LandingPage() {
 
 
         {/* 3. INTERACTIVE INFLUENCER SEARCH (BENTO SEARCH PANEL) */}
-        <FadeIn as="section" className="bento-search-section" distance={24} duration={0.75}>
-          <form className="bento-search-panel" onSubmit={handleSearchSubmit}>
+        <section className="landing-search-stripe">
+          <FadeIn as="div" className="bento-search-section" distance={24} duration={0.75}>
+            <form className="bento-search-panel" onSubmit={handleSearchSubmit}>
             <div className="search-field-item">
               <label>Keyword</label>
               <input
@@ -428,6 +429,7 @@ export default function LandingPage() {
             </Button>
           </form>
         </FadeIn>
+      </section>
 
         {/* 4. BRAND / INFLUENCER BENTO CARDS */}
         <section className="section" id="roles-bento">
@@ -700,52 +702,31 @@ export default function LandingPage() {
         </section>
 
         {/* 8.5 PLATFORM METRICS & TRUST INDICATORS (CENTERED MIDDLE SECTION) */}
-        <section className="section" style={{ paddingTop: '10px', paddingBottom: '30px' }}>
-          <FadeIn distance={20} duration={0.65}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '32px',
-                padding: '36px 32px',
-                background: 'var(--color-surface-2)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-2xl)',
-                textAlign: 'center',
-                boxShadow: 'var(--shadow-bento)',
-                width: '100%',
-              }}
-            >
-              <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
-                <b style={{ display: 'block', fontSize: 'clamp(32px, 3.8vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-neutral)', lineHeight: 1.1 }}>
-                  <CountUp from={0} to={500} duration={1.8} separator="," suffix="+" />
-                </b>
-                <span style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
-                  Verified Creators
-                </span>
-              </div>
+        <section className="landing-metrics-stripe">
+          <div className="section landing-metrics-wrapper">
+            <FadeIn distance={20} duration={0.65}>
+              <div className="landing-metrics-card">
+                <div className="landing-metrics-item">
+                  <b className="landing-metrics-number">
+                    <CountUp from={0} to={500} duration={1.8} separator="," suffix="+" />
+                  </b>
+                  <span className="landing-metrics-label">Verified Creators</span>
+                </div>
 
-              <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
-                <b style={{ display: 'block', fontSize: 'clamp(32px, 3.8vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-neutral)', lineHeight: 1.1 }}>
-                  <CountUp from={0} to={100} duration={1.6} suffix="%" />
-                </b>
-                <span style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
-                  Upfront Rates
-                </span>
-              </div>
+                <div className="landing-metrics-item">
+                  <b className="landing-metrics-number">
+                    <CountUp from={0} to={100} duration={1.6} suffix="%" />
+                  </b>
+                  <span className="landing-metrics-label">Upfront Rates</span>
+                </div>
 
-              <div style={{ flex: '1 1 200px', textAlign: 'center' }}>
-                <b style={{ display: 'block', fontSize: 'clamp(32px, 3.8vw, 44px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-neutral)', lineHeight: 1.1 }}>
-                  Direct
-                </b>
-                <span style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', fontWeight: 500, marginTop: '6px', display: 'block' }}>
-                  Brand Messaging
-                </span>
+                <div className="landing-metrics-item">
+                  <b className="landing-metrics-number">Direct</b>
+                  <span className="landing-metrics-label">Brand Messaging</span>
+                </div>
               </div>
-            </div>
-          </FadeIn>
+            </FadeIn>
+          </div>
         </section>
 
         {/* 9. MARKETPLACE PREVIEW */}
@@ -789,32 +770,6 @@ export default function LandingPage() {
           </StaggerContainer>
         </section>
 
-        {/* 9. VALUE PROPOSITION (4-CARD BENTO GRID) */}
-        <section className="section">
-          <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Why Brand2Influence</span>
-              <h2>Built on Radical Transparency</h2>
-            </div>
-            <p>Clear pricing, direct messaging, and verified creator insights.</p>
-          </FadeIn>
-
-          <StaggerContainer className="bento-grid bento-grid--4" style={{ marginTop: '40px' }} staggerDelay={0.08}>
-            {[
-              { title: 'Zero Cold DMs', desc: 'Stop sending Instagram DMs that get lost in request folders. Creators here are actively seeking partnerships.', variant: 'pink' },
-              { title: 'Upfront Pricing', desc: 'Know reel and story starting rates before sending an inquiry. No guessing games or awkward budget mismatches.', variant: 'yellow' },
-              { title: 'Verified Audience', desc: 'Engagement rates and audience geographic distribution verified directly to protect marketing spend.', variant: 'blue' },
-              { title: 'Dedicated Messages', desc: 'Unified inbox for brief discussions, deliverable approvals, and conversation history.', variant: 'purple' }
-            ].map(({ title, desc, variant }) => (
-              <StaggerItem key={title}>
-                <PixelCard variant={variant} className="bento-card bento-card--elevated" style={{ padding: '24px 20px', minHeight: '190px', width: '100%', height: '100%' }}>
-                  <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>{title}</h4>
-                  <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{desc}</p>
-                </PixelCard>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </section>
 
         {/* 10. REVIEWS & TESTIMONIALS SLIDER */}
         <section className="section" id="reviews">
@@ -847,24 +802,26 @@ export default function LandingPage() {
         </section>
 
         {/* 12. FINAL CTA */}
-        <section className="final-cta-bento">
-          <FadeIn className="final-cta-content" distance={24} duration={0.75} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-            <span className="eyebrow" style={{ color: 'var(--color-accent)', textAlign: 'center' }}>Your Next Collaboration Starts Here</span>
-            <h2 style={{ fontSize: 'clamp(38px, 4.5vw, 56px)', margin: '16px 0 20px', textAlign: 'center' }}>
-              Find your next creator.
-            </h2>
-            <p style={{ color: 'var(--color-neutral-muted)', fontSize: '15px', textAlign: 'center', maxWidth: '560px' }}>
-              Join hundreds of independent brands and influential creators shaping modern commerce.
-            </p>
-            <div className="final-cta-buttons">
-              <Button size="lg" variant="primary" onClick={() => navigate('/auth/signup')}>
-                I’m a Brand
-              </Button>
-              <Button size="lg" variant="secondary" onClick={() => navigate('/auth/signup')}>
-                I’m an Influencer
-              </Button>
-            </div>
-          </FadeIn>
+        <section className="landing-final-cta-stripe">
+          <div className="final-cta-bento">
+            <FadeIn className="final-cta-content" distance={24} duration={0.75} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              <span className="eyebrow" style={{ color: 'var(--color-accent)', textAlign: 'center' }}>Your Next Collaboration Starts Here</span>
+              <h2 style={{ fontSize: 'clamp(38px, 4.5vw, 56px)', margin: '16px 0 20px', textAlign: 'center' }}>
+                Find your next creator.
+              </h2>
+              <p style={{ color: 'var(--color-neutral-muted)', fontSize: '15px', textAlign: 'center', maxWidth: '560px' }}>
+                Join hundreds of independent brands and influential creators shaping modern commerce.
+              </p>
+              <div className="final-cta-buttons">
+                <Button size="lg" variant="primary" onClick={() => navigate('/auth/signup')}>
+                  I’m a Brand
+                </Button>
+                <Button size="lg" variant="secondary" onClick={() => navigate('/auth/signup')}>
+                  I’m an Influencer
+                </Button>
+              </div>
+            </FadeIn>
+          </div>
         </section>
       </main>
 
