@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import {
   Button,
@@ -245,6 +246,15 @@ const BUDGET_OPTIONS = ['Any budget', 'Up to ₹2,500', 'Up to ₹3,500', 'Up to
 
 export default function LandingPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { user, profile, loading } = useAuth()
+
+  // If user is logged in, redirect them to /dashboard
+  // (Only stay on landing page if they clicked 'Return to website' with ?view=site)
+  if (!loading && user && !searchParams.get('view') && !searchParams.get('stay')) {
+    return <Navigate to={profile?.role === 'admin' ? '/admin' : '/dashboard'} replace />
+  }
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('All')
   const [heroCardIndex, setHeroCardIndex] = useState(0)
@@ -740,31 +750,97 @@ export default function LandingPage() {
           </FadeIn>
 
           <StaggerContainer className="preview-bento-composition" staggerDelay={0.12}>
-            <StaggerItem>
-              <Badge variant="primary" style={{ marginBottom: '14px' }}>Marketplace Engine</Badge>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px' }}>Real-Time Creator Discovery</h3>
-              <p style={{ fontSize: '14px', lineHeight: 1.7, marginBottom: '20px' }}>
+            <StaggerItem className="preview-bento-left">
+              <Badge variant="accent" style={{ marginBottom: '16px', display: 'inline-flex', width: 'fit-content', background: 'rgba(99, 102, 241, 0.15)', color: '#A5B4FC', border: '1px solid rgba(129, 140, 248, 0.3)' }}>
+                Marketplace Engine
+              </Badge>
+              <h3>Real-Time Creator Discovery</h3>
+              <p>
                 Quickly compare key creator metrics, rates, and portfolio media with instant search feedback. Filter by location down to specific metropolitan hubs.
               </p>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <Button size="sm" variant="primary" onClick={() => navigate('/influencers')}>
+              
+              <div className="preview-feature-pills">
+                <div className="preview-feature-pill">
+                  <span className="preview-feature-pill-icon">✓</span>
+                  <span>Instant verified engagement rates & demographic data</span>
+                </div>
+                <div className="preview-feature-pill">
+                  <span className="preview-feature-pill-icon">✓</span>
+                  <span>Direct brand-to-creator messaging & inquiry locks</span>
+                </div>
+                <div className="preview-feature-pill">
+                  <span className="preview-feature-pill-icon">✓</span>
+                  <span>Transparent milestone-based budget agreements</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <Button size="md" variant="primary" onClick={() => navigate('/influencers')} style={{ background: '#FFFFFF', color: '#0A0A0A', fontWeight: 600 }}>
                   Launch Live Directory
                 </Button>
-                <Button size="sm" variant="secondary" onClick={() => navigate('/auth/signup')}>
+                <Button size="md" variant="secondary" onClick={() => navigate('/auth/signup')} style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#FFFFFF', background: 'rgba(255,255,255,0.06)' }}>
                   Create Account
                 </Button>
               </div>
             </StaggerItem>
 
-            <StaggerItem style={{ background: 'var(--color-surface-2)', padding: '20px', borderRadius: 'var(--radius-xl)', border: '1px solid var(--color-border)' }}>
-              <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>Live Preview</span>
-              <h4 style={{ margin: '8px 0 14px' }}>Active Collaboration Inquiry</h4>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>
-                "Hi Aanya, we love your sustainable styling reels. We are launching an organic cotton capsule next month and would love to partner on 2 reels."
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--color-border)', paddingTop: '12px' }}>
-                <small style={{ color: 'var(--color-text-tertiary)', fontSize: '11px' }}>Status: In Conversation</small>
-                <Badge variant="accent">Budget: ₹9,000</Badge>
+            <StaggerItem className="creator-mockup-card">
+              <div className="creator-mockup-header">
+                <div className="creator-mockup-avatar-wrap">
+                  <img
+                    src="/creator-aanya.jpg"
+                    alt="Aanya Kapoor"
+                    className="creator-mockup-avatar"
+                  />
+                  <span className="creator-mockup-online-dot" title="Active now" />
+                </div>
+                <div className="creator-mockup-info">
+                  <div className="creator-mockup-name-row">
+                    <span className="creator-mockup-name">Aanya Kapoor</span>
+                    <svg className="creator-mockup-verified" width="16" height="16" viewBox="0 0 24 24" fill="#38BDF8">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                  </div>
+                  <div className="creator-mockup-niche">@aanyakapoor • Sustainable Fashion • Mumbai</div>
+                </div>
+              </div>
+
+              <div className="creator-mockup-stats-bar">
+                <div>
+                  <div className="creator-mockup-stat-val">185K</div>
+                  <div className="creator-mockup-stat-lbl">Followers</div>
+                </div>
+                <div>
+                  <div className="creator-mockup-stat-val" style={{ color: '#34D399' }}>4.8%</div>
+                  <div className="creator-mockup-stat-lbl">Avg. Eng.</div>
+                </div>
+                <div>
+                  <div className="creator-mockup-stat-val">₹4,500</div>
+                  <div className="creator-mockup-stat-lbl">Reel Rate</div>
+                </div>
+              </div>
+
+              <div className="creator-mockup-inquiry-box">
+                <div className="creator-mockup-inquiry-sender">
+                  <span className="creator-mockup-brand-tag">
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#818CF8', display: 'inline-block' }}></span>
+                    UrbanKnit Apparel Co.
+                  </span>
+                  <span className="creator-mockup-time">Just now</span>
+                </div>
+                <p className="creator-mockup-message">
+                  "Hi Aanya, we love your sustainable styling reels! We're launching an organic capsule next month and would love to partner on 2 reels."
+                </p>
+              </div>
+
+              <div className="creator-mockup-footer">
+                <div className="creator-mockup-status-pill">
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981', display: 'inline-block' }}></span>
+                  <span>In Conversation</span>
+                </div>
+                <div className="creator-mockup-budget-badge">
+                  <span>Budget: ₹9,000</span>
+                </div>
               </div>
             </StaggerItem>
           </StaggerContainer>
@@ -830,11 +906,15 @@ export default function LandingPage() {
         <div className="footer-main">
           <div className="footer-brand-col">
             <Link to="/" className="footer-brand-logo">
-              Brand2Influence
+              <span>Brand2Influence</span>
             </Link>
             <p className="footer-brand-desc">
-              India’s premier marketplace for independent creators and forward-thinking brands.
+              India’s premier marketplace for independent creators and forward-thinking brands. Built with transparent rates and direct collaboration.
             </p>
+            <div className="footer-status-pill">
+              <span className="footer-status-dot"></span>
+              <span>1,200+ Verified Creators Active</span>
+            </div>
           </div>
           <nav className="footer-nav">
             <button type="button" onClick={() => scrollTo('marketplace')}>Discover</button>
@@ -854,10 +934,10 @@ export default function LandingPage() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              thewasiim
+              @thewasiim
             </a>
           </span>
-          <span className="footer-tagline">Designed for meaningful creator partnerships.</span>
+          <span className="footer-tagline">Designed for meaningful creator partnerships across India.</span>
         </div>
       </FadeIn>
     </div>

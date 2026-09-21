@@ -248,6 +248,14 @@ export function InstagramSidebar() {
                   </svg>
                   <span>Help & How It Works</span>
                 </Link>
+                <Link to="/?view=site" className="ig-popover-item" onClick={() => setMoreMenuOpen(false)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  </svg>
+                  <span>Return to Website</span>
+                </Link>
                 <div className="ig-popover-divider" />
                 <button type="button" className="ig-popover-item ig-popover-logout" onClick={handleLogout}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -277,17 +285,16 @@ export function InstagramSidebar() {
               <span className="ig-item-label">More</span>
             </button>
 
-            {/* Also from BrandHUB / Platform Info */}
-            <Link to="/" className="ig-nav-item ig-meta-link" title="Brand2Influence Marketplace">
+            {/* Return to Website */}
+            <Link to="/?view=site" className="ig-nav-item ig-meta-link" title="Return to Website">
               <div className="ig-item-icon-box">
                 <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="7" height="7" x="3" y="3" rx="1" />
-                  <rect width="7" height="7" x="14" y="3" rx="1" />
-                  <rect width="7" height="7" x="14" y="14" rx="1" />
-                  <rect width="7" height="7" x="3" y="14" rx="1" />
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
               </div>
-              <span className="ig-item-label">BrandHUB Platform</span>
+              <span className="ig-item-label">Return to Website</span>
             </Link>
           </div>
         </div>
@@ -357,6 +364,14 @@ export function InstagramSidebar() {
           <span className="ig-mobile-role-pill">{roleLabel}</span>
         </Link>
         <div className="ig-mobile-actions">
+          <Link to="/?view=site" className="ig-mobile-website-btn" title="Return to Website">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span>Website</span>
+          </Link>
           <button
             type="button"
             className="ig-mobile-icon-btn"

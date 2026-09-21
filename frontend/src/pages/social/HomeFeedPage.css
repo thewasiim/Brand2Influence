@@ -2,7 +2,8 @@
 
 .hfp-root {
   min-height: 100vh;
-  background: transparent;
+  background: #000000;
+  color: #FFFFFF;
   padding: 24px 0;
 }
 
@@ -24,6 +25,10 @@
 
 .hfp-feed-header {
   margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
 }
 
 .hfp-feed-title {
@@ -36,19 +41,42 @@
   margin: 0;
 }
 
+.hfp-return-web-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 6px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.hfp-return-web-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
 /* ── Cards ── */
 .hfp-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #0A0A0A;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   margin-bottom: 20px;
   overflow: hidden;
-  transition: border-color 0.2s ease;
-  backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
 .hfp-card:hover {
-  border-color: rgba(255,255,255,0.15);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .hfp-card-header {
@@ -126,13 +154,13 @@
 
 /* ── Follow button ── */
 .hfp-follow-btn {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff;
+  background: #FFFFFF;
+  color: #000000;
   border: none;
   border-radius: 20px;
   padding: 6px 18px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -141,7 +169,8 @@
 
 .hfp-follow-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+  background: #E4E4E7;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
 }
 
 .hfp-following-label {
@@ -344,11 +373,11 @@
 }
 
 .hfp-sidebar-section {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #0A0A0A;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   padding: 16px;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
 .hfp-sidebar-title {
