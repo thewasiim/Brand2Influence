@@ -93,6 +93,8 @@ export default function App() {
           </Route>
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
+          <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
         </Route>
 
         <Route element={<AdminRoute />}>

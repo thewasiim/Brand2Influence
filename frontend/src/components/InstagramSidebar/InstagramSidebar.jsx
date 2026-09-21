@@ -140,6 +140,20 @@ export function InstagramSidebar() {
               <span className="ig-item-label">Explore</span>
             </NavLink>
 
+            {/* 3.5 Campaigns */}
+            <NavLink
+              to="/campaigns"
+              className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
+              title="Campaigns"
+            >
+              <div className="ig-item-icon-box">
+                <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                </svg>
+              </div>
+              <span className="ig-item-label">Campaigns</span>
+            </NavLink>
+
             {/* 4. Messages */}
             <NavLink
               to="/conversations"
@@ -410,7 +424,7 @@ export function InstagramSidebar() {
           </svg>
         </NavLink>
 
-        {/* 2. Explore — rounded-rect with play (like screenshot) */}
+        {/* 2. Explore */}
         <NavLink to="/explore" className={({ isActive }) => `ig-mobile-tab ${isActive ? 'is-active' : ''}`} aria-label="Explore">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <rect width="18" height="18" x="3" y="3" rx="4" />
@@ -418,19 +432,18 @@ export function InstagramSidebar() {
           </svg>
         </NavLink>
 
-        {/* 3. Messages — paper-plane send (like screenshot) */}
+        {/* 3. Campaigns */}
+        <NavLink to="/campaigns" className={({ isActive }) => `ig-mobile-tab ${isActive ? 'is-active' : ''}`} aria-label="Campaigns">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z" />
+          </svg>
+        </NavLink>
+
+        {/* 4. Messages */}
         <NavLink to="/conversations" className={({ isActive }) => `ig-mobile-tab ${isActive ? 'is-active' : ''}`} aria-label="Messages">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" />
             <polygon points="22 2 15 22 11 13 2 9 22 2" />
-          </svg>
-        </NavLink>
-
-        {/* 4. Search */}
-        <NavLink to="/search" className={({ isActive }) => `ig-mobile-tab ${isActive ? 'is-active' : ''}`} aria-label="Search">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </NavLink>
 
