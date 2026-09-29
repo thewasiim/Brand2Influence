@@ -371,15 +371,32 @@ export async function handleGoogleCallback(code, stateStr) {
     profile_status: 'active'
   }, { onConflict: 'id' })
 
-  // 5. Generate magic link login token from Supabase
-  const { data: linkData, error: linkError } = await db.auth.admin.generateLink({
-    type: 'magiclink',
-    email
-  })
+  // 5. Generate magic link login session from Supabase
+  const callbackUrl = `${env.frontendOrigin}/auth/callback?role=${encodeURIComponent(assignedRole || '')}`
+  let actionLink = ''
+  let hashedToken = ''
+  let emailOtp = ''
 
-  const hashedToken = linkData?.properties?.hashed_token || ''
-  const emailOtp = linkData?.properties?.email_otp || ''
-  const redirectTo = linkData?.properties?.redirect_to || ''
+  try {
+    const { data: linkData, error: linkError } = await db.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: {
+        redirectTo: callbackUrl
+      }
+    })
+    if (linkError) {
+      console.warn('generateLink error:', linkError)
+    } else {
+      actionLink = linkData?.properties?.action_link || ''
+      hashedToken = linkData?.properties?.hashed_token || ''
+      emailOtp = linkData?.properties?.email_otp || ''
+    }
+  } catch (linkEx) {
+    console.warn('generateLink exception:', linkEx)
+  }
+
+  const fallbackUrl = `${env.frontendOrigin}/auth/callback?email=${encodeURIComponent(email)}&token=${encodeURIComponent(hashedToken || emailOtp)}&role=${encodeURIComponent(assignedRole || '')}`
 
   return {
     userId,
@@ -387,9 +404,8 @@ export async function handleGoogleCallback(code, stateStr) {
     name,
     role: assignedRole,
     picture,
-    hashedToken,
-    emailOtp,
-    frontendRedirectUrl: `${env.frontendOrigin}/auth/callback?email=${encodeURIComponent(email)}&token=${encodeURIComponent(hashedToken || emailOtp)}&role=${encodeURIComponent(assignedRole || '')}`
+    frontendRedirectUrl: actionLink || fallbackUrl
   }
 }
+
 

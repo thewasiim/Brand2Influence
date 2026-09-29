@@ -47,6 +47,7 @@ export function LoginPage() {
   const nav = useNavigate()
   const location = useLocation()
   const { user, profile, refreshProfile } = useAuth()
+  const [role, setRole] = useState(location.state?.role || 'influencer')
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -71,8 +72,19 @@ export function LoginPage() {
     setError('')
     try {
       const res = await authService.signIn(form)
-      await refreshProfile()
-      if (res?.user?.role === 'admin') {
+      const freshProfile = await refreshProfile()
+      
+      // If user did not have a role yet, assign the chosen role
+      if (!freshProfile?.role && role) {
+        try {
+          await authService.chooseRole(role)
+          await refreshProfile()
+        } catch (roleErr) {
+          console.warn('Auto role selection error:', roleErr)
+        }
+      }
+
+      if (res?.user?.role === 'admin' || freshProfile?.role === 'admin') {
         nav('/admin')
       } else {
         nav(location.state?.from || '/dashboard')
@@ -91,13 +103,74 @@ export function LoginPage() {
 
   return (
     <AuthCard title="Welcome back" subtitle="Log in to manage your creator collaborations, rate card, and messages.">
+      {/* Role Selection Tabs */}
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+          Select Account Type
+        </label>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '8px',
+          background: 'rgba(255, 255, 255, 0.04)',
+          padding: '4px',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.08)'
+        }}>
+          <button
+            type="button"
+            onClick={() => setRole('influencer')}
+            style={{
+              padding: '10px 12px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease',
+              background: role === 'influencer' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'transparent',
+              color: role === 'influencer' ? '#ffffff' : 'var(--color-text-secondary)',
+              boxShadow: role === 'influencer' ? '0 2px 10px rgba(99, 102, 241, 0.35)' : 'none'
+            }}
+          >
+            <span>✨</span> Creator
+          </button>
+          <button
+            type="button"
+            onClick={() => setRole('brand')}
+            style={{
+              padding: '10px 12px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease',
+              background: role === 'brand' ? 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' : 'transparent',
+              color: role === 'brand' ? '#ffffff' : 'var(--color-text-secondary)',
+              boxShadow: role === 'brand' ? '0 2px 10px rgba(99, 102, 241, 0.35)' : 'none'
+            }}
+          >
+            <span>🏢</span> Brand
+          </button>
+        </div>
+      </div>
+
       <button
         type="button"
         className="btn-google"
-        onClick={() => authService.signInWithGoogle()}
+        onClick={() => authService.signInWithGoogle(role)}
       >
         <GoogleIcon />
-        <span>Continue with Google</span>
+        <span>Continue with Google as {role === 'influencer' ? 'Creator' : 'Brand'}</span>
       </button>
 
       <div className="auth-divider">
@@ -124,7 +197,7 @@ export function LoginPage() {
         />
         {error && <ErrorState error={error} />}
         <Button disabled={busy} loading={busy} size="lg" className="full">
-          {busy ? 'Signing in…' : 'Log in'}
+          {busy ? 'Signing in…' : `Log in as ${role === 'influencer' ? 'Creator' : 'Brand'}`}
         </Button>
       </form>
       <div className="auth-card-links">
@@ -986,53 +1059,81 @@ export function AuthCallbackPage() {
         const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''))
 
         const email = searchParams.get('email')
-        const token = searchParams.get('token')
+        const token = searchParams.get('token') || searchParams.get('token_hash')
+        const code = searchParams.get('code')
         const role = searchParams.get('role')
-        const errParam = searchParams.get('error')
+        const errParam = searchParams.get('error') || searchParams.get('error_description')
 
         if (errParam) {
           if (active) setError(decodeURIComponent(errParam))
           return
         }
 
-        // If tokens arrived in hash from direct OAuth
+        const supabase = requireSupabase()
+
+        // 1. If tokens arrived in hash from direct OAuth/Supabase verify redirect
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
 
         if (accessToken) {
           try {
-            await requireSupabase().auth.setSession({
+            await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken || '',
             })
           } catch (sessionErr) {
-            console.warn('Set session error:', sessionErr)
+            console.warn('Set session warning:', sessionErr)
           }
-          await refreshProfile()
-          if (active) navigate(role ? '/dashboard' : '/role-select')
-          return
-        }
-
-        // If email and OTP/token arrived from backend Google callback
-        if (email && token) {
+        } else if (code) {
+          // 2. PKCE code exchange
           try {
-            await requireSupabase().auth.verifyOtp({
-              email,
-              token,
+            await supabase.auth.exchangeCodeForSession(code)
+          } catch (codeErr) {
+            console.warn('Exchange code warning:', codeErr)
+          }
+        } else if (token) {
+          // 3. OTP / Magiclink token verify
+          try {
+            await supabase.auth.verifyOtp({
+              token_hash: token,
               type: 'magiclink'
             })
           } catch (verifyErr) {
-            console.warn('Verify OTP fallback:', verifyErr)
+            try {
+              if (email) {
+                await supabase.auth.verifyOtp({
+                  email,
+                  token,
+                  type: 'magiclink'
+                })
+              }
+            } catch (fallbackErr) {
+              console.warn('Verify OTP warning:', fallbackErr)
+            }
           }
         }
 
-        await refreshProfile()
+        let freshProfile = await refreshProfile()
+
+        // If user profile role is not set yet, assign the role chosen before login
+        if (!freshProfile?.role && role) {
+          try {
+            await authService.chooseRole(role)
+            freshProfile = await refreshProfile()
+          } catch (roleErr) {
+            console.warn('Auto assign role warning:', roleErr)
+          }
+        }
+
+        const finalRole = freshProfile?.role || role
 
         if (active) {
-          if (!role) {
-            navigate('/role-select')
+          if (finalRole === 'admin') {
+            navigate('/admin', { replace: true })
+          } else if (finalRole) {
+            navigate('/dashboard', { replace: true })
           } else {
-            navigate('/dashboard')
+            navigate('/role-select', { replace: true })
           }
         }
       } catch (err) {

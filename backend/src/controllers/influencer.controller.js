@@ -1,5 +1,5 @@
 import * as service from '../services/influencer.service.js'
-import { syncSocialAccount, fetchSocialPublic } from '../services/socialSync.service.js'
+import { syncSocialAccount, fetchSocialPublic, fetchSocialPosts, verifySocialOwnership } from '../services/socialSync.service.js'
 
 export const list = async (req, res, next) => { try { res.json(await service.list(req.query)) } catch (e) { next(e) } }
 export const get = async (req, res, next) => { try { res.json(await service.getById(req.params.id)) } catch (e) { next(e) } }
@@ -14,3 +14,21 @@ export const fetchPublicSocial = async (req, res, next) => {
     next(e)
   }
 }
+export const fetchPosts = async (req, res, next) => {
+  try {
+    const posts = await fetchSocialPosts(req.body)
+    res.json({ success: true, posts, count: posts.length })
+  } catch (e) {
+    next(e)
+  }
+}
+export const verifyOwnership = async (req, res, next) => {
+  try {
+    const result = await verifySocialOwnership(req.currentUser, req.body)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
+

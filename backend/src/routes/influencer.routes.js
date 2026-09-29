@@ -8,6 +8,10 @@ export const influencerRouter = Router()
 influencerRouter.get('/', c.list)
 influencerRouter.get('/:id', c.get)
 influencerRouter.post('/fetch-social', c.fetchPublicSocial)
+influencerRouter.post('/fetch-posts', c.fetchPosts)
+influencerRouter.post('/verify-ownership', authenticate, loadCurrentUser, c.verifyOwnership)
 influencerRouter.post('/profile', authenticate, loadCurrentUser, allowRoles('influencer', 'admin'), c.save)
 influencerRouter.post('/posts', authenticate, loadCurrentUser, allowRoles('influencer', 'admin'), c.addPost)
 influencerRouter.post('/social-sync', authenticate, loadCurrentUser, allowRoles('influencer', 'admin'), c.syncSocial)
+
+
