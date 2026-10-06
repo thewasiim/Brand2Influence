@@ -91,7 +91,7 @@ export default function ReviewSlider() {
       {/* Active Review Slide Container */}
       <div
         style={{
-          minHeight: '320px',
+          minHeight: '300px',
           display: 'flex',
           alignItems: 'center',
           position: 'relative',
@@ -100,90 +100,141 @@ export default function ReviewSlider() {
         <AnimatePresence mode="wait">
           <motion.div
             key={review.id}
-            initial={{ opacity: 0, x: 28, scale: 0.98 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -28, scale: 0.98 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 16, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.99 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             style={{
               width: '100%',
-              background: 'var(--color-surface-2)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '36px 32px',
-              boxShadow: 'var(--shadow-lg)',
+              background: 'linear-gradient(135deg, rgba(18, 18, 17, 0.95) 0%, rgba(11, 11, 10, 0.98) 100%)',
+              border: '1px solid rgba(244, 241, 232, 0.12)',
+              borderRadius: '24px',
+              padding: '40px 38px',
+              boxShadow: '0 24px 60px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.08)',
               position: 'relative',
               overflow: 'hidden',
+              backdropFilter: 'blur(20px)',
             }}
           >
-            {/* Background Glow */}
+            {/* Background Glow & Watermark Quote */}
             <div
               style={{
                 position: 'absolute',
-                top: '-40px',
-                right: '-40px',
-                width: '180px',
-                height: '180px',
-                background: 'radial-gradient(circle, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0) 70%)',
+                top: '-30px',
+                right: '-30px',
+                width: '260px',
+                height: '260px',
+                background: 'radial-gradient(circle, rgba(244, 241, 232, 0.05) 0%, transparent 70%)',
                 pointerEvents: 'none',
               }}
             />
+            <svg
+              style={{
+                position: 'absolute',
+                top: '24px',
+                right: '28px',
+                width: '72px',
+                height: '72px',
+                color: 'rgba(244, 241, 232, 0.04)',
+                pointerEvents: 'none',
+              }}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
               {/* Star Rating & Type */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ display: 'flex', color: '#0A0A0A', fontSize: '18px', letterSpacing: '2px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', color: '#eab308', fontSize: '18px', letterSpacing: '3px', textShadow: '0 0 12px rgba(234, 179, 8, 0.35)' }}>
                   {'★'.repeat(review.rating)}
                 </div>
-                <Badge variant={review.type === 'Brand Partner' ? 'primary' : 'accent'}>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '4px 12px',
+                    borderRadius: '999px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    background: 'rgba(244, 241, 232, 0.06)',
+                    color: '#f4f1e8',
+                    border: '1px solid rgba(244, 241, 232, 0.16)',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
                   {review.type}
-                </Badge>
+                </span>
               </div>
 
               {/* Verified Metric Pill */}
               <div
                 style={{
-                  background: 'var(--color-surface-3)',
-                  border: '1px solid var(--color-border)',
+                  background: 'rgba(244, 241, 232, 0.035)',
+                  border: '1px solid rgba(244, 241, 232, 0.12)',
                   padding: '6px 14px',
-                  borderRadius: '20px',
-                  textAlign: 'right',
+                  borderRadius: '999px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
                 }}
               >
-                <span style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--color-secondary)' }}>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#f4f1e8', fontFamily: 'var(--font-display)' }}>
                   📈 {review.metric}
                 </span>
-                <small style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                <span style={{ color: 'rgba(244, 241, 232, 0.2)' }}>•</span>
+                <small style={{ fontSize: '11.5px', color: 'rgba(244, 241, 232, 0.55)', fontFamily: 'var(--font-mono)' }}>
                   {review.metricSub}
                 </small>
               </div>
             </div>
 
             {/* Quote Text */}
-            <blockquote
+            <p
               style={{
-                fontSize: '17px',
-                lineHeight: 1.65,
-                color: 'var(--color-text-primary)',
-                fontStyle: 'italic',
-                margin: '0 0 24px 0',
+                fontSize: '19px',
+                lineHeight: 1.7,
+                color: 'var(--cb-text)',
+                fontWeight: 400,
+                letterSpacing: '-0.01em',
+                margin: '0 0 28px 0',
                 position: 'relative',
+                zIndex: 1,
+                fontFamily: 'var(--font-display)',
               }}
             >
               "{review.quote}"
-            </blockquote>
+            </p>
 
             {/* Reviewer Profile */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', borderTop: '1px solid var(--color-border)', paddingTop: '18px' }}>
-              <Avatar
-                name={review.name}
-                src={review.avatar}
-                size="lg"
-                tone="secondary"
-              />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderTop: '1px solid rgba(244, 241, 232, 0.08)', paddingTop: '20px' }}>
+              <div
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: '2px solid rgba(244, 241, 232, 0.25)',
+                  boxShadow: '0 0 16px rgba(244, 241, 232, 0.1)',
+                  flexShrink: 0,
+                }}
+              >
+                <img
+                  src={review.avatar}
+                  alt={review.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
               <div>
-                <h4 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>{review.name}</h4>
-                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
-                  {review.role} • <b>{review.company}</b>
+                <h4 style={{ fontSize: '16.5px', fontWeight: 700, color: 'var(--cb-text)', margin: 0, fontFamily: 'var(--font-display)' }}>
+                  {review.name}
+                </h4>
+                <p style={{ fontSize: '13px', color: 'rgba(244, 241, 232, 0.6)', margin: '3px 0 0', fontFamily: 'var(--font-mono)' }}>
+                  {review.role} • <strong style={{ color: '#f4f1e8', fontWeight: 600 }}>{review.company}</strong>
                 </p>
               </div>
             </div>
@@ -197,8 +248,8 @@ export default function ReviewSlider() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: '20px',
-          padding: '0 8px',
+          marginTop: '22px',
+          padding: '0 6px',
         }}
       >
         {/* Slider Dots */}
@@ -210,14 +261,15 @@ export default function ReviewSlider() {
               aria-label={`Go to slide ${idx + 1}`}
               onClick={() => setCurrent(idx)}
               style={{
-                width: current === idx ? '24px' : '8px',
+                width: current === idx ? '28px' : '8px',
                 height: '8px',
                 borderRadius: '4px',
-                background: current === idx ? 'var(--color-secondary)' : 'var(--color-border)',
+                background: current === idx ? '#f4f1e8' : 'rgba(244, 241, 232, 0.18)',
                 border: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.25s ease',
+                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                 padding: 0,
+                boxShadow: current === idx ? '0 0 12px rgba(244, 241, 232, 0.4)' : 'none',
               }}
             />
           ))}
@@ -230,17 +282,33 @@ export default function ReviewSlider() {
             aria-label="Previous Review"
             onClick={prev}
             style={{
-              width: '38px',
-              height: '38px',
+              width: '42px',
+              height: '42px',
               borderRadius: '50%',
-              background: 'var(--color-surface-2)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-primary)',
+              background: 'rgba(244, 241, 232, 0.04)',
+              border: '1px solid rgba(244, 241, 232, 0.14)',
+              color: '#f4f1e8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
+              fontSize: '16px',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.4)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f4f1e8';
+              e.currentTarget.style.color = '#0b0b0a';
+              e.currentTarget.style.borderColor = '#f4f1e8';
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(244, 241, 232, 0.3)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)';
+              e.currentTarget.style.color = '#f4f1e8';
+              e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.14)';
+              e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.4)';
+              e.currentTarget.style.transform = 'none';
             }}
           >
             ←
@@ -250,17 +318,33 @@ export default function ReviewSlider() {
             aria-label="Next Review"
             onClick={next}
             style={{
-              width: '38px',
-              height: '38px',
+              width: '42px',
+              height: '42px',
               borderRadius: '50%',
-              background: 'var(--color-surface-2)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-primary)',
+              background: 'rgba(244, 241, 232, 0.04)',
+              border: '1px solid rgba(244, 241, 232, 0.14)',
+              color: '#f4f1e8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
+              fontSize: '16px',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.4)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f4f1e8';
+              e.currentTarget.style.color = '#0b0b0a';
+              e.currentTarget.style.borderColor = '#f4f1e8';
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(244, 241, 232, 0.3)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)';
+              e.currentTarget.style.color = '#f4f1e8';
+              e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.14)';
+              e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 0, 0, 0.4)';
+              e.currentTarget.style.transform = 'none';
             }}
           >
             →

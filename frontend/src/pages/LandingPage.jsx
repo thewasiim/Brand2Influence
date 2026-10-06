@@ -20,7 +20,7 @@ import BrandCard from '../components/ProfileCard/BrandCard'
 import CampaignCard from '../components/ProfileCard/CampaignCard'
 import PixelCard from '../components/PixelCard/PixelCard'
 import GlowCursor from '../components/GlowCursor/GlowCursor'
-import VantaCellsBackground from '../components/VantaCellsBackground'
+import { useEffect as useIntroEffect } from 'react'
 
 // Curated Showcase Creators for Bento Showcase & Dynamic Filtering
 const SHOWCASE_CREATORS = [
@@ -249,11 +249,7 @@ export default function LandingPage() {
   const [searchParams] = useSearchParams()
   const { user, profile, loading } = useAuth()
 
-  // If user is logged in, redirect them to /dashboard
-  // (Only stay on landing page if they clicked 'Return to website' with ?view=site)
-  if (!loading && user && !searchParams.get('view') && !searchParams.get('stay')) {
-    return <Navigate to={profile?.role === 'admin' ? '/admin' : '/dashboard'} replace />
-  }
+
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('All')
@@ -319,28 +315,77 @@ export default function LandingPage() {
     }
   }, [mobileMenuOpen])
 
+  const [introVisible, setIntroVisible] = useState(() => !sessionStorage.getItem('b2i-home-intro-seen'))
+  const [preloaderProgress, setPreloaderProgress] = useState(0)
+
+  useIntroEffect(() => {
+    if (!introVisible) return undefined
+    const start = performance.now()
+    const duration = 1200
+
+    let rafId
+    const step = (now) => {
+      const elapsed = now - start
+      const progress = Math.min(100, Math.floor((elapsed / duration) * 100))
+      setPreloaderProgress(progress)
+      if (elapsed < duration) {
+        rafId = requestAnimationFrame(step)
+      } else {
+        sessionStorage.setItem('b2i-home-intro-seen', 'true')
+        setIntroVisible(false)
+      }
+    }
+    rafId = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(rafId)
+  }, [introVisible])
+
+  // If user is logged in, redirect them to /dashboard
+  // (Only stay on landing page if they clicked 'Return to website' with ?view=site)
+  if (!loading && user && !searchParams.get('view') && !searchParams.get('stay')) {
+    return <Navigate to={profile?.role === 'admin' ? '/admin' : '/dashboard'} replace />
+  }
+
+
   return (
     <div className="landing-page-root">
+      {introVisible && (
+        <div className="experience-preloader" role="status" aria-live="polite">
+          <div className="experience-preloader__top">Brand2Influence / System online</div>
+          <div className="experience-preloader__center">
+            <span>INITIALIZING</span>
+            <strong>EXPERIENCE</strong>
+          </div>
+          <div className="experience-preloader__bottom">
+            <span className="experience-preloader__count">{String(preloaderProgress).padStart(3, '0')} — 100</span>
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.setItem('b2i-home-intro-seen', 'true')
+                setIntroVisible(false)
+              }}
+            >
+              Skip intro
+            </button>
+          </div>
+        </div>
+      )}
       <main>
         {/* 2. BENTO HERO */}
         <section className="bento-hero" id="top">
-          <VantaCellsBackground
-            color1={0x000039}
-            color2={0x3b82f6}
-            size={1.5}
-            speed={1.0}
-            className="hero-vanta-bg"
-          />
-          <div className="hero-vanta-overlay" />
           <div className="bento-hero-content">
             <FadeIn delay={0.05} distance={16}>
               <div className="hero-badge">
-                <i /> INDIA'S CREATOR & BRAND MARKETPLACE
+                <span className="hero-badge__dot" />
+                <span className="hero-badge__code"><span className="num-accent">[ 00 ]</span> // PLATFORM : ONLINE</span>
+                <span className="hero-badge__label">DIRECT CREATOR &amp; BRAND MARKETPLACE</span>
               </div>
             </FadeIn>
             <FadeIn delay={0.12} distance={22}>
               <h1 className="hero-title">
-                Make work that <em>moves people.</em>
+                <span className="hero-title__line">TURN INFLUENCE</span>
+                <span className="hero-title__line hero-title__line--accent">
+                  <em>into</em> <strong>IMPACT<span className="dot-accent">.</span></strong>
+                </span>
               </h1>
             </FadeIn>
             <FadeIn delay={0.2} distance={20}>
@@ -359,17 +404,76 @@ export default function LandingPage() {
               </div>
             </FadeIn>
             <FadeIn delay={0.34} distance={14}>
-              <p className="quiet" style={{ marginTop: '16px' }}>
-                Are you a creator? <b onClick={() => navigate('/auth/signup')} style={{ cursor: 'pointer' }}>Join the community →</b>
-              </p>
+              <div className="hero-tech-specs">
+                <div className="hero-tech-spec-item">
+                  <span className="hero-tech-spec-num">[ 01 ]</span>
+                  <span className="hero-tech-spec-label">0% Agency Markups</span>
+                  <span className="hero-tech-spec-sub">Direct Creator Pricing</span>
+                </div>
+                <div className="hero-tech-spec-item">
+                  <span className="hero-tech-spec-num">[ 02 ]</span>
+                  <span className="hero-tech-spec-label">100% Upfront Rates</span>
+                  <span className="hero-tech-spec-sub">Zero Hidden Retainers</span>
+                </div>
+                <div className="hero-tech-spec-item">
+                  <span className="hero-tech-spec-num">[ 03 ]</span>
+                  <span className="hero-tech-spec-label">Verified Direct Inquiries</span>
+                  <span className="hero-tech-spec-sub">Real Audience Data</span>
+                </div>
+              </div>
             </FadeIn>
           </div>
         </section>
+
+        {/* INFINITE MARQUEE TICKER 1 */}
+        <div className="editorial-marquee" aria-hidden="true">
+          <div className="editorial-marquee__track">
+            <div className="editorial-marquee__group">
+              <span>CREATORS</span>
+              <b>///</b>
+              <span>BRANDS</span>
+              <b>///</b>
+              <span>COLLABORATE</span>
+              <b>///</b>
+              <span>DISCOVER</span>
+              <b>///</b>
+              <span>CREATE</span>
+              <b>///</b>
+              <span>SCALE</span>
+              <b>///</b>
+              <span>VERIFIED METRICS</span>
+              <b>///</b>
+              <span>UPFRONT RATES</span>
+              <b>///</b>
+            </div>
+            <div className="editorial-marquee__group">
+              <span>CREATORS</span>
+              <b>///</b>
+              <span>BRANDS</span>
+              <b>///</b>
+              <span>COLLABORATE</span>
+              <b>///</b>
+              <span>DISCOVER</span>
+              <b>///</b>
+              <span>CREATE</span>
+              <b>///</b>
+              <span>SCALE</span>
+              <b>///</b>
+              <span>VERIFIED METRICS</span>
+              <b>///</b>
+              <span>UPFRONT RATES</span>
+              <b>///</b>
+            </div>
+          </div>
+        </div>
 
 
         {/* 3. INTERACTIVE INFLUENCER SEARCH (BENTO SEARCH PANEL) */}
         <section className="landing-search-stripe">
           <FadeIn as="div" className="bento-search-section" distance={24} duration={0.75}>
+            <div style={{ marginBottom: '14px' }}>
+              <span className="eyebrow"><span className="num-accent">[ 01 ]</span> Direct Search &amp; Filters</span>
+            </div>
             <form className="bento-search-panel" onSubmit={handleSearchSubmit}>
             <div className="search-field-item">
               <label>Keyword</label>
@@ -444,10 +548,8 @@ export default function LandingPage() {
         {/* 4. BRAND / INFLUENCER BENTO CARDS */}
         <section className="section" id="roles-bento">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Two Sides of the Marketplace</span>
-              <h2>Built for Both Creators and Brands</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 02 ]</span> Two Sides of the Marketplace</span>
+            <h2>Built for Both <em>Creators &amp; Brands<span className="dot-accent">.</span></em></h2>
             <p>Clear expectations, verified metrics, and direct messaging without the agency bloat.</p>
           </FadeIn>
 
@@ -498,8 +600,8 @@ export default function LandingPage() {
               </ul>
 
               <div className="role-card-footer">
-                <Button variant="secondary" size="md" onClick={() => navigate('/brands')}>
-                  Search Brands & Deals →
+                <Button variant="primary" size="md" onClick={() => navigate('/brands')}>
+                  Search Brands &amp; Deals →
                 </Button>
               </div>
             </StaggerItem>
@@ -559,15 +661,13 @@ export default function LandingPage() {
         {/* 5. INFLUENCER DISCOVERY SHOWCASE (ASYMMETRIC BENTO GRID) */}
         <section className="section" id="marketplace">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Curated Showcase</span>
-              <h2>Featured Independent Talent</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 03 ]</span> Curated Showcase</span>
+            <h2>Featured <em>Independent Talent<span className="dot-accent">.</span></em></h2>
             <p>Select a category or use the search controls above to filter in real-time.</p>
           </FadeIn>
 
           {/* CATEGORY TABS */}
-          <FadeIn delay={0.08} distance={14}>
+          <FadeIn delay={0.08} distance={14} className="marketplace-tabs-wrap">
             <Tabs
               tabs={CATEGORY_TABS}
               activeTab={activeTab}
@@ -616,10 +716,8 @@ export default function LandingPage() {
         {/* 6. FEATURED BRANDS SHOWCASE (DIRECTLY UNDER CREATORS) */}
         <section className="section" id="brand-deals">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Verified Partners</span>
-              <h2>Featured Brands & Collaborations</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 04 ]</span> Verified Partners</span>
+            <h2>Featured <em>Brand Partnerships<span className="dot-accent">.</span></em></h2>
             <p>Explore verified businesses offering active sponsorship budgets for creators.</p>
           </FadeIn>
 
@@ -644,10 +742,8 @@ export default function LandingPage() {
         {/* 7. OPEN CAMPAIGN BRIEFS & SPONSORSHIPS (DIRECTLY UNDER BRANDS) */}
         <section className="section" id="campaign-deals">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Active Sponsorships</span>
-              <h2>Open Brand Campaigns & Briefs</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 05 ]</span> Active Sponsorships</span>
+            <h2>Open <em>Campaign Briefs<span className="dot-accent">.</span></em></h2>
             <p>Pitch deliverables directly to brands with approved budgets and clear requirements.</p>
           </FadeIn>
 
@@ -686,10 +782,8 @@ export default function LandingPage() {
         {/* 8. HOW IT WORKS (BENTO WORKFLOW) */}
         <section className="section" id="how-it-works">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Simple, By Design</span>
-              <h2>How Brand2Influence Works</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 06 ]</span> Simple, By Design</span>
+            <h2>How Brand2Influence <em>Works<span className="dot-accent">.</span></em></h2>
             <p>From initial creative discovery to confirmed collaboration in four clear steps.</p>
           </FadeIn>
 
@@ -702,7 +796,7 @@ export default function LandingPage() {
             ].map(({ step, title, desc, variant }) => (
               <StaggerItem key={step}>
                 <PixelCard variant={variant} className="workflow-card" style={{ padding: '24px 20px', minHeight: '220px', width: '100%', height: '100%' }}>
-                  <span className="workflow-step">{step}</span>
+                  <span className="workflow-step"><span className="num-accent">[ {step} ]</span></span>
                   <h3 style={{ marginTop: '12px', fontSize: '20px', fontWeight: 700 }}>{title}</h3>
                   <p style={{ marginTop: '8px', fontSize: '13.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{desc}</p>
                 </PixelCard>
@@ -711,10 +805,47 @@ export default function LandingPage() {
           </StaggerContainer>
         </section>
 
+        {/* INFINITE MARQUEE TICKER 2 (REVERSE) */}
+        <div className="editorial-marquee editorial-marquee--reverse" aria-hidden="true">
+          <div className="editorial-marquee__track">
+            <div className="editorial-marquee__group">
+              <span>DIRECT INBOX</span>
+              <b>///</b>
+              <span>VERIFIED METRICS</span>
+              <b>///</b>
+              <span>TRANSPARENT RATES</span>
+              <b>///</b>
+              <span>COMMISSION FREE</span>
+              <b>///</b>
+              <span>CAMPAIGN BRIEFS</span>
+              <b>///</b>
+              <span>INSTANT ESCROW</span>
+              <b>///</b>
+            </div>
+            <div className="editorial-marquee__group">
+              <span>DIRECT INBOX</span>
+              <b>///</b>
+              <span>VERIFIED METRICS</span>
+              <b>///</b>
+              <span>TRANSPARENT RATES</span>
+              <b>///</b>
+              <span>COMMISSION FREE</span>
+              <b>///</b>
+              <span>CAMPAIGN BRIEFS</span>
+              <b>///</b>
+              <span>INSTANT ESCROW</span>
+              <b>///</b>
+            </div>
+          </div>
+        </div>
+
         {/* 8.5 PLATFORM METRICS & TRUST INDICATORS (CENTERED MIDDLE SECTION) */}
         <section className="landing-metrics-stripe">
           <div className="section landing-metrics-wrapper">
             <FadeIn distance={20} duration={0.65}>
+              <div style={{ marginBottom: '18px', textAlign: 'center' }}>
+                <span className="eyebrow"><span className="num-accent">[ 07 ]</span> Platform Scale</span>
+              </div>
               <div className="landing-metrics-card">
                 <div className="landing-metrics-item">
                   <b className="landing-metrics-number">
@@ -742,18 +873,16 @@ export default function LandingPage() {
         {/* 9. MARKETPLACE PREVIEW */}
         <section className="section">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Product Experience</span>
-              <h2>A Clean, Uncluttered Workspace</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 08 ]</span> Product Experience</span>
+            <h2>A Clean, <em>Uncluttered Workspace<span className="dot-accent">.</span></em></h2>
             <p>Every tool you need to evaluate, communicate, and track creator partnerships.</p>
           </FadeIn>
 
           <StaggerContainer className="preview-bento-composition" staggerDelay={0.12}>
             <StaggerItem className="preview-bento-left">
-              <Badge variant="accent" style={{ marginBottom: '16px', display: 'inline-flex', width: 'fit-content', background: 'rgba(99, 102, 241, 0.15)', color: '#A5B4FC', border: '1px solid rgba(129, 140, 248, 0.3)' }}>
+              <span className="preview-bento-badge">
                 Marketplace Engine
-              </Badge>
+              </span>
               <h3>Real-Time Creator Discovery</h3>
               <p>
                 Quickly compare key creator metrics, rates, and portfolio media with instant search feedback. Filter by location down to specific metropolitan hubs.
@@ -762,11 +891,11 @@ export default function LandingPage() {
               <div className="preview-feature-pills">
                 <div className="preview-feature-pill">
                   <span className="preview-feature-pill-icon">✓</span>
-                  <span>Instant verified engagement rates & demographic data</span>
+                  <span>Instant verified engagement rates &amp; demographic data</span>
                 </div>
                 <div className="preview-feature-pill">
                   <span className="preview-feature-pill-icon">✓</span>
-                  <span>Direct brand-to-creator messaging & inquiry locks</span>
+                  <span>Direct brand-to-creator messaging &amp; inquiry locks</span>
                 </div>
                 <div className="preview-feature-pill">
                   <span className="preview-feature-pill-icon">✓</span>
@@ -774,11 +903,11 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <Button size="md" variant="primary" onClick={() => navigate('/influencers')} style={{ background: '#FFFFFF', color: '#0A0A0A', fontWeight: 600 }}>
+              <div className="preview-bento-actions">
+                <Button size="md" variant="primary" onClick={() => navigate('/influencers')}>
                   Launch Live Directory
                 </Button>
-                <Button size="md" variant="secondary" onClick={() => navigate('/auth/signup')} style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#FFFFFF', background: 'rgba(255,255,255,0.06)' }}>
+                <Button size="md" variant="secondary" onClick={() => navigate('/auth/signup')}>
                   Create Account
                 </Button>
               </div>
@@ -850,10 +979,8 @@ export default function LandingPage() {
         {/* 10. REVIEWS & TESTIMONIALS SLIDER */}
         <section className="section" id="reviews">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Real Stories & Proven Results</span>
-              <h2>Loved by Growing Brands & Top Creators</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 09 ]</span> Real Stories &amp; Proven Results</span>
+            <h2>Proven Results from <em>Top Creators<span className="dot-accent">.</span></em></h2>
             <p>Discover how verified partnerships drive authentic audience engagement and predictable growth.</p>
           </FadeIn>
 
@@ -865,10 +992,8 @@ export default function LandingPage() {
         {/* 11. FAQ ACCORDION (QUESTION ANSWERING) */}
         <section className="section" id="faq">
           <FadeIn className="page-heading">
-            <div>
-              <span className="eyebrow">Got Questions?</span>
-              <h2>Frequently Asked Questions</h2>
-            </div>
+            <span className="eyebrow"><span className="num-accent">[ 10 ]</span> Got Questions?</span>
+            <h2>Frequently <em>Asked Questions<span className="dot-accent">.</span></em></h2>
             <p>Everything you need to know about navigating the Brand2Influence marketplace.</p>
           </FadeIn>
 
@@ -880,12 +1005,12 @@ export default function LandingPage() {
         {/* 12. FINAL CTA */}
         <section className="landing-final-cta-stripe">
           <div className="final-cta-bento">
-            <FadeIn className="final-cta-content" distance={24} duration={0.75} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-              <span className="eyebrow" style={{ color: 'var(--color-accent)', textAlign: 'center' }}>Your Next Collaboration Starts Here</span>
-              <h2 style={{ fontSize: 'clamp(38px, 4.5vw, 56px)', margin: '16px 0 20px', textAlign: 'center' }}>
-                Find your next creator.
+            <FadeIn className="final-cta-content" distance={24} duration={0.75}>
+              <span className="eyebrow"><span className="num-accent">[ 11 ]</span> Your Next Collaboration Starts Here</span>
+              <h2>
+                Find your next <em>creator<span className="dot-accent">.</span></em>
               </h2>
-              <p style={{ color: 'var(--color-neutral-muted)', fontSize: '15px', textAlign: 'center', maxWidth: '560px' }}>
+              <p>
                 Join hundreds of independent brands and influential creators shaping modern commerce.
               </p>
               <div className="final-cta-buttons">
@@ -901,45 +1026,82 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* 11. FOOTER */}
-      <FadeIn as="footer" className="landing-footer" distance={16} delay={0.1}>
-        <div className="footer-main">
-          <div className="footer-brand-col">
-            <Link to="/" className="footer-brand-logo">
-              <span>Brand2Influence</span>
-            </Link>
-            <p className="footer-brand-desc">
-              India’s premier marketplace for independent creators and forward-thinking brands. Built with transparent rates and direct collaboration.
-            </p>
-            <div className="footer-status-pill">
-              <span className="footer-status-dot"></span>
-              <span>1,200+ Verified Creators Active</span>
+      {/* 11. CODEASTRA EDITORIAL FOOTER */}
+      <footer className="codeastra-footer" role="contentinfo">
+        <div className="codeastra-footer-inner">
+          <div className="codeastra-footer-grid">
+            {/* Left Hero Column */}
+            <div className="codeastra-footer-hero">
+              <h2 className="codeastra-footer-title">
+                Go beyond<br />
+                the code.
+              </h2>
+              <p className="codeastra-footer-desc">
+                There is always a line between an idea and reality.<br />
+                Brand2Influence invites you to cross it.
+              </p>
+              <button
+                type="button"
+                className="codeastra-footer-btn"
+                onClick={() => navigate('/auth/signup')}
+              >
+                GO BEYOND <span className="codeastra-footer-btn-arrow">→</span>
+              </button>
+            </div>
+
+            {/* Right Navigation Columns */}
+            <div className="codeastra-footer-links-wrap">
+              <div className="codeastra-footer-col">
+                <span className="codeastra-footer-col-title">PLATFORM</span>
+                <nav className="codeastra-footer-nav" aria-label="Platform Links">
+                  <button type="button" onClick={() => scrollTo('marketplace')}>THE CREATORS</button>
+                  <button type="button" onClick={() => navigate('/brands')}>BRAND DIRECTORY</button>
+                  <button type="button" onClick={() => navigate('/campaigns')}>ACTIVE BRIEFS</button>
+                  <button type="button" onClick={() => scrollTo('how-it-works')}>WORKFLOW</button>
+                  <button type="button" onClick={() => scrollTo('reviews')}>COMMUNITY REVIEWS</button>
+                  <button type="button" onClick={() => scrollTo('faq')}>FAQ &amp; PROTOCOL</button>
+                </nav>
+              </div>
+
+              <div className="codeastra-footer-col">
+                <span className="codeastra-footer-col-title">BRAND2INFLUENCE</span>
+                <nav className="codeastra-footer-nav" aria-label="Company Links">
+                  <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>HOME</button>
+                  <button type="button" onClick={() => navigate('/influencers')}>ALL CREATORS</button>
+                  <a href="https://www.instagram.com/thewasiim/" target="_blank" rel="noopener noreferrer">TEAM</a>
+                  <button type="button" onClick={() => navigate('/auth/login')}>LOG IN</button>
+                  <button type="button" onClick={() => navigate('/auth/signup')}>GET ACCESS</button>
+                </nav>
+              </div>
             </div>
           </div>
-          <nav className="footer-nav">
-            <button type="button" onClick={() => scrollTo('marketplace')}>Discover</button>
-            <button type="button" onClick={() => scrollTo('reviews')}>Reviews</button>
-            <button type="button" onClick={() => scrollTo('faq')}>FAQ</button>
-            <button type="button" onClick={() => scrollTo('how-it-works')}>How it works</button>
-            <button type="button" onClick={() => navigate('/auth/signup')}>Join</button>
-            <button type="button" onClick={() => navigate('/auth/login')}>Log in</button>
-          </nav>
+
+          {/* Metadata & Sub-footer Row */}
+          <div className="codeastra-footer-meta">
+            <span className="codeastra-footer-copy">
+              © 2026 BRAND2INFLUENCE · PLATFORM FOR INDEPENDENT CREATORS &amp; BRANDS
+            </span>
+
+            <div className="codeastra-footer-meta-right">
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="codeastra-footer-backtop"
+              >
+                · BACK TO TOP ↑
+              </button>
+              <span className="codeastra-footer-badge">
+                ✺ LIVE
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="footer-bottom">
-          <span>© 2026 Brand2Influence. All rights reserved.</span>
-          <span className="footer-credit">
-            Made by{' '}
-            <a
-              href="https://www.instagram.com/thewasiim/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              @thewasiim
-            </a>
-          </span>
-          <span className="footer-tagline">Designed for meaningful creator partnerships across India.</span>
+
+        {/* Massive Bottom Obsidian Typography: GO BEYOND */}
+        <div className="codeastra-footer-giant-wrap" aria-hidden="true">
+          <span className="codeastra-footer-giant-text">GO BEYOND</span>
         </div>
-      </FadeIn>
+      </footer>
     </div>
   )
 }

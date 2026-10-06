@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/auth'
 import { api } from '../services/api'
-import { Button, Input, Textarea, Badge, LoadingState, ErrorState } from '../components/ui'
+import { Button, Input, Textarea, Badge, LoadingState, ErrorState, FollowersBreakdownModal } from '../components/ui'
 
 // Helper to reliably convert any YouTube link/id into a working embed URL
 function getYouTubeEmbedUrl(url = '', videoId = '') {
@@ -123,6 +123,7 @@ export default function ProfileManagementPage() {
   // Follow State
   const [isFollowing, setIsFollowing] = useState(false)
   const [followerCount, setFollowerCount] = useState(14800)
+  const [showBreakdown, setShowBreakdown] = useState(false)
 
   // Posts & Lightbox State
   const [posts, setPosts] = useState(DEFAULT_POSTS)
@@ -892,7 +893,11 @@ export default function ProfileManagementPage() {
               <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>{posts.length}</strong>{' '}
               <span style={{ color: '#9CA3AF' }}>posts</span>
             </div>
-            <div>
+            <div
+              className="profile-stat-clickable"
+              onClick={() => setShowBreakdown(true)}
+              title="Click to view followers breakdown (Instagram, Snapchat, YouTube, etc.)"
+            >
               <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>
                 {followerCount >= 1000000
                   ? `${(followerCount / 1000000).toFixed(1)}M`
@@ -900,7 +905,7 @@ export default function ProfileManagementPage() {
                   ? `${(followerCount / 1000).toFixed(1)}K`
                   : followerCount.toLocaleString()}
               </strong>{' '}
-              <span style={{ color: '#9CA3AF' }}>followers</span>
+              <span style={{ color: '#818cf8', textDecoration: 'underline', textUnderlineOffset: '3px' }}>followers ▾</span>
             </div>
             <div>
               <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>318</strong>{' '}
@@ -2394,6 +2399,27 @@ export default function ProfileManagementPage() {
           </div>
         </div>
       )}
+      {/* Followers Breakdown Modal */}
+      <FollowersBreakdownModal
+        isOpen={showBreakdown}
+        onClose={() => setShowBreakdown(false)}
+        creatorName={displayName}
+        stats={{
+          totalFollowers: followerCount,
+          instagram: Number(formData.instagram_followers || followerCount),
+          instagramHandle: formData.instagram_handle || username,
+          isInstagramVerified: Boolean(formData.is_instagram_verified || isVerified),
+          youtube: Number(formData.youtube_subscribers || 0),
+          youtubeUrl: formData.youtube_url,
+          youtubeSkipped: !formData.youtube_subscribers && !formData.youtube_url,
+          snapchat: Number(formData.snapchat_subscribers || 0),
+          snapchatUrl: formData.snapchat_url,
+          snapchatSkipped: !formData.snapchat_subscribers && !formData.snapchat_url,
+          facebook: Number(formData.facebook_followers || 0),
+          facebookUrl: formData.facebook_url,
+          facebookSkipped: !formData.facebook_followers && !formData.facebook_url
+        }}
+      />
     </div>
   )
 }

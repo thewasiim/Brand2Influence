@@ -85,33 +85,40 @@ export default function FocusCardSlider({
     >
       {/* Top Slider Navigation & Controls */}
       <div className="focus-slider-controls-top">
-        <div className="focus-slider-counter">
-          <span className="current-num">{String(activeIndex + 1).padStart(2, '0')}</span>
-          <span className="divider">/</span>
-          <span className="total-num">{String(items.length).padStart(2, '0')}</span>
+        <div className="focus-slider-hint">
+          <span className="focus-slider-hint-dot" />
+          <span>Spotlight Showcase • Click or swipe cards</span>
         </div>
 
-        <div className="focus-slider-arrows">
-          <button
-            type="button"
-            className="focus-slider-arrow-btn"
-            onClick={handlePrev}
-            aria-label="Previous Slide"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m15 18-6-6 6-6"/>
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="focus-slider-arrow-btn"
-            onClick={handleNext}
-            aria-label="Next Slide"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m9 18 6-6-6-6"/>
-            </svg>
-          </button>
+        <div className="focus-slider-right-cluster">
+          <div className="focus-slider-counter">
+            <span className="current-num">{String(activeIndex + 1).padStart(2, '0')}</span>
+            <span className="divider">/</span>
+            <span className="total-num">{String(items.length).padStart(2, '0')}</span>
+          </div>
+
+          <div className="focus-slider-arrows">
+            <button
+              type="button"
+              className="focus-slider-arrow-btn"
+              onClick={handlePrev}
+              aria-label="Previous Slide"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="focus-slider-arrow-btn"
+              onClick={handleNext}
+              aria-label="Next Slide"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -152,24 +159,24 @@ export default function FocusCardSlider({
             let cardZIndex = 10;
 
             if (distance === 0) {
-              cardScale = 1.03;
+              cardScale = 1.02;
               cardBlur = 0;
               cardOpacity = 1;
               cardZIndex = 12;
             } else if (distance === 1) {
-              cardScale = 0.90;
-              cardBlur = 4.5;
-              cardOpacity = 0.65;
+              cardScale = 0.96;
+              cardBlur = 0;
+              cardOpacity = 0.9;
               cardZIndex = 8;
             } else if (distance === 2) {
-              cardScale = 0.80;
-              cardBlur = 7.5;
-              cardOpacity = 0.38;
+              cardScale = 0.88;
+              cardBlur = 2;
+              cardOpacity = 0.65;
               cardZIndex = 4;
             } else {
-              cardScale = 0.72;
-              cardBlur = 10;
-              cardOpacity = 0.2;
+              cardScale = 0.8;
+              cardBlur = 4;
+              cardOpacity = 0.35;
               cardZIndex = 1;
             }
 

@@ -8,5 +8,11 @@ import HomeFeedPage from './social/HomeFeedPage'
 export default function DashboardPage() {
   const { profile } = useAuth()
   if (!profile?.role) return <Navigate to="/onboarding/role" replace />
+  if (profile?.role === 'influencer' && profile.onboarding_completed === false) {
+    return <Navigate to="/onboarding/influencer" replace />
+  }
+  if (profile?.role === 'brand' && profile.onboarding_completed === false) {
+    return <Navigate to="/onboarding/brand" replace />
+  }
   return <HomeFeedPage />
 }

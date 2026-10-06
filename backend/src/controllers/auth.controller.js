@@ -26,6 +26,25 @@ export const register = async (req, res, next) => {
   }
 }
 
+export const checkUsername = async (req, res, next) => {
+  try {
+    const username = req.query.username || req.body.username || ''
+    const result = await service.checkUsernameAvailability(username)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const resolveIdentifier = async (req, res, next) => {
+  try {
+    const result = await service.resolveIdentifier(req.body.identifier)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
 export const profile = async (req, res, next) => {
   try {
     res.json(await service.getProfile(req.auth))

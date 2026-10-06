@@ -326,10 +326,16 @@ export const GlowCursor = ({
       if (!destroyed) raf = requestAnimationFrame(render);
     };
 
+    const handlePointerLeave = () => {
+      pointerInside = false;
+    };
+
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
     window.addEventListener('resize', resize);
     window.addEventListener('pointermove', updatePointer, { passive: true });
+    window.addEventListener('pointerleave', handlePointerLeave);
+    window.addEventListener('mouseleave', handlePointerLeave);
     resize();
     raf = requestAnimationFrame(render);
 
@@ -339,6 +345,8 @@ export const GlowCursor = ({
       resizeObserver.disconnect();
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', updatePointer);
+      window.removeEventListener('pointerleave', handlePointerLeave);
+      window.removeEventListener('mouseleave', handlePointerLeave);
       try {
         mesh.geometry.remove();
         program.remove();

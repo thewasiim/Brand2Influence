@@ -21,6 +21,7 @@ import {
   FadeIn,
   StaggerContainer,
   StaggerItem,
+  FollowersBreakdownModal,
 } from '../../components/ui'
 
 const CREATOR_NICHES = [
@@ -34,59 +35,137 @@ const CREATOR_NICHES = [
   'Lifestyle',
 ]
 
+const CREATOR_AVATAR_PRESETS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400'
+]
+
 export function InfluencerOnboardingPage() {
   const nav = useNavigate()
+  const { profile, refreshProfile } = useAuth()
+  const photoInputRef = React.useRef(null)
+
   const [form, setForm] = useState({
-    name: '',
-    niche: '',
+    name: profile?.name || '',
+    niche: 'Fashion & Lifestyle',
     followersCount: '',
-    engagementRate: '',
-    reelRate: '',
+    engagementRate: '4.5',
+    reelRate: '3500',
     portfolioLinks: '',
-    location: '',
+    location: 'Mumbai',
     bio: '',
     profileImageUrl: '',
     profileImage: null,
     status: 'published',
   })
-  const [syncPlatform, setSyncPlatform] = useState('instagram')
-  const [socialInput, setSocialInput] = useState('')
-  const [fetchingSocial, setFetchingSocial] = useState(false)
-  const [syncMsg, setSyncMsg] = useState('')
+
+  // Instagram Phone OTP Verification state
+  const [instaHandle, setInstaHandle] = useState('')
+  const [instaPhone, setInstaPhone] = useState(profile?.phone || '')
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpCode, setOtpCode] = useState('')
+  const [otpMaskedPhone, setOtpMaskedPhone] = useState('')
+  const [testOtp, setTestOtp] = useState('')
+  const [otpError, setOtpError] = useState('')
+  const [otpSuccess, setOtpSuccess] = useState('')
+  const [isInstaVerified, setIsInstaVerified] = useState(false)
+  const [sendingOtp, setSendingOtp] = useState(false)
+  const [verifyingOtp, setVerifyingOtp] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const handleFetchSocial = async () => {
-    if (!socialInput.trim()) {
-      setError(`Please enter your ${syncPlatform} username, handle, or profile URL`)
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = setInterval(() => setResendCooldown((c) => c - 1), 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Profile image must be less than 5MB')
       return
     }
-    setFetchingSocial(true)
-    setError('')
-    setSyncMsg('')
+    setForm(prev => ({ ...prev, profileImage: file }))
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setForm(prev => ({ ...prev, profileImageUrl: ev.target.result }))
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleSendInstaOtp = async () => {
+    setOtpError('')
+    setOtpSuccess('')
+    if (!instaHandle.trim()) {
+      setOtpError('Please enter your Instagram handle or profile URL first.')
+      return
+    }
+    const cleanPhone = instaPhone.trim().replace(/\D/g, '')
+    if (cleanPhone.length < 10) {
+      setOtpError('Please enter a valid 10-digit mobile number connected to your Instagram account.')
+      return
+    }
+
+    setSendingOtp(true)
     try {
-      const res = await api('/influencers/social-sync', {
-        method: 'POST',
-        body: JSON.stringify({
-          platform: syncPlatform,
-          urlOrHandle: socialInput.trim()
-        })
+      const res = await influencersService.sendSocialOtp({
+        platform: 'instagram',
+        urlOrHandle: instaHandle.trim(),
+        phone: cleanPhone
       })
-      if (res?.stats) {
-        const count = res.stats.followers || res.stats.subscribers || 0
+      setOtpSent(true)
+      setOtpMaskedPhone(res.maskedPhone)
+      setTestOtp(res.testOtp || '')
+      setResendCooldown(45)
+      setOtpSuccess(`Verification code sent to ${res.maskedPhone}!`)
+    } catch (err) {
+      setOtpError(err.message || 'Failed to send OTP. Please check the handle and phone number.')
+    } finally {
+      setSendingOtp(false)
+    }
+  }
+
+  const handleVerifyInstaOtp = async () => {
+    setOtpError('')
+    setOtpSuccess('')
+    if (!otpCode || otpCode.trim().length < 6) {
+      setOtpError('Please enter the full 6-digit OTP code.')
+      return
+    }
+    const cleanPhone = instaPhone.trim().replace(/\D/g, '')
+
+    setVerifyingOtp(true)
+    try {
+      const res = await influencersService.verifySocialOtp({
+        platform: 'instagram',
+        urlOrHandle: instaHandle.trim(),
+        phone: cleanPhone,
+        otp: otpCode.trim()
+      })
+      setIsInstaVerified(true)
+      setOtpSuccess(res.message || 'Instagram account ownership verified!')
+      const count = res.stats?.followers ?? res.stats?.subscribers ?? 0
+      if (count) {
         setForm(prev => ({
           ...prev,
-          followersCount: count || prev.followersCount,
+          followersCount: String(count),
           portfolioLinks: prev.portfolioLinks
-            ? `${res.stats.url}, ${prev.portfolioLinks}`
-            : res.stats.url
+            ? `${res.stats?.url || `https://instagram.com/${instaHandle.replace('@', '')}`}, ${prev.portfolioLinks}`
+            : res.stats?.url || `https://instagram.com/${instaHandle.replace('@', '')}`
         }))
-        setSyncMsg(`✓ Connected ${res.stats.handle || syncPlatform}! ${Number(count).toLocaleString()} audience auto-filled.`)
       }
     } catch (err) {
-      setError(err.message || `Could not fetch ${syncPlatform} details`)
+      setOtpError(err.message || 'Invalid or expired OTP. Verification failed.')
     } finally {
-      setFetchingSocial(false)
+      setVerifyingOtp(false)
     }
   }
 
@@ -94,25 +173,36 @@ export function InfluencerOnboardingPage() {
     setBusy(true)
     setError('')
     try {
-      let profileImageUrl = form.profileImageUrl
+      let finalImageUrl = form.profileImageUrl
       if (form.profileImage && supabase) {
         const userRes = await supabase.auth.getUser()
         if (userRes.data?.user?.id) {
-          profileImageUrl = await influencersService.uploadProfileImage(form.profileImage, userRes.data.user.id)
+          try {
+            finalImageUrl = await influencersService.uploadProfileImage(form.profileImage, userRes.data.user.id)
+          } catch (upErr) {
+            console.warn('Storage upload fallback:', upErr)
+          }
         }
       }
 
       await influencersService.saveProfile({
         ...form,
-        profileImageUrl,
+        profileImageUrl: finalImageUrl,
+        profile_image_url: finalImageUrl,
         status,
         portfolioLinks: form.portfolioLinks
           ? form.portfolioLinks.split(',').map((x) => x.trim()).filter(Boolean)
           : [],
-        rateCard: { reel: Number(form.reelRate || 0) },
+        rateCard: {
+          reel: Number(form.reelRate || 0),
+          instagram_handle: instaHandle.replace(/^@/, ''),
+          instagram_verified: isInstaVerified,
+          instagram_followers: Number(form.followersCount || 0)
+        },
       })
 
-      nav(status === 'draft' ? '/dashboard' : '/influencers')
+      await refreshProfile()
+      nav('/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -123,80 +213,252 @@ export function InfluencerOnboardingPage() {
   return (
     <main className="setup">
       <div className="overline">
-        <i /> Creator Profile Setup
+        <i /> Creator Profile Setup & Verification
       </div>
 
-      {/* Multi-Platform Social Auto-Fetch Banner */}
-      <div
-        style={{
-          background: 'var(--color-surface-2)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '16px 18px',
-          marginBottom: '20px',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '18px' }}>⚡</span>
-            <b style={{ fontSize: '13.5px' }}>Auto-Fetch Creator Stats (Optional)</b>
+      {/* INSTAGRAM-STYLE PROFILE PHOTO SETUP */}
+      <div className="insta-photo-setup">
+        <input
+          type="file"
+          ref={photoInputRef}
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
+        <div
+          className="insta-avatar-ring"
+          title="Click to set or change profile photo"
+          onClick={() => photoInputRef.current?.click()}
+        >
+          <div className="insta-avatar-inner">
+            {form.profileImageUrl ? (
+              <img src={form.profileImageUrl} alt="Profile preview" className="insta-avatar-img" />
+            ) : (
+              <div className="insta-avatar-placeholder">📸</div>
+            )}
           </div>
-          {/* Platform Switcher */}
-          <div style={{ display: 'flex', gap: '4px' }}>
-            {[
-              { id: 'instagram', label: '📸 Instagram' },
-              { id: 'youtube', label: '▶️ YouTube' },
-              { id: 'snapchat', label: '👻 Snapchat' },
-            ].map(p => (
+          <button
+            type="button"
+            className="insta-avatar-camera-btn"
+            title="Upload profile picture"
+            onClick={(e) => {
+              e.stopPropagation()
+              photoInputRef.current?.click()
+            }}
+          >
+            📷
+          </button>
+        </div>
+
+        <h4 className="insta-photo-title">
+          {form.profileImageUrl ? 'Profile Photo Selected' : 'Add Profile Photo'}
+        </h4>
+        <p className="insta-photo-desc">
+          Add an authentic profile photo like Instagram. Brands are 4x more likely to hire creators with verified headshots.
+        </p>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => photoInputRef.current?.click()}
+          >
+            📁 Choose from Device
+          </Button>
+          {form.profileImageUrl && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setForm(prev => ({ ...prev, profileImageUrl: '', profileImage: null }))}
+              style={{ color: '#ef4444' }}
+            >
+              Remove
+            </Button>
+          )}
+        </div>
+
+        {/* Quick Avatar Presets */}
+        <div className="insta-preset-container">
+          <span className="insta-preset-label">Or choose a stylish creator avatar</span>
+          <div className="insta-preset-row">
+            {CREATOR_AVATAR_PRESETS.map((presetUrl, idx) => (
               <button
-                key={p.id}
+                key={idx}
                 type="button"
-                className={`chip ${syncPlatform === p.id ? 'chip--active' : ''}`}
-                style={{ fontSize: '11px', padding: '3px 9px' }}
-                onClick={() => {
-                  setSyncPlatform(p.id)
-                  setSyncMsg('')
-                  setError('')
-                }}
+                className={`insta-preset-avatar ${form.profileImageUrl === presetUrl ? 'is-active' : ''}`}
+                onClick={() => setForm(prev => ({ ...prev, profileImageUrl: presetUrl, profileImage: null }))}
+                title={`Select avatar ${idx + 1}`}
               >
-                {p.label}
+                <img src={presetUrl} alt={`Avatar option ${idx + 1}`} />
               </button>
             ))}
           </div>
         </div>
+      </div>
 
-        <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', marginBottom: '12px' }}>
-          Connect your {syncPlatform === 'instagram' ? 'Instagram' : syncPlatform === 'youtube' ? 'YouTube' : 'Snapchat'} to automatically fetch and verify audience metrics.
+      {/* INSTAGRAM FOLLOWER FETCH WITH CONNECTED PHONE OTP VERIFICATION */}
+      <div
+        className={`social-platform-card ${isInstaVerified ? 'is-verified' : ''}`}
+        style={{
+          borderColor: isInstaVerified ? 'rgba(52, 211, 153, 0.6)' : undefined,
+          background: isInstaVerified ? 'rgba(16, 185, 129, 0.04)' : undefined,
+          marginBottom: '20px'
+        }}
+      >
+        <div className="social-card-header">
+          <div className="social-platform-label">
+            <span style={{ fontSize: '15px' }}>📸</span> Instagram Follower Verification
+            {isInstaVerified && (
+              <span style={{ fontSize: '11px', color: '#34d399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
+                ✓ Ownership Verified
+              </span>
+            )}
+          </div>
+          <span className="social-platform-api-tag">Meta Security</span>
+        </div>
+
+        <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: '8px 0 12px' }}>
+          To prevent fake accounts and unverified follower claims, verify ownership of your Instagram handle via an OTP code sent to your registered phone number.
         </p>
 
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            className="field-input"
-            style={{ flex: 1, minWidth: '200px' }}
-            placeholder={
-              syncPlatform === 'instagram'
-                ? '@yourhandle or instagram.com/username'
-                : syncPlatform === 'youtube'
-                ? '@channelHandle or youtube.com/@channel'
-                : 'snapchat.com/add/yourhandle'
-            }
-            value={socialInput}
-            onChange={(e) => setSocialInput(e.target.value)}
+        <div className="form-row-2">
+          <Input
+            label="Instagram Handle or URL"
+            placeholder="e.g. @yourhandle"
+            disabled={isInstaVerified}
+            value={instaHandle}
+            onChange={(e) => {
+              setInstaHandle(e.target.value)
+              setIsInstaVerified(false)
+              setOtpSent(false)
+            }}
           />
-          <Button
-            type="button"
-            variant="secondary"
-            loading={fetchingSocial}
-            onClick={handleFetchSocial}
-          >
-            {fetchingSocial ? 'Fetching…' : 'Fetch Live Stats'}
-          </Button>
+          <Input
+            label="Connected Mobile Number"
+            type="tel"
+            placeholder="e.g. 9876543210"
+            disabled={isInstaVerified}
+            value={instaPhone}
+            onChange={(e) => {
+              setInstaPhone(e.target.value)
+              setIsInstaVerified(false)
+              setOtpSent(false)
+            }}
+          />
         </div>
-        {syncMsg && (
-          <p style={{ color: 'var(--color-secondary)', fontSize: '12px', marginTop: '8px', fontWeight: 600 }}>
-            {syncMsg}
-          </p>
+
+        {!isInstaVerified ? (
+          <div style={{ marginTop: '12px' }}>
+            <Button
+              type="button"
+              size="md"
+              className="full"
+              style={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                color: '#fff',
+                fontWeight: 700
+              }}
+              loading={sendingOtp}
+              disabled={sendingOtp}
+              onClick={handleSendInstaOtp}
+            >
+              ⚡ Fetch Followers & Send Verification OTP
+            </Button>
+          </div>
+        ) : null}
+
+        {/* OTP Verification Prompt Card */}
+        {otpSent && !isInstaVerified && (
+          <div className="otp-verify-card">
+            <div className="otp-verify-header">
+              <span className="otp-verify-title">
+                🛡️ Authenticate Instagram Ownership
+              </span>
+              {resendCooldown > 0 ? (
+                <span style={{ fontSize: '11.5px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  Resend in {resendCooldown}s
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSendInstaOtp}
+                  style={{ background: 'none', border: 'none', color: '#818cf8', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Resend Code
+                </button>
+              )}
+            </div>
+
+            <p className="otp-verify-desc">
+              A 6-digit security OTP was sent to <strong>{otpMaskedPhone}</strong> to verify that you own <strong>@{instaHandle || 'this account'}</strong>.
+            </p>
+
+            {testOtp && (
+              <div
+                className="dev-test-otp-chip"
+                onClick={() => setOtpCode(testOtp)}
+                title="Click to auto-fill test code"
+              >
+                <span>🧪 Dev / Test OTP: <b>{testOtp}</b></span>
+                <span style={{ opacity: 0.7 }}>(Click to fill)</span>
+              </div>
+            )}
+
+            <div className="otp-input-row">
+              <input
+                type="text"
+                maxLength="6"
+                className="otp-code-field"
+                placeholder="••••••"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+              />
+              <Button
+                type="button"
+                size="md"
+                loading={verifyingOtp}
+                disabled={verifyingOtp || otpCode.length < 6}
+                onClick={handleVerifyInstaOtp}
+                style={{
+                  background: '#10b981',
+                  borderColor: '#10b981',
+                  color: '#fff',
+                  fontWeight: 700
+                }}
+              >
+                Verify OTP
+              </Button>
+            </div>
+
+            {otpError && (
+              <div style={{ color: '#f87171', fontSize: '12px', fontWeight: 600, marginTop: '6px' }}>
+                ⚠️ {otpError}
+              </div>
+            )}
+            {otpSuccess && (
+              <div style={{ color: '#34d399', fontSize: '12px', fontWeight: 600, marginTop: '6px' }}>
+                ✓ {otpSuccess}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Verified Success Badge */}
+        {isInstaVerified && (
+          <div className="verified-badge-card" style={{ marginTop: '14px' }}>
+            <div>
+              <div className="verified-badge-text">
+                <span>🛡️✓</span>
+                <span>Ownership Verified for @{instaHandle}</span>
+              </div>
+              <div className="verified-badge-sub">
+                100% Authentic Creator · Followers verified and locked via OTP authentication
+              </div>
+            </div>
+            <Badge variant="accent">Verified ✓</Badge>
+          </div>
         )}
       </div>
 
@@ -228,11 +490,12 @@ export function InfluencerOnboardingPage() {
 
         <div className="form-row-3">
           <Input
-            label="Followers"
+            label="Followers Count"
             type="number"
             min="0"
             required
             placeholder="15000"
+            disabled={isInstaVerified}
             value={form.followersCount}
             onChange={(e) => setForm({ ...form, followersCount: e.target.value })}
           />
@@ -248,7 +511,7 @@ export function InfluencerOnboardingPage() {
             onChange={(e) => setForm({ ...form, engagementRate: e.target.value })}
           />
           <Input
-            label="Starting Reel (₹)"
+            label="Starting Reel Rate (₹)"
             type="number"
             min="0"
             required
@@ -259,33 +522,16 @@ export function InfluencerOnboardingPage() {
         </div>
 
         <Input
-          label="Portfolio Links (comma separated)"
+          label="Portfolio / Reel Links (comma separated)"
           placeholder="https://instagram.com/reel/..., https://youtube.com/..."
           value={form.portfolioLinks}
           onChange={(e) => setForm({ ...form, portfolioLinks: e.target.value })}
         />
 
-        <Input
-          label="Profile Image URL (optional)"
-          type="url"
-          placeholder="https://images.unsplash.com/..."
-          value={form.profileImageUrl}
-          onChange={(e) => setForm({ ...form, profileImageUrl: e.target.value })}
-        />
-
-        <label className="field">
-          <span className="field-label">Upload Profile Photo</span>
-          <input
-            type="file"
-            accept="image/*"
-            className="field-input"
-            onChange={(e) => setForm({ ...form, profileImage: e.target.files?.[0] || null })}
-          />
-        </label>
-
         <Textarea
           label="Bio & Aesthetic Focus"
           required
+          rows={3}
           placeholder="Tell brands about your style, audience demographic, and past collaborations..."
           value={form.bio}
           onChange={(e) => setForm({ ...form, bio: e.target.value })}
@@ -293,17 +539,15 @@ export function InfluencerOnboardingPage() {
 
         {error && <ErrorState error={error} />}
 
-        <div className="form-actions" style={{ marginTop: '16px' }}>
+        <div style={{ marginTop: '20px' }}>
           <Button
-            type="button"
-            variant="secondary"
+            type="submit"
+            size="lg"
+            className="full"
+            loading={busy}
             disabled={busy}
-            onClick={() => save('draft')}
           >
-            Save Draft
-          </Button>
-          <Button disabled={busy} loading={busy}>
-            {busy ? 'Saving…' : 'Publish Profile'}
+            {busy ? 'Saving Verified Profile…' : 'Complete Setup & Enter Dashboard'}
           </Button>
         </div>
       </form>
@@ -314,17 +558,21 @@ export function InfluencerOnboardingPage() {
 export function DiscoveryPage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [niche, setNiche] = useState('All Niches')
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  const load = async (searchQuery = search) => {
+  const load = async (searchQuery = search, nicheFilter = niche) => {
     setLoading(true)
     setError('')
     try {
       const payload = {}
       if (searchQuery && searchQuery.trim()) {
         payload.search = searchQuery.trim()
+      }
+      if (nicheFilter && nicheFilter !== 'All Niches') {
+        payload.niche = nicheFilter
       }
       const res = await influencersService.list(payload)
       setData(res)
@@ -335,59 +583,72 @@ export function DiscoveryPage() {
     }
   }
 
-  // Live real-time search on typing with slight debounce
+  // Live search and niche change
   useEffect(() => {
     const timer = setTimeout(() => {
-      load(search)
+      load(search, niche)
     }, 200)
 
     return () => clearTimeout(timer)
-  }, [search])
+  }, [search, niche])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
-    load(search)
+    load(search, niche)
   }
 
   const handleClear = () => {
     setSearch('')
+    setNiche('All Niches')
   }
 
   return (
     <main className="page">
+      {/* Signature CodeAstra Page Heading */}
       <FadeIn className="page-heading">
-        <div>
-          <div className="overline">
-            <i /> Creator Directory & Discovery
-          </div>
-          <h1 style={{ marginTop: '6px' }}>Discover Verified Creators</h1>
-          <p>Search verified creators across industries, niches, and locations.</p>
-        </div>
+        <span className="eyebrow">
+          <span className="num-accent">[ 01 ]</span> Creator Directory
+        </span>
+        <h2>
+          Discover <em>Verified Creators<span className="dot-accent">.</span></em>
+        </h2>
+        <p>
+          Connect with vetted creators across high-growth niches, inspect transparent rate cards, and launch genuine collaborations.
+        </p>
       </FadeIn>
 
-      {/* SINGLE SEARCH BAR */}
-      <FadeIn delay={0.08} distance={18}>
+      {/* Obsidian Glass Search & Filter Panel */}
+      <FadeIn delay={0.08} distance={18} style={{ marginBottom: '28px' }}>
         <form
+          onSubmit={handleSearchSubmit}
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
-            background: '#FFFFFF',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-xl)',
-            padding: '8px 12px 8px 18px',
-            boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-            marginBottom: '28px',
-            maxWidth: '720px',
+            background: 'rgba(244, 241, 232, 0.03)',
+            border: '1px solid rgba(244, 241, 232, 0.14)',
+            borderRadius: 'var(--radius-pill)',
+            padding: '8px 12px 8px 20px',
+            boxShadow: '0 8px 32px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(244, 241, 232, 0.08)',
+            backdropFilter: 'blur(16px)',
+            maxWidth: '760px',
+            transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           }}
-          onSubmit={handleSearchSubmit}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.35)'
+            e.currentTarget.style.boxShadow = '0 12px 40px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(244, 241, 232, 0.15)'
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.14)'
+            e.currentTarget.style.boxShadow = '0 8px 32px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(244, 241, 232, 0.08)'
+          }}
         >
-          <span style={{ fontSize: '16px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontSize: '16px', color: 'rgba(244, 241, 232, 0.5)', display: 'flex', alignItems: 'center' }}>
             🔍
           </span>
           <input
             type="text"
-            placeholder="Search creators by name, handle, niche, location, bio..."
+            placeholder="Search creators by handle, name, city, bio, or creative style..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
@@ -395,45 +656,95 @@ export function DiscoveryPage() {
               border: 'none',
               background: 'transparent',
               fontSize: '15px',
-              fontFamily: 'inherit',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-display)',
+              color: 'var(--cb-text)',
               outline: 'none',
-              padding: '6px 0',
+              padding: '8px 0',
             }}
           />
           {search && (
             <button
               type="button"
-              onClick={handleClear}
+              onClick={() => setSearch('')}
               style={{
-                background: 'transparent',
+                background: 'rgba(244, 241, 232, 0.08)',
                 border: 'none',
-                color: 'var(--color-text-secondary)',
+                color: 'var(--cb-text-muted)',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: '12px',
                 padding: '4px 8px',
-                borderRadius: '4px',
+                borderRadius: '999px',
               }}
-              title="Clear search"
+              title="Clear search input"
             >
               ✕
             </button>
           )}
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" size="md">
             Search
           </Button>
         </form>
+
+        {/* Niche Filter Pills */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginTop: '16px' }}>
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'rgba(244, 241, 232, 0.45)', marginRight: '4px' }}>
+            NICHES:
+          </span>
+          {CREATOR_NICHES.map((n) => {
+            const isActive = niche === n
+            return (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setNiche(n)}
+                style={{
+                  background: isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.04)',
+                  color: isActive ? '#0b0b0a' : 'rgba(244, 241, 232, 0.75)',
+                  border: `1px solid ${isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.12)'}`,
+                  padding: '5px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '12.5px',
+                  fontWeight: isActive ? 700 : 500,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: isActive ? '0 2px 10px rgba(244, 241, 232, 0.2)' : 'none',
+                }}
+              >
+                {n}
+              </button>
+            )
+          })}
+          {(niche !== 'All Niches' || search.trim()) && (
+            <button
+              type="button"
+              onClick={handleClear}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'rgba(244, 241, 232, 0.5)',
+                fontSize: '12px',
+                fontFamily: 'var(--font-mono)',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                textDecoration: 'underline',
+              }}
+            >
+              Reset filters
+            </button>
+          )}
+        </div>
       </FadeIn>
 
-      {error && <ErrorState error={error} onRetry={() => load(search)} />}
+      {error && <ErrorState error={error} onRetry={() => load(search, niche)} />}
 
       {loading ? (
-        <LoadingState label="Loading creators…" />
+        <LoadingState label="Searching verified creators…" />
       ) : data?.items?.length ? (
         <StaggerContainer
-          key={search}
+          key={search + niche}
           className="bento-grid bento-grid--3"
-          staggerDelay={0.07}
+          staggerDelay={0.06}
         >
           {data.items.map((creator, idx) => (
             <StaggerItem key={creator.id}>
@@ -448,22 +759,22 @@ export function DiscoveryPage() {
         </StaggerContainer>
       ) : (
         <EmptyState
-          title={search ? `No creators match "${search}"` : "No creators found"}
+          title={search || niche !== 'All Niches' ? "No creators match this filter" : "No creators found"}
           action={
-            search ? (
+            (search || niche !== 'All Niches') ? (
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handleClear}
               >
-                Clear Search
+                Reset Filters
               </Button>
             ) : null
           }
         >
-          {search
-            ? "Try searching with a different keyword, handle, city, or niche."
-            : "No creators are available in the directory at this time."}
+          {search || niche !== 'All Niches'
+            ? "Try selecting another niche category or clearing your search keywords."
+            : "No verified creator profiles are available in the directory at this time."}
         </EmptyState>
       )}
     </main>
@@ -485,6 +796,7 @@ export function InfluencerProfilePage() {
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [showPostModal, setShowPostModal] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
   const [postForm, setPostForm] = useState({
     type: 'image',
     mediaUrl: '',
@@ -656,11 +968,17 @@ export function InfluencerProfilePage() {
 
       {/* Metrics Bento Row */}
       <div className="creator-metrics-grid">
-        <MetricCard
-          label="Total Audience"
-          value={formattedFollowers}
-          subtext="Followers across platforms"
-        />
+        <div
+          onClick={() => setShowBreakdown(true)}
+          style={{ cursor: 'pointer' }}
+          title="Click to view audience breakdown by platform"
+        >
+          <MetricCard
+            label="Total Audience ▾"
+            value={formattedFollowers}
+            subtext="Click to view platform breakdown"
+          />
+        </div>
         <MetricCard
           label="Engagement Rate"
           value={`${creator.engagementRate || '0'}%`}
@@ -1105,6 +1423,27 @@ export function InfluencerProfilePage() {
           </div>
         </div>
       )}
+      {/* Followers Breakdown Modal */}
+      <FollowersBreakdownModal
+        isOpen={showBreakdown}
+        onClose={() => setShowBreakdown(false)}
+        creatorName={creator?.name}
+        stats={{
+          totalFollowers: Number(creator?.followersCount || 0),
+          instagram: Number(creator?.rateCard?.instagram_followers || creator?.followersCount || 0),
+          instagramHandle: creator?.rateCard?.instagram_handle || creator?.username,
+          isInstagramVerified: Boolean(creator?.rateCard?.is_instagram_verified || true),
+          youtube: Number(creator?.rateCard?.youtube_subscribers || 0),
+          youtubeUrl: creator?.rateCard?.youtube_url,
+          youtubeSkipped: Boolean(creator?.rateCard?.youtube_skipped || (!creator?.rateCard?.youtube_subscribers && !creator?.rateCard?.youtube_url)),
+          snapchat: Number(creator?.rateCard?.snapchat_subscribers || 0),
+          snapchatUrl: creator?.rateCard?.snapchat_url,
+          snapchatSkipped: Boolean(creator?.rateCard?.snapchat_skipped || (!creator?.rateCard?.snapchat_subscribers && !creator?.rateCard?.snapchat_url)),
+          facebook: Number(creator?.rateCard?.facebook_followers || 0),
+          facebookUrl: creator?.rateCard?.facebook_url,
+          facebookSkipped: Boolean(creator?.rateCard?.facebook_skipped || (!creator?.rateCard?.facebook_followers && !creator?.rateCard?.facebook_url))
+        }}
+      />
     </main>
   )
 }

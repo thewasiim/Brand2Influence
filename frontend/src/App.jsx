@@ -22,22 +22,22 @@ import SearchPage from './pages/social/SearchPage'
 export default function App() {
   return (
     <GlowCursor
-      color="#18181B"
+      color="#FFFFFF"
       secondaryColor="#71717A"
-      trailLength={35}
-      trailWidth={10}
+      trailLength={30}
+      trailWidth={8}
       trailTaper={0.7}
       followSpeed={0.2}
-      glowIntensity={1.4}
-      glowSpread={1.2}
-      hotspot={0.5}
-      brightness={1.0}
-      opacity={1}
-      pulseSpeed={1.2}
-      noiseStrength={0.02}
-      idleFade={false}
-      idleTimeout={2000}
-      fadeDuration={800}
+      glowIntensity={0.8}
+      glowSpread={0.9}
+      hotspot={0.4}
+      brightness={0.9}
+      opacity={0.35}
+      pulseSpeed={1.0}
+      noiseStrength={0.015}
+      idleFade={true}
+      idleTimeout={1000}
+      fadeDuration={500}
       blendMode="normal"
     >
       <Routes>

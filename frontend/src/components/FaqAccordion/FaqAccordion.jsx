@@ -51,23 +51,25 @@ export default function FaqAccordion() {
     <div
       style={{
         width: '100%',
-        maxWidth: '860px',
+        maxWidth: '920px',
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px',
       }}
     >
-      {FAQS.map((faq) => {
+      {FAQS.map((faq, idx) => {
         const isOpen = openId === faq.id
         return (
           <div
             key={faq.id}
             style={{
-              background: isOpen ? 'var(--color-surface-2)' : 'var(--color-surface-1)',
-              border: `1px solid ${isOpen ? 'var(--color-secondary)' : 'var(--color-border)'}`,
-              borderRadius: 'var(--radius-lg)',
-              transition: 'all 0.2s ease',
+              background: isOpen ? 'rgba(244, 241, 232, 0.045)' : 'rgba(244, 241, 232, 0.02)',
+              border: `1px solid ${isOpen ? 'rgba(244, 241, 232, 0.22)' : 'rgba(244, 241, 232, 0.08)'}`,
+              borderRadius: '16px',
+              backdropFilter: 'blur(16px)',
+              boxShadow: isOpen ? '0 12px 36px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(244, 241, 232, 0.08)' : 'none',
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
               overflow: 'hidden',
             }}
           >
@@ -80,32 +82,39 @@ export default function FaqAccordion() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '20px 24px',
+                padding: '22px 26px',
                 background: 'none',
                 border: 'none',
                 textAlign: 'left',
                 cursor: 'pointer',
-                color: 'var(--color-text-primary)',
+                color: 'var(--cb-text)',
               }}
             >
-              <span style={{ fontSize: '16.5px', fontWeight: 600, paddingRight: '16px' }}>
-                {faq.question}
+              <span style={{ fontSize: '16.5px', fontWeight: 600, paddingRight: '16px', display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+                <span className="num-accent" style={{ color: 'rgba(244, 241, 232, 0.45)', fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, flexShrink: 0 }}>
+                  {`[ 0${idx + 1} ]`}
+                </span>
+                <span style={{ fontFamily: 'var(--font-display)', color: 'var(--cb-text)', letterSpacing: '-0.01em' }}>
+                  {faq.question}
+                </span>
               </span>
               <span
                 style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
-                  background: isOpen ? 'var(--color-secondary)' : 'var(--color-surface-3)',
-                  color: isOpen ? '#FFFFFF' : 'var(--color-text-secondary)',
+                  background: isOpen ? '#f4f1e8' : 'rgba(244, 241, 232, 0.05)',
+                  color: isOpen ? '#0b0b0a' : 'rgba(244, 241, 232, 0.75)',
+                  border: isOpen ? 'none' : '1px solid rgba(244, 241, 232, 0.14)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '16px',
+                  fontSize: '18px',
                   fontWeight: 700,
                   flexShrink: 0,
-                  transition: 'transform 0.25s ease, background 0.2s ease',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                   transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                  boxShadow: isOpen ? '0 0 16px rgba(244, 241, 232, 0.3)' : 'none',
                 }}
               >
                 +
@@ -122,12 +131,13 @@ export default function FaqAccordion() {
                 >
                   <div
                     style={{
-                      padding: '0 24px 22px 24px',
-                      color: 'var(--color-text-secondary)',
-                      fontSize: '14.5px',
-                      lineHeight: 1.7,
-                      borderTop: '1px solid var(--color-border)',
-                      paddingTop: '16px',
+                      padding: '0 26px 24px 26px',
+                      color: 'rgba(244, 241, 232, 0.72)',
+                      fontSize: '15px',
+                      lineHeight: 1.75,
+                      borderTop: '1px solid rgba(244, 241, 232, 0.08)',
+                      paddingTop: '18px',
+                      fontFamily: 'var(--font-display)',
                     }}
                   >
                     {faq.answer}

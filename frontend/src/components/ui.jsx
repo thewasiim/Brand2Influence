@@ -26,12 +26,12 @@ export function Button({
   const variantClass = variant === 'secondary'
     ? 'ui-btn--secondary'
     : variant === 'accent'
-    ? 'ui-btn--accent'
-    : variant === 'ghost'
-    ? 'ui-btn--ghost'
-    : variant === 'outline'
-    ? 'ui-btn--outline'
-    : 'ui-btn--primary'
+      ? 'ui-btn--accent'
+      : variant === 'ghost'
+        ? 'ui-btn--ghost'
+        : variant === 'outline'
+          ? 'ui-btn--outline'
+          : 'ui-btn--primary'
 
   const sizeClass = size === 'sm' ? 'ui-btn--sm' : size === 'lg' ? 'ui-btn--lg' : 'ui-btn--md'
 
@@ -123,18 +123,18 @@ export function Card({
   const variantClass = variant === 'glass'
     ? 'bento-card--glass'
     : variant === 'elevated'
-    ? 'bento-card--elevated'
-    : variant === 'interactive'
-    ? 'bento-card--interactive'
-    : 'bento-card--default'
+      ? 'bento-card--elevated'
+      : variant === 'interactive'
+        ? 'bento-card--interactive'
+        : 'bento-card--default'
 
   const padClass = padding === 'none'
     ? 'bento-pad--none'
     : padding === 'sm'
-    ? 'bento-pad--sm'
-    : padding === 'lg'
-    ? 'bento-pad--lg'
-    : 'bento-pad--md'
+      ? 'bento-pad--sm'
+      : padding === 'lg'
+        ? 'bento-pad--lg'
+        : 'bento-pad--md'
 
   return (
     <Component className={`bento-card ${variantClass} ${padClass} ${className}`} {...props}>
@@ -155,10 +155,10 @@ export function BentoGrid({
   const colClass = cols === 2
     ? 'bento-grid--2'
     : cols === 4
-    ? 'bento-grid--4'
-    : cols === 'asymmetric' || asymmetric
-    ? 'bento-grid--asymmetric'
-    : 'bento-grid--3'
+      ? 'bento-grid--4'
+      : cols === 'asymmetric' || asymmetric
+        ? 'bento-grid--asymmetric'
+        : 'bento-grid--3'
 
   const gapClass = gap === 'sm' ? 'bento-gap--sm' : gap === 'lg' ? 'bento-gap--lg' : 'bento-gap--md'
 
@@ -180,10 +180,10 @@ export function BentoCell({
   const colSpanClass = span === 2
     ? 'bento-span--2'
     : span === 3
-    ? 'bento-span--3'
-    : span === 4
-    ? 'bento-span--4'
-    : ''
+      ? 'bento-span--3'
+      : span === 4
+        ? 'bento-span--4'
+        : ''
 
   const rowSpanClass = rowSpan === 2 ? 'bento-row--2' : ''
 
@@ -205,12 +205,12 @@ export function Badge({
   const variantClass = variant === 'secondary'
     ? 'ui-badge--secondary'
     : variant === 'accent'
-    ? 'ui-badge--accent'
-    : variant === 'outline'
-    ? 'ui-badge--outline'
-    : variant === 'neutral'
-    ? 'ui-badge--neutral'
-    : 'ui-badge--primary'
+      ? 'ui-badge--accent'
+      : variant === 'outline'
+        ? 'ui-badge--outline'
+        : variant === 'neutral'
+          ? 'ui-badge--neutral'
+          : 'ui-badge--primary'
 
   const sizeClass = size === 'sm' ? 'ui-badge--sm' : 'ui-badge--md'
 
@@ -291,26 +291,26 @@ export function Avatar({
   const sizeClass = size === 'sm'
     ? 'ui-avatar--sm'
     : size === 'lg'
-    ? 'ui-avatar--lg'
-    : size === 'xl'
-    ? 'ui-avatar--xl'
-    : 'ui-avatar--md'
+      ? 'ui-avatar--lg'
+      : size === 'xl'
+        ? 'ui-avatar--xl'
+        : 'ui-avatar--md'
 
   const toneClass = tone === 'secondary'
     ? 'ui-avatar--secondary'
     : tone === 'accent'
-    ? 'ui-avatar--accent'
-    : tone === 'neutral'
-    ? 'ui-avatar--neutral'
-    : 'ui-avatar--primary'
+      ? 'ui-avatar--accent'
+      : tone === 'neutral'
+        ? 'ui-avatar--neutral'
+        : 'ui-avatar--primary'
 
   const initials = name
     ? name
-        .split(' ')
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((w) => w[0].toUpperCase())
-        .join('')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0].toUpperCase())
+      .join('')
     : 'U'
 
   return (
@@ -381,8 +381,8 @@ export function InfluencerCard({
     ? followersCount >= 1000000
       ? `${(followersCount / 1000000).toFixed(1)}M`
       : followersCount >= 1000
-      ? `${(followersCount / 1000).toFixed(0)}K`
-      : followersCount.toLocaleString()
+        ? `${(followersCount / 1000).toFixed(0)}K`
+        : followersCount.toLocaleString()
     : followersCount || '10K+'
 
   const reelRate = rateCard?.reel || creator.budget || 2500
@@ -509,4 +509,145 @@ export { default as CountUp } from './CountUp/CountUp'
 export { default as ReviewSlider } from './ReviewSlider/ReviewSlider'
 export { default as FaqAccordion } from './FaqAccordion/FaqAccordion'
 export { default as FocusCardSlider } from './FocusCardSlider/FocusCardSlider'
+
+export function FollowersBreakdownModal({ isOpen, onClose, creatorName, stats }) {
+  if (!isOpen) return null
+
+  const ig = Number(stats?.instagram || 0)
+  const yt = Number(stats?.youtube || 0)
+  const snap = Number(stats?.snapchat || 0)
+  const fb = Number(stats?.facebook || 0)
+  const total = Number(stats?.totalFollowers || (ig + yt + snap + fb) || 1)
+
+  const platforms = [
+    {
+      name: 'Instagram',
+      icon: '📸',
+      count: ig,
+      color: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)',
+      handle: stats?.instagramHandle ? `@${stats.instagramHandle.replace('@', '')}` : '',
+      url: stats?.instagramUrl,
+      verified: stats?.isInstagramVerified,
+      skipped: false
+    },
+    {
+      name: 'YouTube',
+      icon: '▶️',
+      count: yt,
+      color: '#ff0000',
+      handle: stats?.youtubeUrl ? 'Channel Linked' : '',
+      url: stats?.youtubeUrl,
+      verified: false,
+      skipped: stats?.youtubeSkipped || (!yt && !stats?.youtubeUrl)
+    },
+    {
+      name: 'Snapchat',
+      icon: '👻',
+      count: snap,
+      color: '#fffc00',
+      handle: stats?.snapchatUrl ? 'Snap Profile' : '',
+      url: stats?.snapchatUrl,
+      verified: false,
+      skipped: stats?.snapchatSkipped || (!snap && !stats?.snapchatUrl)
+    },
+    {
+      name: 'Facebook',
+      icon: '📘',
+      count: fb,
+      color: '#1877f2',
+      handle: stats?.facebookUrl ? 'Page Linked' : '',
+      url: stats?.facebookUrl,
+      verified: false,
+      skipped: stats?.facebookSkipped || (!fb && !stats?.facebookUrl)
+    }
+  ]
+
+  return (
+    <div className="follower-breakdown-overlay" onClick={onClose}>
+      <div className="follower-breakdown-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="follower-breakdown-header">
+          <div>
+            <h3 className="follower-breakdown-title">
+              <span>📊</span> Audience Reach Breakdown
+            </h3>
+            <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+              Followers across linked channels for {creatorName || 'Creator'}
+            </span>
+          </div>
+          <button type="button" className="follower-breakdown-close" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        <div className="follower-breakdown-total-card">
+          <div className="follower-breakdown-total-num">
+            {total.toLocaleString()}
+          </div>
+          <div className="follower-breakdown-total-label">
+            Total Combined Audience
+          </div>
+        </div>
+
+        <div className="follower-platform-list">
+          {platforms.map((p, idx) => {
+            const pct = total > 0 ? Math.min(100, Math.round((p.count / total) * 100)) : 0
+            return (
+              <div key={idx} className="follower-platform-item">
+                <div className="follower-platform-top">
+                  <div className="follower-platform-brand">
+                    <span>{p.icon}</span>
+                    <span style={{ color: '#ffffff' }}>{p.name}</span>
+                    {p.verified && (
+                      <span style={{ fontSize: '11px', color: '#34d399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                        ✓ Verified
+                      </span>
+                    )}
+                    {p.handle && (
+                      <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', fontFamily: 'var(--font-mono)' }}>
+                        {p.handle}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    {p.skipped ? (
+                      <span style={{ fontSize: '12px', color: '#9ca3af', fontStyle: 'italic' }}>
+                        Not linked / Skipped
+                      </span>
+                    ) : (
+                      <span className="follower-platform-count">
+                        {p.count.toLocaleString()}{' '}
+                        <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 500 }}>
+                          ({pct}%)
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {!p.skipped && (
+                  <div className="follower-platform-bar-track">
+                    <div
+                      className="follower-platform-bar-fill"
+                      style={{
+                        width: `${pct}%`,
+                        background: p.color
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        <div style={{ marginTop: '18px', textAlign: 'center' }}>
+          <Button size="sm" variant="secondary" className="full" onClick={onClose}>
+            Close Breakdown
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 

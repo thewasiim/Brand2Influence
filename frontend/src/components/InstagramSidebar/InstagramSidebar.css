@@ -138,7 +138,7 @@
   font-family: var(--font-display, inherit);
   font-size: 1.2rem !important;
   font-weight: 800 !important;
-  color: #FFFFFF !important;
+  color: #00327A80 !important;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -628,7 +628,7 @@
   .ig-mobile-logo-title {
     font-size: 1.05rem;
     font-weight: 800;
-    color: #FFFFFF;
+    color: #00327A80;
   }
 
   .ig-mobile-role-pill {

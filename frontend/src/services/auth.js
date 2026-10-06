@@ -13,11 +13,16 @@ export const authService = {
       body: JSON.stringify(payload)
     })
   },
+  checkUsername: (username) => api(`/auth/check-username?username=${encodeURIComponent(username)}`),
   signIn: async ({ email, password }) => {
     const { data, error } = await requireSupabase().auth.signInWithPassword({ email, password })
     if (error) throw error
     return data
   },
+  resolveIdentifier: (identifier) => api('/auth/resolve-identifier', {
+    method: 'POST',
+    body: JSON.stringify({ identifier })
+  }),
   signOut: () => requireSupabase().auth.signOut(),
   forgotPassword: async email => {
     const { error } = await requireSupabase().auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/reset-password` })

@@ -188,43 +188,73 @@ export function BrandDiscoveryPage() {
 
   return (
     <main className="page">
+      {/* Signature CodeAstra Page Heading */}
       <FadeIn className="page-heading">
-        <div>
-          <div className="overline">
-            <i /> Brand Directory & Discovery
-          </div>
-          <h1 style={{ marginTop: '6px' }}>Explore Brands & Partnerships</h1>
-          <p>
-            Search verified brands offering creator sponsorships. View company profiles, budgets, and explore active campaign advertisements.
-          </p>
-        </div>
+        <span className="eyebrow">
+          <span className="num-accent">[ 02 ]</span> Brand Directory
+        </span>
+        <h2>
+          Explore <em>Brands &amp; Partnerships<span className="dot-accent">.</span></em>
+        </h2>
+        <p>
+          Search verified brands offering creator sponsorships. View company profiles, budgets, and explore active campaign advertisements.
+        </p>
       </FadeIn>
 
-      {/* SEARCH AND FILTER BAR */}
+      {/* Obsidian Glass Search & Filter Panel */}
       <FadeIn delay={0.08} distance={18}>
         <form
           className="bento-search-panel"
-          style={{ marginBottom: '28px' }}
+          style={{
+            marginBottom: '28px',
+            background: 'rgba(244, 241, 232, 0.03)',
+            border: '1px solid rgba(244, 241, 232, 0.12)',
+            borderRadius: 'var(--radius-xl)',
+            padding: '12px 16px',
+            boxShadow: '0 8px 32px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(244, 241, 232, 0.06)',
+            backdropFilter: 'blur(16px)',
+          }}
           onSubmit={handleSearchSubmit}
         >
           <div className="search-field-item" style={{ flex: 1.5 }}>
-            <label>Brand Name or Keyword</label>
+            <label style={{ color: 'rgba(244, 241, 232, 0.45)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>
+              Brand Name or Keyword
+            </label>
             <input
               placeholder="Search by brand name, product, niche..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              style={{
+                background: 'transparent',
+                color: 'var(--cb-text)',
+                border: 'none',
+                fontFamily: 'var(--font-display)',
+                fontSize: '14px',
+                outline: 'none',
+              }}
             />
           </div>
 
           <div className="search-field-item">
-            <label>Industry / Category</label>
+            <label style={{ color: 'rgba(244, 241, 232, 0.45)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>
+              Industry / Category
+            </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               aria-label="Category filter"
+              style={{
+                background: 'transparent',
+                color: 'var(--cb-text)',
+                border: 'none',
+                fontFamily: 'var(--font-display)',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
               {BRAND_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
+                <option key={cat} value={cat} style={{ background: '#121211', color: '#f4f1e8' }}>
                   {cat}
                 </option>
               ))}
@@ -232,42 +262,68 @@ export function BrandDiscoveryPage() {
           </div>
 
           <div className="search-field-item">
-            <label>Headquarters / City</label>
+            <label style={{ color: 'rgba(244, 241, 232, 0.45)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em' }}>
+              Headquarters / City
+            </label>
             <select
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               aria-label="Location filter"
+              style={{
+                background: 'transparent',
+                color: 'var(--cb-text)',
+                border: 'none',
+                fontFamily: 'var(--font-display)',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
               {BRAND_LOCATIONS.map((loc) => (
-                <option key={loc} value={loc}>
+                <option key={loc} value={loc} style={{ background: '#121211', color: '#f4f1e8' }}>
                   {loc}
                 </option>
               ))}
             </select>
           </div>
 
-          <Button type="submit" variant="primary">
+          <Button type="submit" variant="primary" style={{ height: '44px' }}>
             Search Brands
           </Button>
         </form>
       </FadeIn>
 
       {/* QUICK CATEGORY CHIPS */}
-      <FadeIn delay={0.12} distance={14} style={{ marginBottom: '24px' }}>
+      <FadeIn delay={0.12} distance={14} style={{ marginBottom: '28px' }}>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', marginRight: '4px' }}>
-            Popular:
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', color: 'rgba(244, 241, 232, 0.45)', marginRight: '4px' }}>
+            CATEGORIES:
           </span>
-          {BRAND_CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              className={`chip ${category === cat ? 'chip--active' : ''}`}
-              onClick={() => setCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
+          {BRAND_CATEGORIES.map((cat) => {
+            const isActive = category === cat
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                style={{
+                  background: isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.04)',
+                  color: isActive ? '#0b0b0a' : 'rgba(244, 241, 232, 0.75)',
+                  border: `1px solid ${isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.12)'}`,
+                  padding: '5px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '12.5px',
+                  fontWeight: isActive ? 700 : 500,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: isActive ? '0 2px 10px rgba(244, 241, 232, 0.2)' : 'none',
+                }}
+              >
+                {cat}
+              </button>
+            )
+          })}
           {(category !== 'All Categories' || location !== 'All locations' || search.trim()) && (
             <button
               type="button"
@@ -279,8 +335,9 @@ export function BrandDiscoveryPage() {
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--color-secondary)',
+                color: 'rgba(244, 241, 232, 0.5)',
                 fontSize: '12px',
+                fontFamily: 'var(--font-mono)',
                 cursor: 'pointer',
                 padding: '4px 8px',
                 textDecoration: 'underline',
@@ -304,38 +361,66 @@ export function BrandDiscoveryPage() {
         >
           {data.map((brand) => (
             <StaggerItem key={brand.id}>
-              <Card
-                variant="elevated"
-                hover
-                padding="lg"
+              <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  borderRadius: 'var(--radius-xl)',
+                  borderRadius: '20px',
                   height: '100%',
                   cursor: 'pointer',
+                  padding: '24px',
+                  background: 'rgba(244, 241, 232, 0.03)',
+                  border: '1px solid rgba(244, 241, 232, 0.12)',
+                  backdropFilter: 'blur(16px)',
+                  boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06)',
                   transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(-3px)'
+                  e.currentTarget.style.boxShadow = '0 16px 40px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.12)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06)'
                 }}
                 onClick={() => navigate(`/brands/${brand.id}`)}
               >
                 <div>
                   {/* Brand Top Header */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                       <Avatar
                         name={brand.businessName}
                         size="lg"
                         tone="secondary"
                       />
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--cb-text)', margin: 0, fontFamily: 'var(--font-display)' }}>
                             {brand.businessName}
                           </h3>
-                          <Badge variant="accent" size="sm">✓ Verified</Badge>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px',
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              background: 'rgba(244, 241, 232, 0.08)',
+                              color: '#f4f1e8',
+                              border: '1px solid rgba(244, 241, 232, 0.2)',
+                              fontFamily: 'var(--font-mono)',
+                            }}
+                          >
+                            ✓ Verified
+                          </span>
                         </div>
-                        <span style={{ fontSize: '12.5px', color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)' }}>
+                        <span style={{ fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.55)', fontFamily: 'var(--font-mono)', marginTop: '3px', display: 'block' }}>
                           {brand.businessType}
                         </span>
                       </div>
@@ -343,38 +428,70 @@ export function BrandDiscoveryPage() {
                   </div>
 
                   {/* Brand Location & Budget Row */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', background: 'var(--color-surface-2)', padding: '10px 12px', borderRadius: 'var(--radius-md)', marginBottom: '14px', border: '1px solid var(--color-border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                      <span style={{ color: 'var(--color-text-secondary)' }}>📍 Headquarters:</span>
-                      <b>{brand.location}</b>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      background: 'rgba(244, 241, 232, 0.025)',
+                      padding: '12px 14px',
+                      borderRadius: '12px',
+                      marginBottom: '16px',
+                      border: '1px solid rgba(244, 241, 232, 0.08)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
+                      <span style={{ color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)' }}>📍 Headquarters</span>
+                      <b style={{ color: 'var(--cb-text)', fontWeight: 600 }}>{brand.location}</b>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-                      <span style={{ color: 'var(--color-text-secondary)' }}>💰 Collab Budget:</span>
-                      <b style={{ color: 'var(--color-secondary)' }}>{brand.budgetRange}</b>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12.5px' }}>
+                      <span style={{ color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)' }}>💰 Collab Budget</span>
+                      <b style={{ color: '#f4f1e8', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>{brand.budgetRange}</b>
                     </div>
                   </div>
 
                   {brand.description && (
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    <p style={{ fontSize: '13.5px', color: 'rgba(244, 241, 232, 0.65)', lineHeight: 1.6, marginBottom: '20px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {brand.description}
                     </p>
                   )}
                 </div>
 
                 {/* Footer Action */}
-                <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: brand.activeCampaignsCount > 0 ? 'var(--color-secondary)' : 'var(--color-text-tertiary)' }}>
+                <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(244, 241, 232, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: brand.activeCampaignsCount > 0 ? '#f4f1e8' : 'rgba(244, 241, 232, 0.45)' }}>
                     {brand.activeCampaignsCount > 0 ? `📢 ${brand.activeCampaignsCount} Active Campaign${brand.activeCampaignsCount > 1 ? 's' : ''}` : '✨ Open to Pitches'}
                   </span>
                   <Link
                     to={`/brands/${brand.id}`}
-                    className="ui-button ui-btn--primary ui-btn--sm"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '7px 16px',
+                      borderRadius: '9999px',
+                      background: '#f4f1e8',
+                      color: '#0b0b0a',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-display)',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease',
+                    }}
                     onClick={(e) => e.stopPropagation()}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#ffffff'
+                      e.currentTarget.style.transform = 'translateX(2px)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#f4f1e8'
+                      e.currentTarget.style.transform = 'translateX(0)'
+                    }}
                   >
-                    View Brand & Campaigns →
+                    View Brand →
                   </Link>
                 </div>
-              </Card>
+              </div>
             </StaggerItem>
           ))}
         </StaggerContainer>

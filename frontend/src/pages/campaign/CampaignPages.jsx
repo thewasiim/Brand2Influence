@@ -75,64 +75,135 @@ export function CampaignDiscoveryPage() {
 
   return (
     <main className="page">
+      {/* Signature CodeAstra Page Heading */}
       <FadeIn className="page-heading">
-        <div>
-          <div className="overline">
-            <i /> Brand Advertisements & Deals
-          </div>
-          <h1 style={{ marginTop: '6px' }}>Open Sponsorship Opportunities</h1>
-          <p>
-            Explore verified brand campaign briefs. Connect directly with brands and pitch your collaboration deliverables.
-          </p>
-        </div>
-        {profile?.role === 'brand' && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <Link to="/brand/campaigns" className="ui-button ui-btn--primary">
-              + Post New Ad Brief
-            </Link>
+            <span className="eyebrow">
+              <span className="num-accent">[ 03 ]</span> Open Briefs &amp; Deals
+            </span>
+            <h2>
+              Active <em>Sponsorship Deals<span className="dot-accent">.</span></em>
+            </h2>
+            <p>
+              Explore verified brand campaign briefs. Pitch directly to decision-makers with upfront deliverables and transparent budgets.
+            </p>
           </div>
-        )}
+          {profile?.role === 'brand' && (
+            <div style={{ marginTop: '12px' }}>
+              <Link
+                to="/brand/campaigns"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 22px',
+                  borderRadius: '9999px',
+                  background: '#f4f1e8',
+                  color: '#0b0b0a',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  fontFamily: 'var(--font-display)',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                + Post New Ad Brief
+              </Link>
+            </div>
+          )}
+        </div>
       </FadeIn>
 
       {/* SEARCH AND CLEAN FILTERS BUTTON */}
       <FadeIn delay={0.08} distance={16} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '28px' }}>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', maxWidth: '640px' }}>
-          <div style={{ flex: 1, minWidth: '240px' }}>
-            <Input
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', maxWidth: '760px' }}>
+          <div
+            style={{
+              flex: 1,
+              minWidth: '260px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.14)',
+              borderRadius: 'var(--radius-pill)',
+              padding: '8px 16px',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 8px 32px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(244, 241, 232, 0.06)',
+            }}
+          >
+            <span style={{ fontSize: '15px', color: 'rgba(244, 241, 232, 0.45)' }}>🔍</span>
+            <input
               placeholder="Search campaigns by keyword, brand, or requirements..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search campaigns"
+              style={{
+                flex: 1,
+                border: 'none',
+                background: 'transparent',
+                fontSize: '14.5px',
+                fontFamily: 'var(--font-display)',
+                color: 'var(--cb-text)',
+                outline: 'none',
+                padding: '4px 0',
+              }}
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                style={{
+                  background: 'rgba(244, 241, 232, 0.08)',
+                  border: 'none',
+                  color: 'rgba(244, 241, 232, 0.6)',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  padding: '2px 7px',
+                  borderRadius: '999px',
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
 
           <button
             type="button"
-            className="ui-button ui-btn--secondary"
             onClick={openSheet}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
               height: '42px',
-              padding: '0 16px',
-              borderRadius: 'var(--radius-md)',
-              fontWeight: 500,
+              padding: '0 18px',
+              borderRadius: '9999px',
+              fontWeight: 600,
+              fontSize: '13px',
+              fontFamily: 'var(--font-display)',
+              background: activeCount > 0 ? '#f4f1e8' : 'rgba(244, 241, 232, 0.04)',
+              color: activeCount > 0 ? '#0b0b0a' : 'rgba(244, 241, 232, 0.85)',
+              border: `1px solid ${activeCount > 0 ? '#f4f1e8' : 'rgba(244, 241, 232, 0.14)'}`,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
             <span>Filters</span>
             {activeCount > 0 && (
               <span
                 style={{
-                  background: 'var(--color-primary)',
-                  color: '#FFFFFF',
+                  background: '#0b0b0a',
+                  color: '#f4f1e8',
                   fontSize: '11px',
                   fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
                   borderRadius: '10px',
-                  padding: '2px 7px',
+                  padding: '1px 7px',
                   lineHeight: 1,
                 }}
               >
@@ -144,7 +215,7 @@ export function CampaignDiscoveryPage() {
 
         {/* ACTIVE REMOVABLE CHIPS */}
         {activeCount > 0 && (
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginTop: '2px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginTop: '4px' }}>
             {niche !== 'All Niches' && (
               <button
                 type="button"
@@ -153,19 +224,20 @@ export function CampaignDiscoveryPage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: 'var(--color-surface-3)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-primary)',
-                  padding: '5px 12px',
-                  borderRadius: '20px',
+                  background: 'rgba(244, 241, 232, 0.06)',
+                  border: '1px solid rgba(244, 241, 232, 0.2)',
+                  color: '#f4f1e8',
+                  padding: '5px 14px',
+                  borderRadius: '9999px',
                   fontSize: '12px',
-                  fontWeight: 500,
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-mono)',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
               >
                 <span>{niche}</span>
-                <span style={{ color: 'var(--color-text-tertiary)', fontWeight: 700 }}>✕</span>
+                <span style={{ color: 'rgba(244, 241, 232, 0.45)', fontWeight: 700 }}>✕</span>
               </button>
             )}
 
@@ -177,19 +249,20 @@ export function CampaignDiscoveryPage() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: 'var(--color-surface-3)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-primary)',
-                  padding: '5px 12px',
-                  borderRadius: '20px',
+                  background: 'rgba(244, 241, 232, 0.06)',
+                  border: '1px solid rgba(244, 241, 232, 0.2)',
+                  color: '#f4f1e8',
+                  padding: '5px 14px',
+                  borderRadius: '9999px',
                   fontSize: '12px',
-                  fontWeight: 500,
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-mono)',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
               >
                 <span>{platform}</span>
-                <span style={{ color: 'var(--color-text-tertiary)', fontWeight: 700 }}>✕</span>
+                <span style={{ color: 'rgba(244, 241, 232, 0.45)', fontWeight: 700 }}>✕</span>
               </button>
             )}
 
@@ -202,8 +275,9 @@ export function CampaignDiscoveryPage() {
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--color-text-tertiary)',
+                color: 'rgba(244, 241, 232, 0.5)',
                 fontSize: '12px',
+                fontFamily: 'var(--font-mono)',
                 cursor: 'pointer',
                 padding: '4px 8px',
                 textDecoration: 'underline',
@@ -225,47 +299,49 @@ export function CampaignDiscoveryPage() {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
-            background: 'rgba(0, 0, 0, 0.65)',
-            backdropFilter: 'blur(6px)',
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
           }}
           onClick={() => setSheetOpen(false)}
         >
           <div
             style={{
-              background: 'var(--color-surface-1)',
-              borderTop: '1px solid var(--color-border)',
+              background: '#121211',
+              borderTop: '1px solid rgba(244, 241, 232, 0.16)',
               borderTopLeftRadius: '24px',
               borderTopRightRadius: '24px',
-              padding: '24px 20px 32px',
+              padding: '28px 24px 36px',
               maxHeight: '85vh',
               overflowY: 'auto',
-              maxWidth: '560px',
+              maxWidth: '580px',
               margin: '0 auto',
               width: '100%',
-              boxShadow: 'var(--shadow-xl)',
+              boxShadow: '0 -20px 50px rgba(0, 0, 0, 0.9)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag indicator */}
             <div
               style={{
-                width: '36px',
+                width: '40px',
                 height: '4px',
-                background: 'var(--color-border)',
+                background: 'rgba(244, 241, 232, 0.18)',
                 borderRadius: '2px',
-                margin: '0 auto 16px',
+                margin: '0 auto 20px',
               }}
             />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Filter Sponsorships</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ fontSize: '19px', fontWeight: 700, color: 'var(--cb-text)', margin: 0, fontFamily: 'var(--font-display)' }}>
+                Filter Sponsorships
+              </h3>
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--color-text-secondary)',
+                  color: 'rgba(244, 241, 232, 0.6)',
                   fontSize: '20px',
                   cursor: 'pointer',
                   padding: '4px 8px',
@@ -276,48 +352,87 @@ export function CampaignDiscoveryPage() {
             </div>
 
             {/* Niche Section */}
-            <div style={{ marginBottom: '22px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'rgba(244, 241, 232, 0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', marginBottom: '12px' }}>
                 Category / Niche
               </label>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {NICHES.map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={`chip ${tempNiche === n ? 'chip--active' : ''}`}
-                    onClick={() => setTempNiche(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
+                {NICHES.map((n) => {
+                  const isActive = tempNiche === n
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setTempNiche(n)}
+                      style={{
+                        background: isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.04)',
+                        color: isActive ? '#0b0b0a' : 'rgba(244, 241, 232, 0.75)',
+                        border: `1px solid ${isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.12)'}`,
+                        padding: '6px 14px',
+                        borderRadius: '9999px',
+                        fontSize: '12.5px',
+                        fontWeight: isActive ? 700 : 500,
+                        fontFamily: 'var(--font-display)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {n}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
             {/* Platform Section */}
-            <div style={{ marginBottom: '28px' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+            <div style={{ marginBottom: '32px' }}>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'rgba(244, 241, 232, 0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', marginBottom: '12px' }}>
                 Platform
               </label>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {PLATFORMS.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    className={`chip ${tempPlatform === p ? 'chip--active' : ''}`}
-                    onClick={() => setTempPlatform(p)}
-                  >
-                    {p}
-                  </button>
-                ))}
+                {PLATFORMS.map((p) => {
+                  const isActive = tempPlatform === p
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setTempPlatform(p)}
+                      style={{
+                        background: isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.04)',
+                        color: isActive ? '#0b0b0a' : 'rgba(244, 241, 232, 0.75)',
+                        border: `1px solid ${isActive ? '#f4f1e8' : 'rgba(244, 241, 232, 0.12)'}`,
+                        padding: '6px 14px',
+                        borderRadius: '9999px',
+                        fontSize: '12.5px',
+                        fontWeight: isActive ? 700 : 500,
+                        fontFamily: 'var(--font-display)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {p}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
             {/* Footer Actions */}
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <Button
-                variant="secondary"
-                style={{ flex: 1 }}
+              <button
+                type="button"
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '9999px',
+                  background: 'rgba(244, 241, 232, 0.05)',
+                  border: '1px solid rgba(244, 241, 232, 0.14)',
+                  color: 'rgba(244, 241, 232, 0.8)',
+                  fontSize: '13.5px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                }}
                 onClick={() => {
                   setTempNiche('All Niches')
                   setTempPlatform('All Platforms')
@@ -327,10 +442,22 @@ export function CampaignDiscoveryPage() {
                 }}
               >
                 Clear all
-              </Button>
-              <Button
-                variant="primary"
-                style={{ flex: 2 }}
+              </button>
+              <button
+                type="button"
+                style={{
+                  flex: 2,
+                  padding: '12px 20px',
+                  borderRadius: '9999px',
+                  background: '#f4f1e8',
+                  border: '1px solid #f4f1e8',
+                  color: '#0b0b0a',
+                  fontSize: '13.5px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(244, 241, 232, 0.2)',
+                }}
                 onClick={() => {
                   setNiche(tempNiche)
                   setPlatform(tempPlatform)
@@ -338,12 +465,11 @@ export function CampaignDiscoveryPage() {
                 }}
               >
                 Apply Filters
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
-
 
       {error && <ErrorState error={error} />}
 
@@ -357,35 +483,89 @@ export function CampaignDiscoveryPage() {
         <StaggerContainer
           key={search + niche + platform}
           className="campaign-grid"
-          style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }}
           staggerDelay={0.07}
         >
           {items.map((item) => (
             <StaggerItem key={item.id}>
-              <Card variant="elevated" hover padding="lg" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: 'var(--radius-xl)' }}>
-
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  borderRadius: '20px',
+                  padding: '24px',
+                  background: 'rgba(244, 241, 232, 0.03)',
+                  border: '1px solid rgba(244, 241, 232, 0.12)',
+                  backdropFilter: 'blur(16px)',
+                  boxShadow: '0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06)',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(-3px)'
+                  e.currentTarget.style.boxShadow = '0 16px 40px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.12)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06)'
+                }}
+                onClick={() => navigate(`/campaigns/${item.id}`)}
+              >
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      <Badge variant="primary">{item.platform}</Badge>
-                      <Badge variant="accent">{item.niche}</Badge>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '3px 10px',
+                          borderRadius: '999px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          background: 'rgba(244, 241, 232, 0.08)',
+                          color: '#f4f1e8',
+                          border: '1px solid rgba(244, 241, 232, 0.2)',
+                          fontFamily: 'var(--font-mono)',
+                        }}
+                      >
+                        {item.platform}
+                      </span>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '3px 10px',
+                          borderRadius: '999px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          background: 'rgba(244, 241, 232, 0.03)',
+                          color: 'rgba(244, 241, 232, 0.7)',
+                          border: '1px solid rgba(244, 241, 232, 0.1)',
+                          fontFamily: 'var(--font-display)',
+                        }}
+                      >
+                        {item.niche}
+                      </span>
                     </div>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-secondary)' }}>
-                      {item.budget_range}
+                    <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#f4f1e8', fontFamily: 'var(--font-mono)' }}>
+                      💰 {item.budget_range}
                     </span>
                   </div>
 
-                  <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '6px' }}>
+                  <h3 style={{ fontSize: '19px', fontWeight: 700, marginBottom: '6px', color: 'var(--cb-text)', fontFamily: 'var(--font-display)' }}>
                     {item.title}
                   </h3>
 
-                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <b>{item.brand?.businessName || item.brand?.name || 'Brand'}</b>
+                  <div style={{ fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.6)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)' }}>
+                    <b style={{ color: 'var(--cb-text)', fontWeight: 600 }}>{item.brand?.businessName || item.brand?.name || 'Brand'}</b>
                     <span>•</span>
-                    <span>{item.location}</span>
+                    <span>📍 {item.location}</span>
                   </div>
 
-                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <p style={{ fontSize: '13.5px', color: 'rgba(244, 241, 232, 0.65)', lineHeight: 1.6, marginBottom: '18px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {item.description}
                   </p>
 
@@ -397,17 +577,18 @@ export function CampaignDiscoveryPage() {
                           : [])
                     if (delivList.length === 0) return null
                     return (
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px' }}>
                         {delivList.map((d, i) => (
                           <span
                             key={i}
                             style={{
                               fontSize: '11px',
-                              background: 'var(--color-surface-3)',
-                              border: '1px solid var(--color-border)',
-                              padding: '3px 8px',
-                              borderRadius: 'var(--radius-sm)',
-                              color: 'var(--color-neutral-subtle)',
+                              background: 'rgba(244, 241, 232, 0.03)',
+                              border: '1px solid rgba(244, 241, 232, 0.1)',
+                              padding: '3px 10px',
+                              borderRadius: '999px',
+                              color: 'rgba(244, 241, 232, 0.85)',
+                              fontFamily: 'var(--font-mono)',
                             }}
                           >
                             ✓ {d}
@@ -418,15 +599,40 @@ export function CampaignDiscoveryPage() {
                   })()}
                 </div>
 
-                <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(244, 241, 232, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11.5px', color: 'rgba(244, 241, 232, 0.45)', fontFamily: 'var(--font-mono)' }}>
                     Min Followers: {item.target_followers_min ? Number(item.target_followers_min).toLocaleString() : 'Any'}
                   </span>
-                  <Link to={`/campaigns/${item.id}`} className="ui-button ui-btn--primary ui-btn--sm">
-                    View Brief & Contact →
+                  <Link
+                    to={`/campaigns/${item.id}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '7px 16px',
+                      borderRadius: '9999px',
+                      background: '#f4f1e8',
+                      color: '#0b0b0a',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      fontFamily: 'var(--font-display)',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#ffffff'
+                      e.currentTarget.style.transform = 'translateX(2px)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#f4f1e8'
+                      e.currentTarget.style.transform = 'translateX(0)'
+                    }}
+                  >
+                    View Brief &amp; Contact →
                   </Link>
                 </div>
-              </Card>
+              </div>
             </StaggerItem>
           ))}
         </StaggerContainer>

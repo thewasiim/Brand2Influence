@@ -324,30 +324,31 @@
 }
 
 /* ==========================================================================
-   Brand Showcase Card (Clean, Minimalist & Modern Noir)
+   Brand Showcase Card (CodeAstra Obsidian & Warm Cream)
    ========================================================================== */
 .brand-showcase-card {
   width: 100%;
-  background: #FFFFFF;
-  border: 1px solid var(--color-border);
+  background: rgba(244, 241, 232, 0.03);
+  border: 1px solid rgba(244, 241, 232, 0.12);
   border-radius: 24px;
   padding: 28px 24px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 16px -4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   box-sizing: border-box;
   text-align: left;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(16px);
 }
 
 .brand-showcase-card:hover {
   transform: translateY(-4px);
-  border-color: var(--color-primary);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--color-primary);
+  border-color: rgba(244, 241, 232, 0.3);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12);
 }
 
 .brand-card-identity {
@@ -364,9 +365,9 @@
   height: 84px;
   border-radius: 22px;
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(244, 241, 232, 0.15);
+  background: rgba(244, 241, 232, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -398,7 +399,8 @@
   font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-text-primary);
+  color: var(--cb-text);
+  font-family: var(--font-display);
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -413,8 +415,8 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #09090B;
-  color: #FFFFFF;
+  background: #f4f1e8;
+  color: #0b0b0a;
   font-size: 9px;
   font-weight: 800;
   flex-shrink: 0;
@@ -422,7 +424,8 @@
 
 .brand-location-text {
   font-size: 12.5px;
-  color: var(--color-text-secondary);
+  color: rgba(244, 241, 232, 0.55);
+  font-family: var(--font-mono);
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -430,13 +433,13 @@
 }
 
 .brand-location-text svg {
-  color: var(--color-text-tertiary);
+  color: rgba(244, 241, 232, 0.4);
   flex-shrink: 0;
 }
 
 .brand-card-price-box {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
+  background: rgba(244, 241, 232, 0.025);
+  border: 1px solid rgba(244, 241, 232, 0.08);
   border-radius: 12px;
   padding: 10px 14px;
   display: flex;
@@ -448,25 +451,26 @@
 }
 
 .brand-price-label {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: rgba(244, 241, 232, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  font-family: var(--font-mono, monospace);
 }
 
 .brand-price-value {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: #f4f1e8;
+  font-family: var(--font-mono);
   letter-spacing: -0.01em;
 }
 
 .brand-card-footer {
   width: 100%;
   padding-top: 12px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(244, 241, 232, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -475,7 +479,7 @@
 .brand-view-link {
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: rgba(244, 241, 232, 0.85);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -483,7 +487,7 @@
 }
 
 .brand-showcase-card:hover .brand-view-link {
-  color: #09090B;
+  color: #f4f1e8;
   gap: 10px;
 }
 
@@ -494,9 +498,8 @@
   width: 100%;
   height: 100%;
   min-height: 290px;
-  background: var(--color-surface-1);
-  background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
-  border: 1px solid var(--color-border);
+  background: rgba(244, 241, 232, 0.03);
+  border: 1px solid rgba(244, 241, 232, 0.12);
   border-radius: var(--radius-xl);
   padding: 22px 20px;
   display: flex;
@@ -504,15 +507,16 @@
   justify-content: space-between;
   cursor: pointer;
   box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 16px -4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
+  backdrop-filter: blur(16px);
 }
 
 .campaign-showcase-card:hover {
   transform: translateY(-4px);
-  border-color: var(--color-primary);
-  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--color-primary);
+  border-color: rgba(244, 241, 232, 0.3);
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12);
 }
 
 .campaign-card-header {
@@ -534,8 +538,8 @@
   height: 40px;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  background: #FFFFFF;
+  border: 1px solid rgba(244, 241, 232, 0.15);
+  background: rgba(244, 241, 232, 0.04);
   flex-shrink: 0;
 }
 
@@ -548,14 +552,15 @@
 .campaign-brand-name {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--cb-text);
   margin: 0;
   line-height: 1.2;
 }
 
 .campaign-location-text {
   font-size: 11.5px;
-  color: var(--color-text-secondary);
+  color: rgba(244, 241, 232, 0.5);
+  font-family: var(--font-mono);
   display: block;
   margin-top: 2px;
 }
@@ -574,7 +579,8 @@
 .campaign-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--cb-text);
+  font-family: var(--font-display);
   line-height: 1.35;
   margin: 0 0 8px 0;
   display: -webkit-box;
@@ -585,7 +591,7 @@
 
 .campaign-desc {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: rgba(244, 241, 232, 0.65);
   line-height: 1.5;
   margin: 0 0 12px 0;
   display: -webkit-box;
@@ -603,17 +609,18 @@
 .campaign-deliverable-chip {
   font-size: 11px;
   font-weight: 500;
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
+  background: rgba(244, 241, 232, 0.04);
+  border: 1px solid rgba(244, 241, 232, 0.1);
   padding: 3px 8px;
   border-radius: 6px;
-  color: var(--color-text-primary);
+  color: rgba(244, 241, 232, 0.85);
+  font-family: var(--font-mono);
 }
 
 .campaign-card-footer {
   margin-top: auto;
   padding-top: 14px;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(244, 241, 232, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -626,17 +633,18 @@
 }
 
 .campaign-budget-label {
-  font-size: 10.5px;
-  font-family: var(--font-mono);
-  color: var(--color-text-tertiary);
+  font-size: 10px;
+  font-family: var(--font-mono, monospace);
+  color: rgba(244, 241, 232, 0.45);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 .campaign-budget-val {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: #f4f1e8;
+  font-family: var(--font-mono);
 }
 
 .campaign-action-btn {

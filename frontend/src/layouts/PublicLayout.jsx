@@ -4,13 +4,14 @@ import { useAuth } from '../context/AuthContext'
 import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import StaggeredMenu from '../components/StaggeredMenu/StaggeredMenu'
 
+// Exactly matches Desktop Navbar items (Creators, Brands, Campaigns, Workflow, Reviews, FAQ)
 const menuItems = [
-  { label: 'Search Influencers', ariaLabel: 'Find and browse creator profiles', link: '/influencers' },
-  { label: 'Search Brands', ariaLabel: 'Find and explore brand profiles', link: '/brands' },
-  { label: 'Brand Campaigns', ariaLabel: 'View open sponsorship briefs', link: '/campaigns' },
-  { label: 'How It Works', ariaLabel: 'Learn how the platform works', link: '/how-it-works' },
-  { label: 'For Brands', ariaLabel: 'Info for brands', link: '/for-brands' },
-  { label: 'For Influencers', ariaLabel: 'Info for influencers', link: '/for-influencers' }
+  { label: 'Creators', ariaLabel: 'Find and browse creator profiles', link: '/influencers' },
+  { label: 'Brands', ariaLabel: 'Find and explore brand profiles', link: '/brands' },
+  { label: 'Campaigns', ariaLabel: 'View open sponsorship briefs', link: '/campaigns' },
+  { label: 'Workflow', ariaLabel: 'Learn how the platform works', link: '/#how-it-works' },
+  { label: 'Reviews', ariaLabel: 'Read verified creator and brand reviews', link: '/#reviews' },
+  { label: 'FAQ', ariaLabel: 'Frequently asked questions', link: '/#faq' }
 ]
 
 const socialItems = [
@@ -24,57 +25,83 @@ export function PublicLayout() {
 
   return (
     <>
-      <header className="navbar">
-        <Link to={user ? "/?view=site" : "/"} className="brand">
-          Brand2Influence
-        </Link>
+      <div className="site-pill-wrap">
+        <header className="navbar site-pill">
+          <Link to={user ? "/?view=site" : "/"} className="brand">
+            <span className="brand-dot" />
+            <span className="brand-text">Brand2Influence</span>
+          </Link>
 
-        <div className="nav-actions">
-          {user && (
-            <Link
-              to={profile?.role === 'admin' ? '/admin' : '/dashboard'}
-              className="ui-button ui-button-sm ui-button-primary"
-              style={{
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                borderRadius: '999px',
-                padding: '6px 14px',
-                fontSize: '13px',
-                fontWeight: 600,
-                background: '#FFFFFF',
-                color: '#0A0A0A',
-              }}
-            >
-              <span>Dashboard</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </Link>
-          )}
-          <UserAvatarMenu />
-          <StaggeredMenu
-            items={menuItems}
-            socialItems={socialItems}
-            displaySocials={true}
-            displayItemNumbering={true}
-            colors={['#EEF2FF', '#DBEAFE', '#FFFFFF']}
-            panelBg="#FFFFFF"
-            textColor="#1D4ED8"
-            accentColor="#2563EB"
-            menuButtonColor="#1D4ED8"
-            openMenuButtonColor="#1D4ED8"
-            loginLabel={user ? 'Dashboard' : 'Log In'}
-            loginLink={user ? '/dashboard' : '/login'}
-            ctaLabel={user ? 'My Profile' : 'Get Started'}
-            ctaLink={user ? '/profile' : '/signup'}
-            onMenuOpen={() => console.log('Menu opened')}
-            onMenuClose={() => console.log('Menu closed')}
-          />
-        </div>
-      </header>
+          {/* Desktop Navigation Links */}
+          <nav className="nav-desktop-links" aria-label="Main Navigation">
+            <NavLink to="/influencers" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              Creators
+            </NavLink>
+            <NavLink to="/brands" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              Brands
+            </NavLink>
+            <NavLink to="/campaigns" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              Campaigns
+            </NavLink>
+            <a href="/#how-it-works" className="nav-link">
+              Workflow
+            </a>
+            <a href="/#reviews" className="nav-link">
+              Reviews
+            </a>
+            <a href="/#faq" className="nav-link">
+              FAQ
+            </a>
+          </nav>
+
+          <div className="nav-actions">
+            {user ? (
+              <>
+                <Link
+                  to={profile?.role === 'admin' ? '/admin' : '/dashboard'}
+                  className="nav-dashboard-pill"
+                >
+                  <span>Dashboard</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </Link>
+                <UserAvatarMenu />
+              </>
+            ) : (
+              <div className="desktop-auth-actions">
+                <Link to="/login" className="nav-login-link">
+                  Sign In
+                </Link>
+                <Link to="/signup" className="nav-signup-button">
+                  Get Started →
+                </Link>
+              </div>
+            )}
+
+            {/* Strictly mobile-only drawer menu — matches exact desktop items & Obsidian/Warm Cream design */}
+            <div className="mobile-only-nav">
+              <StaggeredMenu
+                items={menuItems}
+                socialItems={socialItems}
+                displaySocials={true}
+                displayItemNumbering={true}
+                colors={['#181816', '#121211', '#0b0b0a']}
+                panelBg="#0b0b0a"
+                textColor="#f4f1e8"
+                accentColor="#f4f1e8"
+                menuButtonColor="#f4f1e8"
+                openMenuButtonColor="#0b0b0a"
+                loginLabel={user ? 'Dashboard' : 'Sign In'}
+                loginLink={user ? (profile?.role === 'admin' ? '/admin' : '/dashboard') : '/login'}
+                ctaLabel={user ? 'My Profile' : 'Get Started →'}
+                ctaLink={user ? '/profile' : '/signup'}
+              />
+            </div>
+          </div>
+        </header>
+      </div>
       <Outlet />
     </>
   )

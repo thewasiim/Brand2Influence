@@ -13,4 +13,6 @@ export const influencersService = {
   get: id => api(`/influencers/${id}`),
   saveProfile: payload => api('/influencers/profile', { method: 'POST', body: JSON.stringify(payload) }),
   addPost: payload => api('/influencers/posts', { method: 'POST', body: JSON.stringify(payload) }),
+  sendSocialOtp: payload => api('/influencers/social-otp/send', { method: 'POST', body: JSON.stringify(payload) }),
+  verifySocialOtp: payload => api('/influencers/social-otp/verify', { method: 'POST', body: JSON.stringify(payload) }),
 }

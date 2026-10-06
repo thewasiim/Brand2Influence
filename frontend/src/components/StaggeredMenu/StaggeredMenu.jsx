@@ -349,6 +349,24 @@ export const StaggeredMenu = ({
     closeMenu();
 
     if (item.link) {
+      if (item.link.startsWith('/#')) {
+        e.preventDefault();
+        const hashId = item.link.slice(2);
+        if (location.pathname === '/') {
+          const targetEl = document.getElementById(hashId);
+          if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth' });
+          }
+        } else {
+          navigate(item.link);
+          setTimeout(() => {
+            const targetEl = document.getElementById(hashId);
+            if (targetEl) targetEl.scrollIntoView({ behavior: 'smooth' });
+          }, 350);
+        }
+        return;
+      }
+
       if (item.link.startsWith('#')) {
         e.preventDefault();
         const targetEl = document.getElementById(item.link.slice(1));
@@ -381,18 +399,18 @@ export const StaggeredMenu = ({
   };
 
   // Dynamic CSS Variables based on panelBg lightness
-  const isLightAccent = checkIsLightColor(accentColor || '#2563EB');
+  const isLightAccent = checkIsLightColor(accentColor || '#f4f1e8');
   const panelStyle = {
-    '--sm-bg': panelBg || '#FFFFFF',
-    '--sm-text': textColor || (isLightPanel ? '#1D4ED8' : '#FFFFFF'),
-    '--sm-text-muted': isLightPanel ? '#3B82F6' : 'rgba(255, 255, 255, 0.6)',
-    '--sm-border': isLightPanel ? 'rgba(29, 78, 216, 0.15)' : 'rgba(255, 255, 255, 0.15)',
-    '--sm-btn-sec-bg': isLightPanel ? '#FFFFFF' : 'transparent',
-    '--sm-btn-sec-text': isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
-    '--sm-btn-sec-border': isLightPanel ? (textColor || '#1D4ED8') : 'rgba(255, 255, 255, 0.25)',
-    '--sm-accent': accentColor || '#2563EB',
-    '--sm-btn-pri-bg': accentColor || '#1D4ED8',
-    '--sm-btn-pri-text': isLightAccent ? '#FFFFFF' : '#FFFFFF'
+    '--sm-bg': panelBg || '#0b0b0a',
+    '--sm-text': textColor || '#f4f1e8',
+    '--sm-text-muted': 'rgba(244, 241, 232, 0.45)',
+    '--sm-border': 'rgba(244, 241, 232, 0.12)',
+    '--sm-btn-sec-bg': 'rgba(244, 241, 232, 0.05)',
+    '--sm-btn-sec-text': '#f4f1e8',
+    '--sm-btn-sec-border': 'rgba(244, 241, 232, 0.2)',
+    '--sm-accent': accentColor || '#f4f1e8',
+    '--sm-btn-pri-bg': '#f4f1e8',
+    '--sm-btn-pri-text': '#0b0b0a'
   };
 
   return (
@@ -453,7 +471,7 @@ export const StaggeredMenu = ({
           {/* Pre-layers constrained strictly to drawer panel width */}
           <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
             {(() => {
-              const raw = colors && colors.length ? colors.slice(0, 4) : ['#18181B', '#09090B'];
+              const raw = colors && colors.length ? colors.slice(0, 4) : ['#181816', '#121211', '#0b0b0a'];
               let arr = [...raw];
               if (arr.length >= 3) {
                 const mid = Math.floor(arr.length / 2);
@@ -533,29 +551,9 @@ export const StaggeredMenu = ({
                         <a
                           href={loginLink || '#'}
                           className="sm-btn-secondary"
-                          style={{
-                            color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
-                            borderColor: isLightPanel ? (textColor || '#1D4ED8') : 'rgba(255, 255, 255, 0.25)',
-                            backgroundColor: isLightPanel ? '#FFFFFF' : 'transparent',
-                            borderWidth: '1.5px',
-                            borderStyle: 'solid',
-                            borderRadius: 'var(--radius-pill, 9999px)',
-                            padding: '0.75rem 1.25rem',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            textDecoration: 'none'
-                          }}
                           onClick={e => handleActionClick(e, loginLink, onLoginClick)}
                         >
-                          <span
-                            className="sm-btn-label"
-                            style={{
-                              color: isLightPanel ? (textColor || '#1D4ED8') : '#FFFFFF',
-                              fontWeight: 600,
-                              fontSize: '0.95rem'
-                            }}
-                          >
+                          <span className="sm-btn-label">
                             {loginLabel}
                           </span>
                         </a>
@@ -564,28 +562,9 @@ export const StaggeredMenu = ({
                         <a
                           href={ctaLink || '#'}
                           className="sm-btn-primary"
-                          style={{
-                            backgroundColor: '#1D4ED8',
-                            color: '#FFFFFF',
-                            border: '1.5px solid #1D4ED8',
-                            borderRadius: 'var(--radius-pill, 9999px)',
-                            padding: '0.75rem 1.25rem',
-                            fontWeight: 700,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            textDecoration: 'none'
-                          }}
                           onClick={e => handleActionClick(e, ctaLink, onCtaClick)}
                         >
-                          <span
-                            className="sm-btn-label"
-                            style={{
-                              color: '#FFFFFF',
-                              fontWeight: 700,
-                              fontSize: '0.95rem'
-                            }}
-                          >
+                          <span className="sm-btn-label">
                             {ctaLabel}
                           </span>
                         </a>
