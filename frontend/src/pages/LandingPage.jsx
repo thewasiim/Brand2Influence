@@ -114,116 +114,146 @@ const SHOWCASE_BRANDS = [
   {
     id: 'b-1',
     brand: 'Blue Tokai Coffee Roasters',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
-    budget: '₹15,000–₹50,000',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=800',
   },
   {
     id: 'b-2',
     brand: 'Kiro Clean Beauty',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
-    budget: '₹20,000–₹60,000',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800',
   },
   {
     id: 'b-3',
     brand: 'Mokobara Luggage',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
-    budget: '₹30,000–₹1,00,000',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=800',
   },
   {
     id: 'b-4',
     brand: 'Sleepy Owl Coffee',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=300',
-    budget: '₹18,000–₹45,000',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=800',
   },
   {
     id: 'b-5',
     brand: 'Pilgrim Beauty Secrets',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=300',
-    budget: '₹25,000–₹70,000',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=800',
   },
   {
     id: 'b-6',
     brand: 'Supertails Pet Care',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=300',
-    budget: '₹12,000–₹35,000',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=800',
   },
 ]
 
 const SHOWCASE_CAMPAIGNS = [
   {
     id: 'camp-1',
+    brandId: 'b-loom',
+    productName: 'Handcrafted Summer Linen & Cotton Apparel',
     title: 'Summer Organic Linen & Cotton Capsule',
     brand: 'The Loom Co.',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=300',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=400',
     niche: 'Fashion',
     platform: 'Instagram',
     budget: '₹25,000 – ₹45,000',
-    deliverables: ['2x Reels', '3x Stories'],
+    deliverables: ['2x Dedicated Reels', '1x Carousel Post', '3x Stories'],
+    reelsCount: 2,
+    postsCount: 1,
+    storiesCount: 3,
+    deadline: '30 Apr 2026',
     targetFollowers: '20,000+',
     location: 'Mumbai / Delhi NCR',
     description: 'Looking for sustainable fashion stylists for styling reels featuring our handcrafted summer linen collection.',
   },
   {
     id: 'camp-2',
+    brandId: 'b-1',
+    productName: 'Cold Brew Specialty Starter Kit & Tumbler',
     title: 'Cold Brew Starter Kit Unboxing & Recipe',
-    brand: 'Blue Tokai Roasters',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
+    brand: 'Blue Tokai Coffee Roasters',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=400',
     niche: 'Food & Beverage',
     platform: 'Instagram / YouTube',
     budget: '₹15,000 – ₹35,000',
-    deliverables: ['1x Reel', '1x Carousel'],
+    deliverables: ['1x Reel', '1x Carousel', '2x Stories'],
+    reelsCount: 1,
+    postsCount: 1,
+    storiesCount: 2,
+    deadline: '28 Apr 2026',
     targetFollowers: '15,000+',
     location: 'Pan-India',
     description: 'Seeking food & coffee creators to craft creative iced coffee recipes using our specialty cold brew blends.',
   },
   {
     id: 'camp-3',
+    brandId: 'b-2',
+    productName: 'Botanical Ceramide Skin Barrier Repair Serum',
     title: 'Clean Barrier Repair Serum Campaign',
-    brand: 'Kiro Botanicals',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=300',
+    brand: 'Kiro Clean Beauty',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&q=80&w=400',
     niche: 'Beauty & Skincare',
     platform: 'Instagram',
     budget: '₹20,000 – ₹50,000',
-    deliverables: ['1x Reel', '2x Story Highlights'],
+    deliverables: ['1x Reel', '1x Post', '2x Stories'],
+    reelsCount: 1,
+    postsCount: 1,
+    storiesCount: 2,
+    deadline: '25 Apr 2026',
     targetFollowers: '25,000+',
     location: 'Bengaluru / Mumbai',
     description: 'Ingredient-first skincare review educating followers on ceramides, hydration, and skin barrier health.',
   },
   {
     id: 'camp-4',
+    brandId: 'b-3',
+    productName: 'Cabin Pro Minimalist Travel Backpack',
     title: 'Minimalist Travel Backpack Durability Showcase',
-    brand: 'Mokobara',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=300',
+    brand: 'Mokobara Luggage',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1553531384-397c80973a0b?auto=format&fit=crop&q=80&w=400',
     niche: 'Travel & Lifestyle',
     platform: 'YouTube / Instagram',
     budget: '₹35,000 – ₹80,000',
-    deliverables: ['1x Vlog Integration', '1x Reel'],
+    deliverables: ['1x Vlog Reel', '1x Feed Post', '3x Stories'],
+    reelsCount: 1,
+    postsCount: 1,
+    storiesCount: 3,
+    deadline: '05 May 2026',
     targetFollowers: '40,000+',
     location: 'Pan-India',
     description: 'Calling travel and lifestyle creators to test and showcase transit durability on upcoming weekend trips.',
   },
   {
     id: 'camp-5',
+    brandId: 'b-cosmix',
+    productName: 'Clean Plant Protein & Gut Superfood Blend',
     title: 'Plant-Based Protein Daily Smoothie Routine',
     brand: 'Cosmix Wellness',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=300',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=400',
     niche: 'Fitness & Health',
     platform: 'Instagram',
     budget: '₹18,000 – ₹40,000',
-    deliverables: ['1x Reel', '2x Stories with Link'],
+    deliverables: ['1x Reel', '1x Recipe Post', '2x Stories'],
+    reelsCount: 1,
+    postsCount: 1,
+    storiesCount: 2,
+    deadline: '02 May 2026',
     targetFollowers: '15,000+',
     location: 'Pan-India',
     description: 'Partnering with fitness enthusiasts and nutritionists to showcase clean gut-friendly daily protein routines.',
   },
   {
     id: 'camp-6',
+    brandId: 'b-sleepyowl',
+    productName: 'Minimalist Aluminum Laptop Riser & Desk Mat',
     title: 'Workstation Aesthetic & Ergonomic Desk Setup',
     brand: 'Sleepy Owl Goods',
-    brandLogoUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=300',
+    brandLogoUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400',
     niche: 'Tech & Lifestyle',
     platform: 'Instagram / YouTube',
     budget: '₹20,000 – ₹45,000',
-    deliverables: ['1x Reel', '1x Community Post'],
+    deliverables: ['1x Reel', '1x Community Post', '2x Stories'],
+    reelsCount: 1,
+    postsCount: 1,
+    storiesCount: 2,
+    deadline: '08 May 2026',
     targetFollowers: '30,000+',
     location: 'Delhi NCR / Bengaluru',
     description: 'Showcase productivity rituals, desk aesthetics, and slow coffee routines with tech & lifestyle creators.',
@@ -731,7 +761,6 @@ export default function LandingPage() {
                   id={brand.id}
                   brand={brand.brand}
                   brandLogoUrl={brand.brandLogoUrl}
-                  budget={brand.budget}
                   onClick={() => navigate(`/brands/${brand.id}`)}
                 />
               )}
@@ -756,27 +785,18 @@ export default function LandingPage() {
                 <CampaignCard
                   key={camp.id}
                   id={camp.id}
+                  brandId={camp.brandId}
+                  productName={camp.productName}
                   title={camp.title}
                   brand={camp.brand}
                   brandLogoUrl={camp.brandLogoUrl}
-                  niche={camp.niche}
-                  platform={camp.platform}
                   budget={camp.budget}
-                  deliverables={camp.deliverables}
-                  targetFollowers={camp.targetFollowers}
-                  location={camp.location}
                   description={camp.description}
-                  onSelect={() => navigate(`/campaigns/${camp.id}`)}
+                  onSelect={() => navigate(`/brands/${camp.brandId || 'b-loom'}?campaign=${camp.id}`)}
                 />
               )}
             />
           </div>
-
-          <FadeIn delay={0.15} style={{ textAlign: 'center', marginTop: '28px' }}>
-            <Button variant="secondary" size="md" onClick={() => navigate('/campaigns')}>
-              Explore All Open Brand Campaigns ({'>'} 6 Available) →
-            </Button>
-          </FadeIn>
         </section>
 
         {/* 8. HOW IT WORKS (BENTO WORKFLOW) */}
@@ -1033,8 +1053,7 @@ export default function LandingPage() {
             {/* Left Hero Column */}
             <div className="codeastra-footer-hero">
               <h2 className="codeastra-footer-title">
-                Go beyond<br />
-                the code.
+                Go beyond
               </h2>
               <p className="codeastra-footer-desc">
                 There is always a line between an idea and reality.<br />

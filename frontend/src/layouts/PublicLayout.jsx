@@ -4,12 +4,11 @@ import { useAuth } from '../context/AuthContext'
 import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import StaggeredMenu from '../components/StaggeredMenu/StaggeredMenu'
 
-// Exactly matches Desktop Navbar items (Creators, Brands, Campaigns, Workflow, Reviews, FAQ)
+// Exactly matches Desktop Navbar items (Creators, Brands, Campaigns, Reviews, FAQ)
 const menuItems = [
   { label: 'Creators', ariaLabel: 'Find and browse creator profiles', link: '/influencers' },
   { label: 'Brands', ariaLabel: 'Find and explore brand profiles', link: '/brands' },
   { label: 'Campaigns', ariaLabel: 'View open sponsorship briefs', link: '/campaigns' },
-  { label: 'Workflow', ariaLabel: 'Learn how the platform works', link: '/#how-it-works' },
   { label: 'Reviews', ariaLabel: 'Read verified creator and brand reviews', link: '/#reviews' },
   { label: 'FAQ', ariaLabel: 'Frequently asked questions', link: '/#faq' }
 ]
@@ -20,11 +19,11 @@ const socialItems = [
   { label: 'LinkedIn', link: 'https://linkedin.com' }
 ]
 
-export function PublicLayout() {
+export function PublicLayout({ children }) {
   const { user, profile } = useAuth()
 
   return (
-    <>
+    <div className="public-layout-root">
       <div className="site-pill-wrap">
         <header className="navbar site-pill">
           <Link to={user ? "/?view=site" : "/"} className="brand">
@@ -43,9 +42,6 @@ export function PublicLayout() {
             <NavLink to="/campaigns" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               Campaigns
             </NavLink>
-            <a href="/#how-it-works" className="nav-link">
-              Workflow
-            </a>
             <a href="/#reviews" className="nav-link">
               Reviews
             </a>
@@ -75,7 +71,7 @@ export function PublicLayout() {
                   Sign In
                 </Link>
                 <Link to="/signup" className="nav-signup-button">
-                  Get Started →
+                  Go Beyond →
                 </Link>
               </div>
             )}
@@ -95,14 +91,14 @@ export function PublicLayout() {
                 openMenuButtonColor="#0b0b0a"
                 loginLabel={user ? 'Dashboard' : 'Sign In'}
                 loginLink={user ? (profile?.role === 'admin' ? '/admin' : '/dashboard') : '/login'}
-                ctaLabel={user ? 'My Profile' : 'Get Started →'}
+                ctaLabel={user ? 'My Profile' : 'Go Beyond →'}
                 ctaLink={user ? '/profile' : '/signup'}
               />
             </div>
           </div>
         </header>
       </div>
-      <Outlet />
-    </>
+      {children || <Outlet />}
+    </div>
   )
 }

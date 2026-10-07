@@ -438,8 +438,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--radius-pill) !important;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0 !important;
   border: 1.5px solid rgba(244, 241, 232, 0.18) !important;
   background: rgba(244, 241, 232, 0.05) !important;
   color: #f4f1e8 !important;
@@ -471,35 +471,35 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--radius-pill) !important;
-  border: 1.5px solid #f4f1e8 !important;
-  background: #f4f1e8 !important;
-  background-color: #f4f1e8 !important;
-  color: #0b0b0a !important;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0 !important;
+  border: 1.5px solid #0047AB !important;
+  background: #0047AB !important;
+  background-color: #0047AB !important;
+  color: #FFFFFF !important;
   font-family: var(--font-display, inherit);
   font-weight: 700;
   font-size: 0.95rem;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(244, 241, 232, 0.2);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 18px rgba(0, 71, 171, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
 .sm-btn-primary:hover {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  border-color: #ffffff !important;
-  color: #000000 !important;
+  background: #003882 !important;
+  background-color: #003882 !important;
+  border-color: #003882 !important;
+  color: #FFFFFF !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(244, 241, 232, 0.35);
+  box-shadow: 0 6px 24px rgba(0, 71, 171, 0.6);
 }
 
 .sm-btn-primary .sm-btn-label,
 .sm-btn-primary span {
-  color: #0b0b0a !important;
+  color: #FFFFFF !important;
   font-weight: 700;
   display: inline-block;
 }

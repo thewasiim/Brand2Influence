@@ -8,9 +8,72 @@ import { requireSupabase } from '../../lib/supabase'
 import { Button, ErrorState, Input, Textarea, Badge } from '../../components/ui'
 
 
-function AuthCard({ eyebrow = 'Brand2Influence Access', title, subtitle = null, wide = false, children }) {
+function AuthCard({
+  eyebrow = 'Brand2Influence Access',
+  title,
+  subtitle = null,
+  wide = false,
+  showBack = true,
+  onBack = null,
+  children
+}) {
+  const navigate = useNavigate()
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack()
+    } else if (window.history.length > 1) {
+      navigate(-1)
+    } else {
+      navigate('/')
+    }
+  }
+
   return (
     <section className={`auth-card ${wide ? 'auth-card--wide' : ''}`}>
+      {showBack && (
+        <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center' }}>
+          <button
+            type="button"
+            onClick={handleBack}
+            style={{
+              background: 'rgba(244, 241, 232, 0.04)',
+              border: '1px solid rgba(244, 241, 232, 0.14)',
+              borderRadius: '0px',
+              color: 'rgba(244, 241, 232, 0.75)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '11px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              padding: '6px 12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(244, 241, 232, 0.1)'
+              e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+              e.currentTarget.style.color = '#ffffff'
+              e.currentTarget.style.transform = 'translateX(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)'
+              e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.14)'
+              e.currentTarget.style.color = 'rgba(244, 241, 232, 0.75)'
+              e.currentTarget.style.transform = 'translateX(0)'
+            }}
+            aria-label="Go back"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+        </div>
+      )}
       <div className="auth-card-header">
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
@@ -709,6 +772,14 @@ export function SignupPage() {
       wide={true}
       title={step === 1 ? 'Join Brand2Influence' : step === 2 ? 'Account & Contact Details' : role === 'influencer' ? 'Creator Stats & Rate Card' : 'Brand Profile & Marketing Goals'}
       subtitle={step === 1 ? 'Choose your role to get started with instant access.' : step === 2 ? 'Set your unique username, email, password, and location.' : role === 'influencer' ? 'Showcase your audience reach, set rate card, and link social channels.' : 'Set up your company profile, industry, marketing budget, and campaign goals.'}
+      showBack={true}
+      onBack={step === 1 ? () => {
+        if (window.history.length > 1) {
+          nav(-1)
+        } else {
+          nav('/')
+        }
+      } : () => setStep((s) => s - 1)}
     >
       {/* Step Indicator */}
       <div className="step-indicator">
@@ -803,9 +874,53 @@ export function SignupPage() {
             <span>or continue with email setup</span>
           </div>
 
-          <Button size="lg" className="full" onClick={() => setStep(2)}>
-            Continue with Email Setup →
-          </Button>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.history.length > 1) {
+                  nav(-1)
+                } else {
+                  nav('/')
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '11px 18px',
+                borderRadius: '0px',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                border: '1px solid rgba(244, 241, 232, 0.18)',
+                background: 'rgba(244, 241, 232, 0.05)',
+                color: '#f4f1e8',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(244, 241, 232, 0.12)'
+                e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.35)'
+                e.currentTarget.style.transform = 'translateX(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(244, 241, 232, 0.05)'
+                e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.18)'
+                e.currentTarget.style.transform = 'translateX(0)'
+              }}
+              aria-label="Go back"
+            >
+              ← Back
+            </button>
+            <Button size="lg" className="full" onClick={() => setStep(2)}>
+              Continue with Email Setup →
+            </Button>
+          </div>
 
           <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px' }}>
             Already registered? <Link to="/auth/login" style={{ fontWeight: 600 }}>Log in here</Link>

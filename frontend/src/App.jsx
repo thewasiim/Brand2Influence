@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import { PublicLayout } from './layouts/PublicLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { OnboardingLayout } from './layouts/OnboardingLayout'
@@ -18,6 +19,38 @@ import { AdminDashboardPage, AdminUsersPage, AdminCampaignsPage, ReportsPage, Se
 import GlowCursor from './components/GlowCursor/GlowCursor'
 import ExplorePage from './pages/social/ExplorePage'
 import SearchPage from './pages/social/SearchPage'
+
+function AdaptiveCampaignsRoute() {
+  const { user } = useAuth()
+  if (user) {
+    return (
+      <UserLayout>
+        <CampaignDiscoveryPage />
+      </UserLayout>
+    )
+  }
+  return (
+    <PublicLayout>
+      <CampaignDiscoveryPage />
+    </PublicLayout>
+  )
+}
+
+function AdaptiveCampaignDetailRoute() {
+  const { user } = useAuth()
+  if (user) {
+    return (
+      <UserLayout>
+        <CampaignDetailPage />
+      </UserLayout>
+    )
+  }
+  return (
+    <PublicLayout>
+      <CampaignDetailPage />
+    </PublicLayout>
+  )
+}
 
 export default function App() {
   return (
@@ -44,7 +77,6 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<LandingPage />} />
-        <Route path="/projects" element={<CampaignDiscoveryPage />} />
         <Route path="/contact" element={<LandingPage />} />
         <Route path="/discover" element={<DiscoveryPage />} />
         <Route path="/creators" element={<DiscoveryPage />} />
@@ -53,15 +85,18 @@ export default function App() {
         <Route path="/influencers/:id" element={<InfluencerProfilePage />} />
         <Route path="/brands" element={<BrandDiscoveryPage />} />
         <Route path="/brands/:id" element={<BrandProfilePage />} />
-        <Route path="/brand-deals" element={<CampaignDiscoveryPage />} />
         <Route path="/how-it-works" element={<LandingPage />} />
         <Route path="/for-brands" element={<LandingPage />} />
         <Route path="/for-influencers" element={<LandingPage />} />
-        <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
-        <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
         <Route path="/login" element={<Navigate to="/auth/login" replace />} />
         <Route path="/signup" element={<Navigate to="/auth/signup" replace />} />
       </Route>
+
+      {/* Adaptive Campaign Routes (UserLayout with sidebar when logged-in, PublicLayout when guest) */}
+      <Route path="/campaigns" element={<AdaptiveCampaignsRoute />} />
+      <Route path="/campaigns/:id" element={<AdaptiveCampaignDetailRoute />} />
+      <Route path="/projects" element={<AdaptiveCampaignsRoute />} />
+      <Route path="/brand-deals" element={<AdaptiveCampaignsRoute />} />
 
       <Route element={<AuthLayout />}>
         <Route path="/auth/login" element={<LoginPage />} />
@@ -93,8 +128,6 @@ export default function App() {
           </Route>
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
-          <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
         </Route>
 
         <Route element={<AdminRoute />}>

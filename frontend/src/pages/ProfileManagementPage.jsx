@@ -263,6 +263,10 @@ export default function ProfileManagementPage() {
             deck_link: br.deck_link || '',
             description: br.description || ''
           })
+
+          if (isBrand) {
+            setActiveTab('rates')
+          }
         }
       } catch (err) {
         console.error('Failed to load profile:', err)
@@ -893,23 +897,30 @@ export default function ProfileManagementPage() {
               <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>{posts.length}</strong>{' '}
               <span style={{ color: '#9CA3AF' }}>posts</span>
             </div>
-            <div
-              className="profile-stat-clickable"
-              onClick={() => setShowBreakdown(true)}
-              title="Click to view followers breakdown (Instagram, Snapchat, YouTube, etc.)"
-            >
-              <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>
-                {followerCount >= 1000000
-                  ? `${(followerCount / 1000000).toFixed(1)}M`
-                  : followerCount >= 1000
-                  ? `${(followerCount / 1000).toFixed(1)}K`
-                  : followerCount.toLocaleString()}
-              </strong>{' '}
-              <span style={{ color: '#818cf8', textDecoration: 'underline', textUnderlineOffset: '3px' }}>followers ▾</span>
-            </div>
+            {isInfluencer ? (
+              <div
+                className="profile-stat-clickable"
+                onClick={() => setShowBreakdown(true)}
+                title="Click to view followers breakdown (Instagram, Snapchat, YouTube, etc.)"
+              >
+                <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>
+                  {followerCount >= 1000000
+                    ? `${(followerCount / 1000000).toFixed(1)}M`
+                    : followerCount >= 1000
+                    ? `${(followerCount / 1000).toFixed(1)}K`
+                    : followerCount.toLocaleString()}
+                </strong>{' '}
+                <span style={{ color: '#818cf8', textDecoration: 'underline', textUnderlineOffset: '3px' }}>followers ▾</span>
+              </div>
+            ) : (
+              <div>
+                <strong style={{ color: '#34D399', fontWeight: 700 }}>{formData.budget_range || 'Active'}</strong>{' '}
+                <span style={{ color: '#9CA3AF' }}>budget</span>
+              </div>
+            )}
             <div>
-              <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>318</strong>{' '}
-              <span style={{ color: '#9CA3AF' }}>following</span>
+              <strong style={{ color: '#FFFFFF', fontWeight: 700 }}>{isInfluencer ? '318' : 'Verified'}</strong>{' '}
+              <span style={{ color: '#9CA3AF' }}>{isInfluencer ? 'following' : 'business'}</span>
             </div>
           </div>
 
@@ -2407,8 +2418,8 @@ export default function ProfileManagementPage() {
         stats={{
           totalFollowers: followerCount,
           instagram: Number(formData.instagram_followers || followerCount),
-          instagramHandle: formData.instagram_handle || username,
-          isInstagramVerified: Boolean(formData.is_instagram_verified || isVerified),
+          instagramHandle: formData.instagram_handle || handleUsername,
+          isInstagramVerified: Boolean(formData.is_instagram_verified || isPlatformVerified),
           youtube: Number(formData.youtube_subscribers || 0),
           youtubeUrl: formData.youtube_url,
           youtubeSkipped: !formData.youtube_subscribers && !formData.youtube_url,

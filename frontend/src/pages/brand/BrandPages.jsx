@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { brandsService } from '../../services/brands'
 import { conversationsService } from '../../services/conversations'
 import { useAuth } from '../../context/AuthContext'
@@ -42,6 +42,7 @@ const BRAND_LOCATIONS = [
 
 export function BrandOnboardingPage() {
   const nav = useNavigate()
+  const { refreshProfile } = useAuth()
   const [form, setForm] = useState({
     businessName: '',
     businessType: '',
@@ -60,6 +61,9 @@ export function BrandOnboardingPage() {
     setError('')
     try {
       await brandsService.saveProfile(form)
+      if (typeof refreshProfile === 'function') {
+        await refreshProfile()
+      }
       nav('/dashboard')
     } catch (err) {
       setError(err.message)
@@ -520,8 +524,46 @@ export function BrandDiscoveryPage() {
   )
 }
 
+function getDeliverablesBreakdown(camp) {
+  if (!camp) return { reels: 0, posts: 0, stories: 0, list: [], deadline: 'Rolling' }
+  const list = Array.isArray(camp.deliverables)
+    ? camp.deliverables
+    : (typeof camp.deliverables === 'string'
+        ? camp.deliverables.split('+').map(s => s.trim()).filter(Boolean)
+        : [])
+
+  let reels = camp.reelsCount || 0
+  let posts = camp.postsCount || 0
+  let stories = camp.storiesCount || 0
+
+  if (!reels && !posts && !stories) {
+    for (const item of list) {
+      const lower = item.toLowerCase()
+      const m = lower.match(/(\d+)\s*x?/)
+      const count = m ? parseInt(m[1], 10) : 1
+      if (lower.includes('reel') || lower.includes('video') || lower.includes('short') || lower.includes('grwm')) {
+        reels += count
+      } else if (lower.includes('story') || lower.includes('stories')) {
+        stories += count
+      } else if (lower.includes('post') || lower.includes('carousel') || lower.includes('image') || lower.includes('photo')) {
+        posts += count
+      }
+    }
+  }
+
+  return {
+    reels: reels || (list.some(s => s.toLowerCase().includes('reel')) ? 1 : 0),
+    posts: posts || (list.some(s => s.toLowerCase().includes('post') || s.toLowerCase().includes('carousel')) ? 1 : 0),
+    stories: stories || (list.some(s => s.toLowerCase().includes('story')) ? 2 : 0),
+    list,
+    deadline: camp.deadline || '30 Apr 2026'
+  }
+}
+
 export function BrandProfilePage() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const campaignParam = searchParams.get('campaign')
   const navigate = useNavigate()
   const { user } = useAuth()
   const [brand, setBrand] = useState(null)
@@ -529,15 +571,31 @@ export function BrandProfilePage() {
   const [actionNotice, setActionNotice] = useState('')
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [selectedCampId, setSelectedCampId] = useState(campaignParam || null)
+
+  useEffect(() => {
+    if (campaignParam) {
+      setSelectedCampId(campaignParam)
+    }
+  }, [campaignParam])
 
   useEffect(() => {
     setLoading(true)
     brandsService
       .getById(id)
-      .then(setBrand)
+      .then((b) => {
+        setBrand(b)
+        if (b?.campaigns?.length > 0) {
+          if (campaignParam) {
+            setSelectedCampId(campaignParam)
+          } else if (!selectedCampId) {
+            setSelectedCampId(b.campaigns[0].id)
+          }
+        }
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, campaignParam])
 
   const handleMessageBrand = async () => {
     if (!user) {
@@ -552,12 +610,12 @@ export function BrandProfilePage() {
       setActionNotice('ℹ️ Switch to a creator account to message brand sponsorship opportunities.')
       return
     }
-    if (!brand?.userId) return
+    if (!brand?.userId && !brand?.id) return
 
     setBusy(true)
     setActionNotice('')
     try {
-      const c = await conversationsService.create(brand.userId)
+      const c = await conversationsService.create(brand.userId || brand.id)
       navigate(`/conversations/${c.id}`)
     } catch (e) {
       setActionNotice(`⚠️ ${e.message || 'Could not start conversation'}`)
@@ -587,45 +645,149 @@ export function BrandProfilePage() {
 
   const campaigns = brand.campaigns || []
   const activeCampaigns = campaigns.filter((c) => c.status === 'active')
+  const selectedCampaign = campaigns.find(c => c.id === selectedCampId) || (campaigns.length > 0 ? campaigns[0] : null)
+  const selectedDeliv = selectedCampaign ? getDeliverablesBreakdown(selectedCampaign) : null
 
   return (
     <main className="page">
-      <div style={{ marginBottom: '20px' }}>
-        <Button variant="secondary" size="sm" onClick={() => navigate('/brands')}>
-          ← Back to All Brands
-        </Button>
-      </div>
+      {/* 1. Header Navigation & Editorial Breadcrumb */}
+      <FadeIn delay={0.04} distance={14}>
+        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 2) {
+                navigate(-1)
+              } else {
+                navigate('/campaigns')
+              }
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              height: '38px',
+              padding: '0 18px',
+              borderRadius: '9999px',
+              fontWeight: 600,
+              fontSize: '13px',
+              fontFamily: 'var(--font-display)',
+              background: 'rgba(244, 241, 232, 0.04)',
+              color: '#f4f1e8',
+              border: '1px solid rgba(244, 241, 232, 0.14)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(244, 241, 232, 0.08)'
+              e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+              e.currentTarget.style.transform = 'translateX(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)'
+              e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.14)'
+              e.currentTarget.style.transform = 'translateX(0)'
+            }}
+          >
+            <span>← Back</span>
+          </button>
 
-      {/* Brand Hero Bento Banner */}
-      <Card variant="glass" padding="lg" className="profile-hero-card">
-        <div className="profile-hero-inner">
-          <div className="profile-hero-left">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11.5px', color: 'rgba(244, 241, 232, 0.55)', fontFamily: 'var(--font-mono)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ color: 'rgba(244, 241, 232, 0.4)' }}>[ 02 // BRAND HUB ]</span>
+            <span>•</span>
+            <span style={{ color: '#f4f1e8', fontWeight: 600 }}>{brand.businessName}</span>
+          </div>
+        </div>
+      </FadeIn>
+
+      {/* 2. Brand Hero Bento Banner (Frosted Obsidian Glass) */}
+      <FadeIn delay={0.08} distance={18}>
+        <div
+          style={{
+            marginBottom: '28px',
+            borderRadius: '24px',
+            padding: 'clamp(24px, 4vw, 36px)',
+            background: 'rgba(244, 241, 232, 0.03)',
+            border: '1px solid rgba(244, 241, 232, 0.12)',
+            backdropFilter: 'blur(16px)',
+            boxShadow: '0 12px 36px -10px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(244, 241, 232, 0.06)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '24px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
             <Avatar
               name={brand.businessName}
               size="xl"
               tone="secondary"
+              style={{
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)',
+                border: '1px solid rgba(244, 241, 232, 0.18)',
+              }}
             />
-            <div className="profile-hero-info">
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap' }}>
-                <h1 className="profile-name-title">{brand.businessName}</h1>
-                <Badge variant="accent">Verified Brand</Badge>
+            <div>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap' }}>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: 800, color: '#f4f1e8', letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>
+                  {brand.businessName}
+                </h1>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '3px 10px',
+                    borderRadius: '999px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    background: 'rgba(244, 241, 232, 0.08)',
+                    color: '#f4f1e8',
+                    border: '1px solid rgba(244, 241, 232, 0.2)',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  <span>🛡️</span> Verified Brand
+                </span>
               </div>
-              <p style={{ color: 'var(--color-secondary)', fontFamily: 'var(--font-mono)', fontSize: '14px', fontWeight: 600, margin: '0 0 6px 0' }}>
-                {brand.businessType}
-              </p>
-              <p style={{ marginTop: '4px', fontSize: '13.5px', color: 'var(--color-text-secondary)' }}>
-                📍 Headquarters: {brand.location}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(244, 241, 232, 0.65)', fontFamily: 'var(--font-mono)', fontSize: '13px', flexWrap: 'wrap' }}>
+                <span style={{ color: '#f4f1e8', fontWeight: 600 }}>{brand.businessType}</span>
+                <span>•</span>
+                <span>📍 Headquarters: {brand.location || 'India'}</span>
+              </div>
             </div>
           </div>
 
-          <div className="profile-hero-actions">
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             {brand.website && (
               <a
                 href={brand.website.startsWith('http') ? brand.website : `https://${brand.website}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ui-button ui-btn--secondary ui-btn--md"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 18px',
+                  borderRadius: '9999px',
+                  background: 'rgba(244, 241, 232, 0.04)',
+                  border: '1px solid rgba(244, 241, 232, 0.16)',
+                  color: '#f4f1e8',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-display)',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 241, 232, 0.08)'
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)'
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.16)'
+                }}
               >
                 🌐 Visit Website ↗
               </a>
@@ -635,162 +797,653 @@ export function BrandProfilePage() {
                 href={brand.deckLink.startsWith('http') ? brand.deckLink : `https://${brand.deckLink}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ui-button ui-btn--secondary ui-btn--md"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 18px',
+                  borderRadius: '9999px',
+                  background: 'rgba(244, 241, 232, 0.04)',
+                  border: '1px solid rgba(244, 241, 232, 0.16)',
+                  color: '#f4f1e8',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-display)',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 241, 232, 0.08)'
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)'
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.16)'
+                }}
               >
-                📄 Pitch Deck / Brief ↗
+                📄 Brand Lookbook ↗
               </a>
             )}
-            <Button size="md" variant="primary" loading={busy} onClick={handleMessageBrand}>
-              💬 Message Brand
-            </Button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleMessageBrand}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 22px',
+                borderRadius: '9999px',
+                background: '#f4f1e8',
+                border: '1px solid #f4f1e8',
+                color: '#0b0b0a',
+                fontSize: '13px',
+                fontWeight: 700,
+                fontFamily: 'var(--font-display)',
+                cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#ffffff'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(244, 241, 232, 0.25)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#f4f1e8'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(244, 241, 232, 0.15)'
+              }}
+            >
+              💬 {busy ? 'Connecting…' : 'Message Brand'}
+            </button>
             {actionNotice && (
-              <div style={{ width: '100%', fontSize: '12.5px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-3)', border: '1px solid var(--color-border)', padding: '8px 12px', borderRadius: 'var(--radius-md)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ width: '100%', fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.8)', background: 'rgba(244, 241, 232, 0.06)', border: '1px solid rgba(244, 241, 232, 0.14)', padding: '8px 14px', borderRadius: '12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{actionNotice}</span>
-                <button type="button" onClick={() => setActionNotice('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-tertiary)', fontSize: '13px', marginLeft: '6px' }}>✕</button>
+                <button type="button" onClick={() => setActionNotice('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(244, 241, 232, 0.5)', fontSize: '13px', marginLeft: '6px' }}>✕</button>
               </div>
             )}
           </div>
         </div>
-      </Card>
+      </FadeIn>
 
-      {/* Brand Metrics Row */}
-      <div className="brand-metrics-grid">
-        <MetricCard
-          label="Collaboration Budget Scale"
-          value={brand.budgetRange || 'Flexible'}
-          subtext="Typical campaign allocation"
-        />
-        <MetricCard
-          label="Active Campaigns"
-          value={`${activeCampaigns.length}`}
-          subtext="Open sponsorship opportunities"
-        />
-        <MetricCard
-          label="Operational Base"
-          value={brand.location || 'Pan-India'}
-          subtext="Target collaboration geography"
-        />
-      </div>
+      {/* 3. SELECTED CAMPAIGN SPOTLIGHT (Design based exactly on /campaigns) */}
+      {selectedCampaign && (
+        <FadeIn delay={0.12} distance={20}>
+          <div
+            style={{
+              marginBottom: '36px',
+              borderRadius: '24px',
+              padding: 'clamp(24px, 4vw, 36px)',
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.14)',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 16px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(244, 241, 232, 0.08)',
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '22px' }}>
+              <div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '3px 12px',
+                      borderRadius: '999px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      background: '#f4f1e8',
+                      color: '#0b0b0a',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    ★ Featured Campaign Brief
+                  </span>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '3px 10px',
+                      borderRadius: '999px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      background: 'rgba(244, 241, 232, 0.08)',
+                      color: '#f4f1e8',
+                      border: '1px solid rgba(244, 241, 232, 0.2)',
+                      fontFamily: 'var(--font-mono)',
+                    }}
+                  >
+                    {selectedCampaign.platform || 'Instagram'}
+                  </span>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '3px 10px',
+                      borderRadius: '999px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      background: 'rgba(244, 241, 232, 0.03)',
+                      color: 'rgba(244, 241, 232, 0.75)',
+                      border: '1px solid rgba(244, 241, 232, 0.12)',
+                      fontFamily: 'var(--font-display)',
+                    }}
+                  >
+                    {selectedCampaign.niche || brand.businessType || 'General'}
+                  </span>
+                </div>
 
-      {/* Brand About & Overview */}
-      {brand.description && (
-        <Card variant="elevated" padding="lg" style={{ marginBottom: '32px' }}>
-          <Badge variant="primary" style={{ marginBottom: '12px' }}>Brand Overview</Badge>
-          <h3 style={{ fontSize: '20px', marginBottom: '10px' }}>About {brand.businessName}</h3>
-          <p style={{ fontSize: '14.5px', lineHeight: 1.7, color: 'var(--color-text-secondary)' }}>
-            {brand.description}
-          </p>
-        </Card>
+                <span style={{ fontSize: '11.5px', color: '#60a5fa', fontFamily: 'var(--font-mono)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  Product Advertisement
+                </span>
+                <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', fontWeight: 800, color: '#f4f1e8', fontFamily: 'var(--font-display)', margin: '4px 0 0 0', lineHeight: 1.25, letterSpacing: '-0.02em' }}>
+                  {selectedCampaign.productName || selectedCampaign.title}
+                </h2>
+              </div>
+
+              <div
+                style={{
+                  textAlign: 'right',
+                  background: 'rgba(244, 241, 232, 0.04)',
+                  padding: '12px 20px',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(244, 241, 232, 0.12)',
+                }}
+              >
+                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '2px' }}>
+                  Brand Pays
+                </span>
+                <strong style={{ fontSize: '22px', color: '#f4f1e8', fontFamily: 'var(--font-mono)', fontWeight: 800 }}>
+                  {selectedCampaign.budget_range || (selectedCampaign.budget ? `₹${Number(selectedCampaign.budget).toLocaleString()}` : 'Flexible')}
+                </strong>
+              </div>
+            </div>
+
+            {/* 4 Deliverables Specs Cards: Reels, Posts, Stories, Deadline */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+              {/* Reels */}
+              <div style={{ background: 'rgba(244, 241, 232, 0.03)', border: '1px solid rgba(244, 241, 232, 0.1)', borderRadius: '16px', padding: '16px 18px' }}>
+                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '4px' }}>
+                  🎬 Reels To Post
+                </span>
+                <b style={{ fontSize: '16px', color: '#f4f1e8', fontFamily: 'var(--font-display)' }}>
+                  {selectedDeliv.reels > 0 ? `${selectedDeliv.reels} Dedicated Reel${selectedDeliv.reels > 1 ? 's' : ''}` : 'Optional'}
+                </b>
+              </div>
+
+              {/* Posts */}
+              <div style={{ background: 'rgba(244, 241, 232, 0.03)', border: '1px solid rgba(244, 241, 232, 0.1)', borderRadius: '16px', padding: '16px 18px' }}>
+                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '4px' }}>
+                  📸 Posts To Publish
+                </span>
+                <b style={{ fontSize: '16px', color: '#f4f1e8', fontFamily: 'var(--font-display)' }}>
+                  {selectedDeliv.posts > 0 ? `${selectedDeliv.posts} Feed Post / Carousel` : 'Not required'}
+                </b>
+              </div>
+
+              {/* Stories */}
+              <div style={{ background: 'rgba(244, 241, 232, 0.03)', border: '1px solid rgba(244, 241, 232, 0.1)', borderRadius: '16px', padding: '16px 18px' }}>
+                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '4px' }}>
+                  ⏱️ Stories To Share
+                </span>
+                <b style={{ fontSize: '16px', color: '#f4f1e8', fontFamily: 'var(--font-display)' }}>
+                  {selectedDeliv.stories > 0 ? `${selectedDeliv.stories} Story Link${selectedDeliv.stories > 1 ? 's' : ''}` : 'Optional'}
+                </b>
+              </div>
+
+              {/* Deadline */}
+              <div style={{ background: 'rgba(244, 241, 232, 0.05)', border: '1px solid rgba(244, 241, 232, 0.18)', borderRadius: '16px', padding: '16px 18px' }}>
+                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.65)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '4px' }}>
+                  📅 Campaign Deadline
+                </span>
+                <b style={{ fontSize: '16px', color: '#f4f1e8', fontFamily: 'var(--font-mono)' }}>
+                  {selectedDeliv.deadline}
+                </b>
+              </div>
+            </div>
+
+            {/* Product Overview & Description */}
+            <div style={{ marginBottom: '24px' }}>
+              <h4 style={{ fontSize: '11.5px', color: 'rgba(244, 241, 232, 0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>
+                Product Creative Brief &amp; Deliverables Overview
+              </h4>
+              <p style={{ fontSize: '14.5px', lineHeight: 1.7, color: 'rgba(244, 241, 232, 0.85)', margin: 0, fontFamily: 'var(--font-body)' }}>
+                {selectedCampaign.description}
+              </p>
+            </div>
+
+            {/* Action Row */}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', paddingTop: '20px', borderTop: '1px solid rgba(244, 241, 232, 0.08)' }}>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={handleMessageBrand}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '11px 24px',
+                  borderRadius: '9999px',
+                  background: '#f4f1e8',
+                  border: '1px solid #f4f1e8',
+                  color: '#0b0b0a',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#ffffff'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f4f1e8'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                💬 Message {brand.businessName} &amp; Pitch for this Campaign
+              </button>
+              <Link
+                to={`/campaigns/${selectedCampaign.id}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '11px 22px',
+                  borderRadius: '9999px',
+                  background: 'rgba(244, 241, 232, 0.04)',
+                  border: '1px solid rgba(244, 241, 232, 0.16)',
+                  color: '#f4f1e8',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-display)',
+                  textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 241, 232, 0.08)'
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(244, 241, 232, 0.04)'
+                  e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.16)'
+                }}
+              >
+                Full Campaign Application Page ↗
+              </Link>
+            </div>
+          </div>
+        </FadeIn>
       )}
 
-      {/* BRAND CAMPAIGNS SECTION */}
-      <section style={{ marginTop: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px' }}>
-          <div>
-            <div className="overline">
-              <i /> Sponsorship Campaigns
-            </div>
-            <h2 style={{ fontSize: '24px', marginTop: '6px' }}>
-              Campaigns by {brand.businessName}
-            </h2>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '13.5px' }}>
-              Browse all open collaboration briefs and advertisements run by this brand.
+      {/* 4. Brand Metrics Row (Frosted Obsidian Cards) */}
+      <FadeIn delay={0.15} distance={18}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '28px' }}>
+          <div
+            style={{
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.12)',
+              borderRadius: '18px',
+              padding: '20px 24px',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
+            <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>
+              Collaboration Budget Scale
+            </span>
+            <strong style={{ fontSize: '24px', fontWeight: 800, color: '#f4f1e8', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
+              {brand.budgetRange || 'Flexible'}
+            </strong>
+            <span style={{ fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.55)', fontFamily: 'var(--font-body)' }}>
+              Typical campaign allocation
+            </span>
+          </div>
+
+          <div
+            style={{
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.12)',
+              borderRadius: '18px',
+              padding: '20px 24px',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
+            <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>
+              Active Campaigns
+            </span>
+            <strong style={{ fontSize: '24px', fontWeight: 800, color: '#f4f1e8', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
+              {activeCampaigns.length}
+            </strong>
+            <span style={{ fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.55)', fontFamily: 'var(--font-body)' }}>
+              Open sponsorship opportunities
+            </span>
+          </div>
+
+          <div
+            style={{
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.12)',
+              borderRadius: '18px',
+              padding: '20px 24px',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
+            <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.5)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>
+              Operational Base
+            </span>
+            <strong style={{ fontSize: '24px', fontWeight: 800, color: '#f4f1e8', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
+              {brand.location || 'Pan-India'}
+            </strong>
+            <span style={{ fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.55)', fontFamily: 'var(--font-body)' }}>
+              Target collaboration geography
+            </span>
+          </div>
+        </div>
+      </FadeIn>
+
+      {/* 5. Brand About & Overview */}
+      {brand.description && (
+        <FadeIn delay={0.18} distance={18}>
+          <div
+            style={{
+              marginBottom: '36px',
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.12)',
+              borderRadius: '20px',
+              padding: '28px 32px',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '3px 12px',
+                borderRadius: '999px',
+                fontSize: '11px',
+                fontWeight: 700,
+                background: '#f4f1e8',
+                color: '#0b0b0a',
+                fontFamily: 'var(--font-mono)',
+                marginBottom: '14px',
+              }}
+            >
+              Brand Overview
+            </span>
+            <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#f4f1e8', fontFamily: 'var(--font-display)', marginBottom: '10px' }}>
+              About {brand.businessName}
+            </h3>
+            <p style={{ fontSize: '14.5px', lineHeight: 1.7, color: 'rgba(244, 241, 232, 0.75)', margin: 0, fontFamily: 'var(--font-body)' }}>
+              {brand.description}
             </p>
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-secondary)' }}>
-            {campaigns.length} Total Brief{campaigns.length !== 1 ? 's' : ''}
-          </span>
-        </div>
+        </FadeIn>
+      )}
+
+      {/* 6. ALL OTHER CAMPAIGNS BY THIS BRAND (Matching /campaigns card design) */}
+      <section style={{ marginTop: '24px' }} id="all-brand-campaigns">
+        <FadeIn delay={0.2} distance={18}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '22px', flexWrap: 'wrap', gap: '14px' }}>
+            <div>
+              <div className="overline">
+                <i /> All Brand Briefs
+              </div>
+              <h2 style={{ fontSize: 'clamp(22px, 3.5vw, 30px)', marginTop: '6px', fontFamily: 'var(--font-display)', fontWeight: 800 }}>
+                All Campaigns by <em>{brand.businessName}<span className="dot-accent">.</span></em>
+              </h2>
+              <p style={{ color: 'rgba(244, 241, 232, 0.65)', fontSize: '13.5px', margin: 0 }}>
+                Browse all open collaboration briefs and advertisements run by this brand. Click any campaign to view full deliverables.
+              </p>
+            </div>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '4px 14px',
+                borderRadius: '999px',
+                background: 'rgba(244, 241, 232, 0.05)',
+                border: '1px solid rgba(244, 241, 232, 0.15)',
+                fontSize: '12px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-mono)',
+                color: '#f4f1e8',
+              }}
+            >
+              {campaigns.length} Total Brief{campaigns.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </FadeIn>
 
         {campaigns.length === 0 ? (
-          <Card variant="elevated" padding="lg" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '48px 24px',
+              background: 'rgba(244, 241, 232, 0.03)',
+              border: '1px solid rgba(244, 241, 232, 0.12)',
+              borderRadius: '20px',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
             <span style={{ fontSize: '36px', display: 'block', marginBottom: '12px' }}>📢</span>
-            <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>No Active Public Campaign Briefs</h3>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '13.5px', maxWidth: '480px', margin: '0 auto 20px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f4f1e8', marginBottom: '8px' }}>
+              No Active Public Campaign Briefs
+            </h3>
+            <p style={{ color: 'rgba(244, 241, 232, 0.6)', fontSize: '13.5px', maxWidth: '480px', margin: '0 auto 20px' }}>
               {brand.businessName} hasn't listed open public advertisements at the moment. You can still reach out directly to pitch creative ideas!
             </p>
-            <Button variant="primary" onClick={handleMessageBrand} loading={busy}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={handleMessageBrand}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 22px',
+                borderRadius: '9999px',
+                background: '#f4f1e8',
+                border: '1px solid #f4f1e8',
+                color: '#0b0b0a',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
               💬 Send Collaboration Pitch to Brand
-            </Button>
-          </Card>
+            </button>
+          </div>
         ) : (
           <StaggerContainer className="bento-grid bento-grid--2" staggerDelay={0.08}>
-            {campaigns.map((camp) => (
-              <StaggerItem key={camp.id}>
-                <Card
-                  variant="elevated"
-                  hover
-                  padding="lg"
-                  style={{
-                    borderRadius: 'var(--radius-xl)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    height: '100%',
-                  }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                        <Badge variant="primary">{camp.platform || 'Instagram'}</Badge>
-                        <Badge variant="accent">{camp.niche || brand.businessType || 'General'}</Badge>
-                        <Badge variant={camp.status === 'active' ? 'secondary' : 'outline'}>
-                          {(camp.status || 'active').toUpperCase()}
-                        </Badge>
-                      </div>
-                      <b style={{ color: 'var(--color-secondary)', fontSize: '13px' }}>
-                        {camp.budget_range || (camp.budget ? `₹${Number(camp.budget).toLocaleString()}` : 'Flexible')}
-                      </b>
-                    </div>
-
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-                      {camp.title}
-                    </h3>
-
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.5, marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {camp.description}
-                    </p>
-
-                    {(() => {
-                      const delivList = Array.isArray(camp.deliverables)
-                        ? camp.deliverables
-                        : (typeof camp.deliverables === 'string'
-                            ? camp.deliverables.split('+').map(s => s.trim()).filter(Boolean)
-                            : [])
-                      if (delivList.length === 0) return null
-                      return (
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                          {delivList.map((d, i) => (
+            {campaigns.map((camp) => {
+              const isSelected = selectedCampId === camp.id
+              const deliv = getDeliverablesBreakdown(camp)
+              return (
+                <StaggerItem key={camp.id}>
+                  <div
+                    style={{
+                      borderRadius: '20px',
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      height: '100%',
+                      boxSizing: 'border-box',
+                      background: 'rgba(244, 241, 232, 0.03)',
+                      border: isSelected ? '1px solid rgba(244, 241, 232, 0.35)' : '1px solid rgba(244, 241, 232, 0.12)',
+                      boxShadow: isSelected
+                        ? '0 16px 40px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12)'
+                        : '0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06)',
+                      backdropFilter: 'blur(16px)',
+                      transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.35)'
+                      e.currentTarget.style.transform = 'translateY(-3px)'
+                      e.currentTarget.style.boxShadow = '0 16px 40px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = isSelected ? 'rgba(244, 241, 232, 0.35)' : 'rgba(244, 241, 232, 0.12)'
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.boxShadow = isSelected
+                        ? '0 16px 40px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12)'
+                        : '0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06)'
+                    }}
+                    onClick={() => {
+                      setSelectedCampId(camp.id)
+                      window.scrollTo({ top: 180, behavior: 'smooth' })
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '14px' }}>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '3px 10px',
+                              borderRadius: '999px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              background: 'rgba(244, 241, 232, 0.08)',
+                              color: '#f4f1e8',
+                              border: '1px solid rgba(244, 241, 232, 0.2)',
+                              fontFamily: 'var(--font-mono)',
+                            }}
+                          >
+                            {camp.platform || 'Instagram'}
+                          </span>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              padding: '3px 10px',
+                              borderRadius: '999px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              background: 'rgba(244, 241, 232, 0.03)',
+                              color: 'rgba(244, 241, 232, 0.75)',
+                              border: '1px solid rgba(244, 241, 232, 0.12)',
+                              fontFamily: 'var(--font-display)',
+                            }}
+                          >
+                            {camp.niche || brand.businessType || 'General'}
+                          </span>
+                          {isSelected && (
                             <span
-                              key={i}
                               style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                padding: '3px 10px',
+                                borderRadius: '999px',
                                 fontSize: '11px',
-                                background: 'var(--color-surface-3)',
-                                border: '1px solid var(--color-border)',
-                                padding: '3px 8px',
-                                borderRadius: 'var(--radius-sm)',
-                                color: 'var(--color-neutral-subtle)',
+                                fontWeight: 700,
+                                background: '#f4f1e8',
+                                color: '#0b0b0a',
+                                fontFamily: 'var(--font-mono)',
                               }}
                             >
-                              ✓ {d}
+                              ✓ In Spotlight
                             </span>
-                          ))}
+                          )}
                         </div>
-                      )
-                    })()}
-                  </div>
+                        <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#f4f1e8', fontFamily: 'var(--font-mono)' }}>
+                          💰 {camp.budget_range || (camp.budget ? `₹${Number(camp.budget).toLocaleString()}` : 'Flexible')}
+                        </span>
+                      </div>
 
-                  <div style={{ paddingTop: '14px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                      Min Followers: {camp.target_followers_min ? Number(camp.target_followers_min).toLocaleString() : 'Any'}
-                    </span>
-                    <Link to={`/campaigns/${camp.id}`} className="ui-button ui-btn--primary ui-btn--sm">
-                      View Brief & Pitch →
-                    </Link>
+                      <h3 style={{ fontSize: '19px', fontWeight: 700, marginBottom: '6px', color: '#f4f1e8', fontFamily: 'var(--font-display)' }}>
+                        {camp.productName || camp.title}
+                      </h3>
+
+                      <p style={{ fontSize: '13.5px', color: 'rgba(244, 241, 232, 0.65)', lineHeight: 1.6, marginBottom: '16px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {camp.description}
+                      </p>
+
+                      {/* Deliverables Pills */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px' }}>
+                        {deliv.reels > 0 && (
+                          <span style={{ fontSize: '11px', background: 'rgba(244, 241, 232, 0.03)', border: '1px solid rgba(244, 241, 232, 0.1)', padding: '3px 10px', borderRadius: '999px', color: 'rgba(244, 241, 232, 0.85)', fontFamily: 'var(--font-mono)' }}>
+                            🎬 {deliv.reels}x Reel{deliv.reels > 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {deliv.posts > 0 && (
+                          <span style={{ fontSize: '11px', background: 'rgba(244, 241, 232, 0.03)', border: '1px solid rgba(244, 241, 232, 0.1)', padding: '3px 10px', borderRadius: '999px', color: 'rgba(244, 241, 232, 0.85)', fontFamily: 'var(--font-mono)' }}>
+                            📸 {deliv.posts}x Post{deliv.posts > 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {deliv.stories > 0 && (
+                          <span style={{ fontSize: '11px', background: 'rgba(244, 241, 232, 0.03)', border: '1px solid rgba(244, 241, 232, 0.1)', padding: '3px 10px', borderRadius: '999px', color: 'rgba(244, 241, 232, 0.85)', fontFamily: 'var(--font-mono)' }}>
+                            ⏱️ {deliv.stories}x Stories
+                          </span>
+                        )}
+                        <span style={{ fontSize: '11px', background: 'rgba(244, 241, 232, 0.05)', border: '1px solid rgba(244, 241, 232, 0.18)', padding: '3px 10px', borderRadius: '999px', color: '#f4f1e8', fontFamily: 'var(--font-mono)' }}>
+                          📅 {deliv.deadline}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ paddingTop: '16px', borderTop: '1px solid rgba(244, 241, 232, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedCampId(camp.id)
+                          window.scrollTo({ top: 180, behavior: 'smooth' })
+                        }}
+                        style={{
+                          background: isSelected ? '#f4f1e8' : 'rgba(244, 241, 232, 0.04)',
+                          border: isSelected ? '1px solid #f4f1e8' : '1px solid rgba(244, 241, 232, 0.16)',
+                          borderRadius: '9999px',
+                          color: isSelected ? '#0b0b0a' : '#f4f1e8',
+                          padding: '6px 14px',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-display)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {isSelected ? '✓ In Spotlight' : 'Inspect Deliverables'}
+                      </button>
+
+                      <Link
+                        to={`/campaigns/${camp.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '7px 16px',
+                          borderRadius: '9999px',
+                          background: '#f4f1e8',
+                          color: '#0b0b0a',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          fontFamily: 'var(--font-display)',
+                          textDecoration: 'none',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#ffffff'
+                          e.currentTarget.style.transform = 'translateX(2px)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#f4f1e8'
+                          e.currentTarget.style.transform = 'translateX(0)'
+                        }}
+                      >
+                        View Brief →
+                      </Link>
+                    </div>
                   </div>
-                </Card>
-              </StaggerItem>
-            ))}
+                </StaggerItem>
+              )
+            })}
           </StaggerContainer>
         )}
       </section>

@@ -324,207 +324,181 @@
 }
 
 /* ==========================================================================
-   Brand Showcase Card (CodeAstra Obsidian & Warm Cream)
+   Brand Showcase Card (Full-Bleed Brand Cover + Overlay & Button)
    ========================================================================== */
 .brand-showcase-card {
   width: 100%;
-  background: rgba(244, 241, 232, 0.03);
-  border: 1px solid rgba(244, 241, 232, 0.12);
-  border-radius: 24px;
-  padding: 28px 24px 22px;
+  height: 420px;
+  background: #09090b;
+  border: 1px solid rgba(244, 241, 232, 0.15) !important;
+  border-radius: 20px !important;
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  justify-content: flex-end;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease !important;
   cursor: pointer;
   box-sizing: border-box;
   text-align: left;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(16px);
 }
 
 .brand-showcase-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(244, 241, 232, 0.3);
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12);
+  transform: translateY(-4px) !important;
+  border-color: rgba(244, 241, 232, 0.4) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85) !important;
 }
 
-.brand-card-identity {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 22px;
-  width: 100%;
-}
-
-.brand-logo-frame {
-  width: 84px;
-  height: 84px;
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid rgba(244, 241, 232, 0.15);
-  background: rgba(244, 241, 232, 0.04);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.brand-showcase-card:hover .brand-logo-frame {
-  transform: scale(1.06);
-}
-
-.brand-logo-frame img {
+.brand-card-bg-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  object-position: center;
+  z-index: 1;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: brightness(0.92) contrast(1.05);
+}
+
+.brand-showcase-card:hover .brand-card-bg-img {
+  transform: scale(1.05);
+}
+
+.brand-card-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(9, 9, 11, 0.2) 35%,
+    rgba(9, 9, 11, 0.8) 70%,
+    rgba(9, 9, 11, 0.98) 100%
+  );
+  pointer-events: none;
+}
+
+.brand-card-body {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
 }
 
 .brand-name-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-start;
   width: 100%;
 }
 
 .brand-card-title {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--cb-text);
-  font-family: var(--font-display);
+  color: #f4f1e8;
+  font-family: var(--font-display, "Inter Tight", sans-serif);
   margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  line-height: 1.3;
+  gap: 8px;
+  line-height: 1.25;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .brand-verified-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   background: #f4f1e8;
   color: #0b0b0a;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   flex-shrink: 0;
 }
 
-.brand-location-text {
-  font-size: 12.5px;
-  color: rgba(244, 241, 232, 0.55);
-  font-family: var(--font-mono);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0;
-}
-
-.brand-location-text svg {
-  color: rgba(244, 241, 232, 0.4);
-  flex-shrink: 0;
-}
-
-.brand-card-price-box {
-  background: rgba(244, 241, 232, 0.025);
-  border: 1px solid rgba(244, 241, 232, 0.08);
-  border-radius: 12px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.brand-view-btn {
   width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 16px;
-}
-
-.brand-price-label {
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(244, 241, 232, 0.45);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-family: var(--font-mono, monospace);
-}
-
-.brand-price-value {
-  font-size: 14px;
-  font-weight: 700;
+  padding: 12px 18px;
+  background: rgba(244, 241, 232, 0.08);
+  border: 1px solid rgba(244, 241, 232, 0.22);
+  border-radius: 10px;
   color: #f4f1e8;
-  font-family: var(--font-mono);
-  letter-spacing: -0.01em;
-}
-
-.brand-card-footer {
-  width: 100%;
-  padding-top: 12px;
-  border-top: 1px solid rgba(244, 241, 232, 0.08);
+  font-family: var(--font-display, "Inter Tight", sans-serif);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-sizing: border-box;
 }
 
-.brand-view-link {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(244, 241, 232, 0.85);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: gap 0.2s ease, color 0.2s ease;
+.brand-showcase-card:hover .brand-view-btn,
+.brand-view-btn:hover {
+  background: #0047AB !important;
+  color: #ffffff !important;
+  border-color: #0047AB !important;
+  box-shadow: 0 6px 20px rgba(0, 71, 171, 0.45) !important;
+  transform: translateY(-1px);
 }
 
-.brand-showcase-card:hover .brand-view-link {
-  color: #f4f1e8;
-  gap: 10px;
+.brand-view-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.brand-showcase-card:hover .brand-view-btn svg,
+.brand-view-btn:hover svg {
+  transform: translateX(3px);
 }
 
 /* ==========================================================================
-   Campaign Showcase Card (Landing Page & Discovery)
+   Campaign Showcase Card (Clean Brand & Product Advert Layout)
    ========================================================================== */
 .campaign-showcase-card {
   width: 100%;
-  height: 100%;
-  min-height: 290px;
-  background: rgba(244, 241, 232, 0.03);
-  border: 1px solid rgba(244, 241, 232, 0.12);
-  border-radius: var(--radius-xl);
-  padding: 22px 20px;
+  min-height: 310px;
+  background: var(--cb-surface, #0e0e0d);
+  border: 1px solid rgba(244, 241, 232, 0.14) !important;
+  border-radius: 20px !important;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   cursor: pointer;
   box-sizing: border-box;
-  box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 241, 232, 0.06);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 32px -8px rgba(0, 0, 0, 0.7) !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease !important;
   text-align: left;
-  backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
 }
 
 .campaign-showcase-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(244, 241, 232, 0.3);
-  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 241, 232, 0.12);
+  transform: translateY(-4px) !important;
+  border-color: rgba(244, 241, 232, 0.35) !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.85) !important;
 }
 
 .campaign-card-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 .campaign-brand-info {
@@ -534,123 +508,157 @@
 }
 
 .campaign-brand-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(244, 241, 232, 0.15);
-  background: rgba(244, 241, 232, 0.04);
+  background: rgba(244, 241, 232, 0.05);
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .campaign-brand-logo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.campaign-brand-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .campaign-brand-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--cb-text);
+  color: #f4f1e8;
+  font-family: var(--font-display, "Inter Tight", sans-serif);
   margin: 0;
-  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.25;
 }
 
-.campaign-location-text {
+.campaign-brand-tag {
   font-size: 11.5px;
   color: rgba(244, 241, 232, 0.5);
-  font-family: var(--font-mono);
-  display: block;
-  margin-top: 2px;
-}
-
-.campaign-badge-group {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.02em;
 }
 
 .campaign-card-body {
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.campaign-product-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.campaign-product-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0047AB;
+  font-family: var(--font-mono, monospace);
 }
 
 .campaign-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--cb-text);
-  font-family: var(--font-display);
   line-height: 1.35;
-  margin: 0 0 8px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: #f4f1e8;
+  font-family: var(--font-display, "Inter Tight", sans-serif);
+  margin: 0;
 }
 
-.campaign-desc {
-  font-size: 13px;
+.campaign-desc-2lines {
+  font-size: 13.5px;
   color: rgba(244, 241, 232, 0.65);
   line-height: 1.5;
-  margin: 0 0 12px 0;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.campaign-deliverables-wrap {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.campaign-deliverable-chip {
-  font-size: 11px;
-  font-weight: 500;
-  background: rgba(244, 241, 232, 0.04);
-  border: 1px solid rgba(244, 241, 232, 0.1);
-  padding: 3px 8px;
-  border-radius: 6px;
-  color: rgba(244, 241, 232, 0.85);
-  font-family: var(--font-mono);
+  text-overflow: ellipsis;
 }
 
 .campaign-card-footer {
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid rgba(244, 241, 232, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid rgba(244, 241, 232, 0.1);
+  width: 100%;
   gap: 12px;
 }
 
 .campaign-budget-box {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .campaign-budget-label {
-  font-size: 10px;
-  font-family: var(--font-mono, monospace);
-  color: rgba(244, 241, 232, 0.45);
+  font-size: 10.5px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  color: rgba(244, 241, 232, 0.45);
+  font-family: var(--font-mono, monospace);
 }
 
 .campaign-budget-val {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   color: #f4f1e8;
-  font-family: var(--font-mono);
+  font-family: var(--font-mono, monospace);
 }
 
 .campaign-action-btn {
-  font-size: 12.5px !important;
-  padding: 6px 14px !important;
+  padding: 8px 16px;
+  background: #0047AB;
+  border: 1px solid #0047AB;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-family: var(--font-display, "Inter Tight", sans-serif);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.campaign-showcase-card:hover .campaign-action-btn,
+.campaign-action-btn:hover {
+  background: #003785;
+  border-color: #003785;
+  box-shadow: 0 4px 16px rgba(0, 71, 171, 0.4);
+  transform: translateY(-1px);
+}
+
+.campaign-action-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.campaign-showcase-card:hover .campaign-action-btn svg,
+.campaign-action-btn:hover svg {
+  transform: translateX(3px);
 }
 
 

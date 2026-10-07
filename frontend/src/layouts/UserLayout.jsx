@@ -2,12 +2,12 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { InstagramSidebar } from '../components/InstagramSidebar/InstagramSidebar'
 
-export function UserLayout() {
+export function UserLayout({ children }) {
   return (
     <div className="portal portal-ig-layout">
       <InstagramSidebar />
       <main className="portal-main-section">
-        <Outlet />
+        {children || <Outlet />}
       </main>
     </div>
   )

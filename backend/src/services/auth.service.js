@@ -22,10 +22,10 @@ export async function getMe(auth) {
       profileData = infProfile
     }
   } else if (data.role === 'brand') {
-    const { data: brandProfile } = await db.from('brand_profiles').select('user_id, business_name, budget_range, logo_url').eq('user_id', auth.id).maybeSingle()
+    const { data: brandProfile } = await db.from('brand_profiles').select('user_id, business_name, budget_range').eq('user_id', auth.id).maybeSingle()
     if (brandProfile && brandProfile.business_name) {
       onboarding_completed = true
-      profile_image_url = brandProfile.logo_url || null
+      profile_image_url = null
       profileData = brandProfile
     }
   } else if (data.role === 'admin') {
@@ -442,6 +442,9 @@ export async function updateProfile(auth, payload) {
       business_type: brandData.business_type || brandData.businessType || brandData.category || existingBrand?.business_type || 'Brand',
       budget_range: brandData.budget_range || brandData.budgetRange || existingBrand?.budget_range || '₹25,000 - ₹1,00,000',
       location: loc,
+      website: brandData.website !== undefined ? brandData.website : (existingBrand?.website || null),
+      description: brandData.description !== undefined ? brandData.description : (existingBrand?.description || null),
+      pincode: payload.pincode || brandData.pincode || existingBrand?.pincode || null,
       updated_at: new Date().toISOString()
     }
 

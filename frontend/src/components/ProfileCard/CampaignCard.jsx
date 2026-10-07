@@ -1,36 +1,42 @@
 import React from 'react'
-import { Badge, Button } from '../ui'
 import './ProfileCard.css'
 
 export default function CampaignCard({
   id,
+  brandId,
   title = 'Campaign Brief',
+  productName,
   brand = 'Verified Brand',
   brandLogoUrl = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300',
-  niche = 'Fashion',
-  platform = 'Instagram',
   budget = '₹25,000 – ₹45,000',
-  deliverables = ['2x Reels', '3x Stories'],
-  targetFollowers = '20,000+',
-  location = 'Pan-India',
-  description = 'Looking for authentic creators to showcase upcoming campaign deliverables.',
+  budgetRange,
+  description = 'Looking for authentic creators to showcase upcoming product deliverables.',
   onSelect,
   className = ''
 }) {
+  const displayProduct = productName || title
+  const displayBudget = budget || budgetRange || '₹25,000 – ₹45,000'
+
+  const handleCardClick = (e) => {
+    if (onSelect) {
+      onSelect(e)
+    }
+  }
+
   return (
     <article
       className={`campaign-showcase-card ${className}`.trim()}
-      onClick={onSelect}
+      onClick={handleCardClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          onSelect?.(e)
+          handleCardClick(e)
         }
       }}
     >
-      {/* Top Header: Brand & Badges */}
+      {/* 1. Top: Brand Logo and Brand Name */}
       <div className="campaign-card-header">
         <div className="campaign-brand-info">
           <div className="campaign-brand-logo">
@@ -43,53 +49,49 @@ export default function CampaignCard({
               }}
             />
           </div>
-          <div>
-            <h4 className="campaign-brand-name">{brand}</h4>
-            <span className="campaign-location-text">{location}</span>
+          <div className="campaign-brand-meta">
+            <h4 className="campaign-brand-name">
+              {brand}
+              <span className="brand-verified-icon" title="Verified Brand">✓</span>
+            </h4>
+            <span className="campaign-brand-tag">Verified Brand Partner</span>
           </div>
-        </div>
-
-        <div className="campaign-badge-group">
-          <Badge variant="primary" size="sm">{platform}</Badge>
-          <Badge variant="accent" size="sm">{niche}</Badge>
         </div>
       </div>
 
-      {/* Campaign Title & Description */}
+      {/* 2. Product Name & 3. Short detail in 2 lines */}
       <div className="campaign-card-body">
-        <h3 className="campaign-title">{title}</h3>
-        <p className="campaign-desc">{description}</p>
+        <div className="campaign-product-wrap">
+          <span className="campaign-product-kicker">Featured Product Advert</span>
+          <h3 className="campaign-title">{displayProduct}</h3>
+        </div>
 
-        {/* Deliverables Tags */}
-        {deliverables?.length > 0 && (
-          <div className="campaign-deliverables-wrap">
-            {deliverables.map((item, idx) => (
-              <span key={idx} className="campaign-deliverable-chip">
-                ✓ {item}
-              </span>
-            ))}
-          </div>
-        )}
+        <p className="campaign-desc-2lines" title={description}>
+          {description}
+        </p>
       </div>
 
-      {/* Bottom Footer: Budget & CTA */}
+      {/* 4. Amount Brand Pays & Action Button (That's it!) */}
       <div className="campaign-card-footer">
         <div className="campaign-budget-box">
-          <span className="campaign-budget-label">Sponsorship Budget</span>
-          <strong className="campaign-budget-val">{budget}</strong>
+          <span className="campaign-budget-label">Brand Pays</span>
+          <strong className="campaign-budget-val">{displayBudget}</strong>
         </div>
 
-        <Button
-          variant="primary"
-          size="sm"
+        <button
+          type="button"
           className="campaign-action-btn"
           onClick={(e) => {
             e.stopPropagation()
-            onSelect?.(e)
+            handleCardClick(e)
           }}
         >
-          View Brief →
-        </Button>
+          <span>View Campaign</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </button>
       </div>
     </article>
   )

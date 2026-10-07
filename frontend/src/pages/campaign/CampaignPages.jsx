@@ -90,26 +90,51 @@ export function CampaignDiscoveryPage() {
             </p>
           </div>
           {profile?.role === 'brand' && (
-            <div style={{ marginTop: '12px' }}>
+            <div style={{ marginTop: '12px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link
                 to="/brand/campaigns"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '10px 22px',
-                  borderRadius: '9999px',
-                  background: '#f4f1e8',
-                  color: '#0b0b0a',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  fontFamily: 'var(--font-display)',
+                  padding: '10px 18px',
+                  borderRadius: '0px',
+                  background: 'rgba(244, 241, 232, 0.08)',
+                  border: '1px solid rgba(244, 241, 232, 0.2)',
+                  color: '#f4f1e8',
+                  fontWeight: 600,
+                  fontSize: '11.5px',
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
                   textDecoration: 'none',
-                  boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
                   transition: 'all 0.2s ease',
                 }}
               >
-                + Post New Ad Brief
+                📋 My Brand Briefs
+              </Link>
+              <Link
+                to="/brand/campaigns"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 18px',
+                  borderRadius: '0px',
+                  background: '#0047AB',
+                  border: '1px solid #0047AB',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '11.5px',
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 16px rgba(0, 71, 171, 0.35)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                + Post New Brief
               </Link>
             </div>
           )}
@@ -708,12 +733,65 @@ export function CampaignDetailPage() {
     )
   }
 
+  const delivInfo = (() => {
+    if (!item) return { reels: 0, posts: 0, stories: 0, list: [], deadline: 'Rolling' }
+    const list = Array.isArray(item.deliverables)
+      ? item.deliverables
+      : (typeof item.deliverables === 'string'
+          ? item.deliverables.split('+').map(s => s.trim()).filter(Boolean)
+          : [])
+    let reels = item.reelsCount || 0
+    let posts = item.postsCount || 0
+    let stories = item.storiesCount || 0
+    if (!reels && !posts && !stories) {
+      for (const it of list) {
+        const lower = it.toLowerCase()
+        const m = lower.match(/(\d+)\s*x?/)
+        const count = m ? parseInt(m[1], 10) : 1
+        if (lower.includes('reel') || lower.includes('video') || lower.includes('short') || lower.includes('grwm')) {
+          reels += count
+        } else if (lower.includes('story') || lower.includes('stories')) {
+          stories += count
+        } else if (lower.includes('post') || lower.includes('carousel') || lower.includes('image') || lower.includes('photo')) {
+          posts += count
+        }
+      }
+    }
+    return {
+      reels: reels || (list.some(s => s.toLowerCase().includes('reel')) ? 1 : 0),
+      posts: posts || (list.some(s => s.toLowerCase().includes('post') || s.toLowerCase().includes('carousel')) ? 1 : 0),
+      stories: stories || (list.some(s => s.toLowerCase().includes('story')) ? 2 : 0),
+      list,
+      deadline: item.deadline || '30 Apr 2026'
+    }
+  })()
+
   return (
     <main className="page">
-      <div style={{ marginBottom: '20px' }}>
-        <Button variant="secondary" size="sm" onClick={() => nav('/campaigns')}>
-          ← Back to All Campaigns
+      <div style={{ marginBottom: '22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            if (window.history.length > 2) {
+              nav(-1)
+            } else {
+              nav('/campaigns')
+            }
+          }}
+        >
+          ← Back
         </Button>
+
+        {item.brand && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => nav(`/brands/${item.brand?.id || item.brand_id}?campaign=${item.id}`)}
+          >
+            🏢 View Brand Profile &amp; All Other Campaigns →
+          </Button>
+        )}
       </div>
 
       <div className="bento-grid bento-grid--asymmetric">
@@ -728,8 +806,11 @@ export function CampaignDetailPage() {
               </Badge>
             </div>
 
-            <h1 style={{ fontSize: '28px', lineHeight: 1.3, marginBottom: '12px' }}>
-              {item.title}
+            <span style={{ fontSize: '12px', color: '#60a5fa', fontFamily: 'var(--font-mono)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Product Advert
+            </span>
+            <h1 style={{ fontSize: '28px', lineHeight: 1.3, margin: '4px 0 12px 0' }}>
+              {item.productName || item.title}
             </h1>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
@@ -738,8 +819,47 @@ export function CampaignDetailPage() {
               <span>📍 {item.location}</span>
             </div>
 
+            {/* 4 Specs Cards: Reels, Posts, Stories, Deadline */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  🎬 Reels To Post
+                </span>
+                <b style={{ fontSize: '15px' }}>
+                  {delivInfo.reels > 0 ? `${delivInfo.reels} Dedicated Reel${delivInfo.reels > 1 ? 's' : ''}` : 'Optional'}
+                </b>
+              </div>
+
+              <div style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  📸 Posts To Publish
+                </span>
+                <b style={{ fontSize: '15px' }}>
+                  {delivInfo.posts > 0 ? `${delivInfo.posts} Feed Post / Carousel` : 'None required'}
+                </b>
+              </div>
+
+              <div style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  ⏱️ Stories To Share
+                </span>
+                <b style={{ fontSize: '15px' }}>
+                  {delivInfo.stories > 0 ? `${delivInfo.stories} Story Link${delivInfo.stories > 1 ? 's' : ''}` : 'Optional'}
+                </b>
+              </div>
+
+              <div style={{ background: 'rgba(0, 71, 171, 0.1)', border: '1px solid rgba(0, 71, 171, 0.3)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
+                <span style={{ fontSize: '11px', color: '#7eb1ff', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                  📅 Deadline
+                </span>
+                <b style={{ fontSize: '15px' }}>
+                  {delivInfo.deadline}
+                </b>
+              </div>
+            </div>
+
             <h3 style={{ fontSize: '16px', marginBottom: '8px', color: 'var(--color-neutral-subtle)' }}>
-              Campaign Overview & Brief
+              Campaign Overview &amp; Brief
             </h3>
             <p style={{ fontSize: '15px', lineHeight: 1.8, whiteSpace: 'pre-line', color: 'var(--color-text-primary)', marginBottom: '28px' }}>
               {item.description}
@@ -748,30 +868,20 @@ export function CampaignDetailPage() {
             <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--color-neutral-subtle)' }}>
               Required Deliverables
             </h3>
-            {(() => {
-              const delivList = Array.isArray(item.deliverables)
-                ? item.deliverables
-                : (typeof item.deliverables === 'string'
-                    ? item.deliverables.split('+').map(s => s.trim()).filter(Boolean)
-                    : [])
-              if (delivList.length === 0) {
-                return (
-                  <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
-                    Deliverables can be aligned directly with the brand in messages.
-                  </p>
-                )
-              }
-              return (
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {delivList.map((d, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', background: 'var(--color-surface-2)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
-                      <span style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>✓</span>
-                      <span>{d}</span>
-                    </li>
-                  ))}
-                </ul>
-              )
-            })()}
+            {delivInfo.list.length === 0 ? (
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
+                Deliverables can be aligned directly with the brand in messages.
+              </p>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {delivInfo.list.map((d, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', background: 'var(--color-surface-2)', padding: '10px 14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                    <span style={{ color: 'var(--color-secondary)', fontWeight: 'bold' }}>✓</span>
+                    <span>{d}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </div>
 
@@ -956,7 +1066,29 @@ export function BrandCampaignsPage() {
             Create advertisement briefs with required deliverables and compensation. Influencers can browse and submit proposals directly.
           </p>
         </div>
-        <div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Link
+            to="/campaigns"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '9px 16px',
+              borderRadius: '0px',
+              background: 'rgba(244, 241, 232, 0.06)',
+              border: '1px solid rgba(244, 241, 232, 0.18)',
+              color: '#f4f1e8',
+              fontWeight: 600,
+              fontSize: '11.5px',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            ← Browse All Briefs
+          </Link>
           <Button onClick={() => setModalOpen(true)}>
             + Create New Advertisement
           </Button>
