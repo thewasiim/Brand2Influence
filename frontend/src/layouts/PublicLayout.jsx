@@ -66,8 +66,8 @@ export function PublicLayout({ children }) {
                 <UserAvatarMenu />
               </>
             ) : (
-              <div className="nav-auth-actions">
-                <Link to="/login" className="nav-login-link desktop-only-login">
+              <div className="desktop-auth-actions">
+                <Link to="/login" className="nav-login-link">
                   Sign In
                 </Link>
                 <Link to="/signup" className="nav-signup-button">
