@@ -267,6 +267,32 @@ export function LoginPage() {
           {busy ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
+
+      {/* Admin Demo Shortcut */}
+      <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid rgba(244, 241, 232, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+        <span style={{ fontSize: '11.5px', fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)' }}>
+          🔑 Quick Access:
+        </span>
+        <button
+          type="button"
+          onClick={() => setForm({ identifier: 'admin@brand2influence.com', password: 'admin123' })}
+          style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            padding: '5px 12px',
+            borderRadius: '4px',
+            background: 'rgba(0, 71, 171, 0.15)',
+            border: '1px solid rgba(0, 71, 171, 0.35)',
+            color: '#60A5FA',
+            cursor: 'pointer',
+            fontWeight: 700,
+            transition: 'all 0.2s ease'
+          }}
+        >
+          Fill Admin Credentials
+        </button>
+      </div>
+
       <div className="auth-card-links">
         <Link to="/auth/forgot-password">Forgot password?</Link>
         <Link to="/auth/signup" style={{ fontWeight: 600 }}>Create an account</Link>
