@@ -164,6 +164,7 @@ const ProfileCardComponent = ({
 
   const handlePointerMove = useCallback(
     event => {
+      if (event.pointerType === 'touch') return;
       const shell = shellRef.current;
       if (!shell || !tiltEngine) return;
       const { x, y } = getOffsets(event, shell);
@@ -174,6 +175,7 @@ const ProfileCardComponent = ({
 
   const handlePointerEnter = useCallback(
     event => {
+      if (event.pointerType === 'touch') return;
       const shell = shellRef.current;
       if (!shell || !tiltEngine) return;
 
@@ -317,6 +319,7 @@ const ProfileCardComponent = ({
               src={avatarUrl || fallbackAvatar}
               alt={name}
               loading="lazy"
+              draggable={false}
               onError={e => {
                 e.target.src = fallbackAvatar;
               }}

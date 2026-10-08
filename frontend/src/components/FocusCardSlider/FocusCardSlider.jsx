@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 import './FocusCardSlider.css';
 
 /**
@@ -7,7 +7,8 @@ import './FocusCardSlider.css';
  * A 3D Coverflow-style horizontal card slider with focal depth.
  * - Center card: in sharp focus (scale 1.02, blur 0px, opacity 1, high z-index).
  * - Side cards: blurred (scale down, blur 4px - 8px, opacity 0.6 - 0.35, lower z-index).
- * - Supports drag/swipe, arrow controls, dot navigation, and click-to-focus on side cards.
+ * - Supports native touch swipe & flick, smooth drag, arrow controls, dot navigation,
+ *   keyboard navigation, trackpad horizontal swipe, and click-to-focus on side cards.
  */
 export default function FocusCardSlider({
   items = [],
@@ -22,7 +23,15 @@ export default function FocusCardSlider({
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(1000);
   const [isDragging, setIsDragging] = useState(false);
-  const dragStartX = useRef(0);
+
+  const activeIndexRef = useRef(activeIndex);
+  activeIndexRef.current = activeIndex;
+
+  const isDraggingRef = useRef(false);
+  const justSwipedRef = useRef(false);
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0, startTrackX: 0 });
+  const isHorizontalGestureRef = useRef(null); // null = unknown, true = horizontal swipe, false = vertical page scroll
+  const wheelLockRef = useRef(false);
 
   // Measure container width for precise centering
   useEffect(() => {
@@ -43,6 +52,29 @@ export default function FocusCardSlider({
     }
   }, [items.length, activeIndex]);
 
+  // Dynamic responsive card width
+  const responsiveCardWidth = Math.min(
+    cardWidth,
+    containerWidth > 0 ? Math.max(containerWidth * 0.78, 270) : cardWidth
+  );
+  const itemTotalSpan = responsiveCardWidth + cardGap;
+  const centerOffset = (containerWidth - responsiveCardWidth) / 2;
+  const trackTranslateX = centerOffset - activeIndex * itemTotalSpan;
+
+  const trackX = useMotionValue(trackTranslateX);
+
+  // Animate track translation when activeIndex or dimensions change, unless actively dragging
+  useEffect(() => {
+    if (!isDraggingRef.current) {
+      animate(trackX, trackTranslateX, {
+        type: 'spring',
+        stiffness: 280,
+        damping: 30,
+        mass: 0.8,
+      });
+    }
+  }, [trackTranslateX, activeIndex]);
+
   const handlePrev = useCallback(() => {
     setActiveIndex((prev) => (prev > 0 ? prev - 1 : items.length - 1));
   }, [items.length]);
@@ -52,10 +84,21 @@ export default function FocusCardSlider({
   }, [items.length]);
 
   const handleCardClick = (index, e) => {
-    if (isDragging) return;
+    if (justSwipedRef.current || isDraggingRef.current) {
+      e.stopPropagation();
+      return;
+    }
     if (index !== activeIndex) {
       e.stopPropagation();
       setActiveIndex(index);
+    }
+  };
+
+  const handleClickCapture = (e) => {
+    // Intercept clicks during or immediately following a swipe gesture to prevent accidental navigation
+    if (justSwipedRef.current || isDraggingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -67,11 +110,205 @@ export default function FocusCardSlider({
     }
   };
 
-  // Calculate dynamic responsive card width for mobile
-  const responsiveCardWidth = Math.min(cardWidth, containerWidth > 0 ? Math.max(containerWidth * 0.78, 270) : cardWidth);
-  const itemTotalSpan = responsiveCardWidth + cardGap;
-  const centerOffset = (containerWidth - responsiveCardWidth) / 2;
-  const trackTranslateX = centerOffset - activeIndex * itemTotalSpan;
+  // Trackpad / Horizontal Wheel scroll
+  const handleWheel = (e) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 20) {
+      if (wheelLockRef.current) return;
+      wheelLockRef.current = true;
+      if (e.deltaX > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+      setTimeout(() => {
+        wheelLockRef.current = false;
+      }, 380);
+    }
+  };
+
+  // ==========================================
+  // Direct Touch Event Handlers (Mobile / Touch)
+  // ==========================================
+  const handleTouchStart = (e) => {
+    if (items.length <= 1) return;
+    const touch = e.touches[0];
+    isHorizontalGestureRef.current = null;
+    isDraggingRef.current = false;
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+      startTrackX: trackX.get(),
+    };
+  };
+
+  const handleTouchMove = (e) => {
+    if (items.length <= 1) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    // Detect gesture direction early
+    if (isHorizontalGestureRef.current === null) {
+      if (Math.hypot(deltaX, deltaY) > 8) {
+        if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+          // Horizontal swipe on card slider
+          isHorizontalGestureRef.current = true;
+          isDraggingRef.current = true;
+          setIsDragging(true);
+        } else {
+          // Vertical swipe for page scroll - do not intervene
+          isHorizontalGestureRef.current = false;
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (isHorizontalGestureRef.current === false) {
+      return;
+    }
+
+    // Prevent vertical jitter when horizontally swiping the carousel
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
+    // Apply soft elastic resistance at slider ends
+    let effectiveDeltaX = deltaX;
+    const currIdx = activeIndexRef.current;
+    if ((currIdx === 0 && deltaX > 0) || (currIdx === items.length - 1 && deltaX < 0)) {
+      effectiveDeltaX = deltaX * 0.35;
+    }
+
+    trackX.set(touchStartRef.current.startTrackX + effectiveDeltaX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (isHorizontalGestureRef.current === true) {
+      const touch = e.changedTouches[0];
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      const deltaTime = Math.max(1, Date.now() - touchStartRef.current.time);
+      const velocity = deltaX / deltaTime;
+
+      justSwipedRef.current = true;
+      setTimeout(() => {
+        justSwipedRef.current = false;
+        isDraggingRef.current = false;
+        setIsDragging(false);
+      }, 160);
+
+      let targetIndex = activeIndexRef.current;
+      const threshold = Math.min(responsiveCardWidth * 0.16, 42);
+
+      if (Math.abs(deltaX) > threshold || Math.abs(velocity) > 0.22) {
+        if (deltaX < 0) {
+          // Swiped left -> advance forward
+          const spanJump = Math.max(1, Math.round(Math.abs(deltaX) / itemTotalSpan));
+          targetIndex = Math.min(items.length - 1, activeIndexRef.current + spanJump);
+        } else {
+          // Swiped right -> go backward
+          const spanJump = Math.max(1, Math.round(Math.abs(deltaX) / itemTotalSpan));
+          targetIndex = Math.max(0, activeIndexRef.current - spanJump);
+        }
+      }
+
+      const finalTrackX = centerOffset - targetIndex * itemTotalSpan;
+      animate(trackX, finalTrackX, {
+        type: 'spring',
+        stiffness: 300,
+        damping: 30,
+        mass: 0.8,
+      });
+
+      if (targetIndex !== activeIndexRef.current) {
+        setActiveIndex(targetIndex);
+      }
+    } else {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    }
+    isHorizontalGestureRef.current = null;
+  };
+
+  // ==========================================
+  // Mouse Drag Handlers (Desktop Mouse Users)
+  // ==========================================
+  const handleMouseDown = (e) => {
+    if (e.button !== 0 || items.length <= 1) return; // Only left click
+    const startX = e.clientX;
+    const startTime = Date.now();
+    const startTrackX = trackX.get();
+    let hasMoved = false;
+
+    const onMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      if (!hasMoved && Math.abs(deltaX) > 5) {
+        hasMoved = true;
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      }
+
+      if (hasMoved) {
+        let effectiveDeltaX = deltaX;
+        const currIdx = activeIndexRef.current;
+        if ((currIdx === 0 && deltaX > 0) || (currIdx === items.length - 1 && deltaX < 0)) {
+          effectiveDeltaX = deltaX * 0.35;
+        }
+        trackX.set(startTrackX + effectiveDeltaX);
+      }
+    };
+
+    const onMouseUp = (upEvent) => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+
+      if (hasMoved) {
+        const deltaX = upEvent.clientX - startX;
+        const deltaTime = Math.max(1, Date.now() - startTime);
+        const velocity = deltaX / deltaTime;
+
+        justSwipedRef.current = true;
+        setTimeout(() => {
+          justSwipedRef.current = false;
+          isDraggingRef.current = false;
+          setIsDragging(false);
+        }, 160);
+
+        let targetIndex = activeIndexRef.current;
+        const threshold = Math.min(responsiveCardWidth * 0.16, 42);
+
+        if (Math.abs(deltaX) > threshold || Math.abs(velocity) > 0.22) {
+          if (deltaX < 0) {
+            const spanJump = Math.max(1, Math.round(Math.abs(deltaX) / itemTotalSpan));
+            targetIndex = Math.min(items.length - 1, activeIndexRef.current + spanJump);
+          } else {
+            const spanJump = Math.max(1, Math.round(Math.abs(deltaX) / itemTotalSpan));
+            targetIndex = Math.max(0, activeIndexRef.current - spanJump);
+          }
+        }
+
+        const finalTrackX = centerOffset - targetIndex * itemTotalSpan;
+        animate(trackX, finalTrackX, {
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+          mass: 0.8,
+        });
+
+        if (targetIndex !== activeIndexRef.current) {
+          setActiveIndex(targetIndex);
+        }
+      } else {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
 
   return (
     <div
@@ -80,6 +317,7 @@ export default function FocusCardSlider({
       className={`focus-slider-container ${className}`.trim()}
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onWheel={handleWheel}
       role="region"
       aria-label="Interactive Card Slider"
     >
@@ -129,24 +367,14 @@ export default function FocusCardSlider({
         <div className="focus-slider-edge-fade edge-fade-right" aria-hidden="true" />
 
         <motion.div
-          className="focus-slider-track"
-          drag="x"
-          dragConstraints={{ left: -((items.length - 1) * itemTotalSpan), right: 0 }}
-          dragElastic={0.15}
-          onDragStart={() => setIsDragging(true)}
-          onDragEnd={(_, info) => {
-            setTimeout(() => setIsDragging(false), 50);
-            const offset = info.offset.x;
-            const velocity = info.velocity.x;
-            if (offset < -40 || velocity < -300) {
-              if (activeIndex < items.length - 1) setActiveIndex(activeIndex + 1);
-            } else if (offset > 40 || velocity > 300) {
-              if (activeIndex > 0) setActiveIndex(activeIndex - 1);
-            }
-          }}
-          animate={{ x: trackTranslateX }}
-          transition={{ type: 'spring', stiffness: 280, damping: 30, mass: 0.8 }}
-          style={{ gap: `${cardGap}px` }}
+          className={`focus-slider-track ${isDragging ? 'is-dragging' : ''}`}
+          style={{ x: trackX, gap: `${cardGap}px` }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onClickCapture={handleClickCapture}
         >
           {items.map((item, index) => {
             const distance = Math.abs(index - activeIndex);

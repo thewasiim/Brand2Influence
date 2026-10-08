@@ -44,6 +44,7 @@ export default function CampaignCard({
               src={brandLogoUrl}
               alt={`${brand} logo`}
               loading="lazy"
+              draggable={false}
               onError={(e) => {
                 e.target.src = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&q=80&w=300'
               }}

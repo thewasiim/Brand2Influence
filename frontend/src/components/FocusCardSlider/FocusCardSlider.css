@@ -151,9 +151,12 @@
   cursor: grab;
   touch-action: pan-y;
   will-change: transform;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.focus-slider-track:active {
+.focus-slider-track:active,
+.focus-slider-track.is-dragging {
   cursor: grabbing;
 }
 
@@ -164,6 +167,9 @@
   transform-origin: center center;
   transition: box-shadow 0.3s ease;
   cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .focus-slider-item.is-active {

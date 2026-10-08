@@ -38,7 +38,9 @@
   perspective: 600px;
   transform: translate3d(0, 0, 0.1px);
   position: relative;
-  touch-action: manipulation;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
   width: 100%;
 }
 
@@ -128,6 +130,9 @@
   z-index: 1;
   transition: transform 0.4s ease;
   filter: brightness(0.92) contrast(1.05);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .pc-card:hover .pc-avatar-bg {
@@ -343,6 +348,9 @@
   cursor: pointer;
   box-sizing: border-box;
   text-align: left;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .brand-showcase-card:hover {
@@ -361,6 +369,9 @@
   z-index: 1;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   filter: brightness(0.92) contrast(1.05);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .brand-showcase-card:hover .brand-card-bg-img {
@@ -485,6 +496,9 @@
   text-align: left;
   position: relative;
   overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .campaign-showcase-card:hover {
