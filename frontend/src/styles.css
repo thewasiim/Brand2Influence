@@ -385,6 +385,7 @@ p {
   display: none !important;
 }
 
+.nav-auth-actions,
 .desktop-auth-actions {
   display: flex;
   align-items: center;
@@ -430,12 +431,29 @@ p {
 @media (max-width: 960px) {
 
   .nav-desktop-links,
-  .desktop-auth-actions {
+  .desktop-only-login {
     display: none !important;
   }
 
   .mobile-only-nav {
     display: block !important;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+
+  .nav-auth-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-signup-button {
+    font-size: 10.5px !important;
+    padding: 6px 12px !important;
+    letter-spacing: 0.06em !important;
+    white-space: nowrap;
   }
 }
 
@@ -6653,6 +6671,7 @@ body::before {
   gap: 12px;
 }
 
+.nav-auth-actions,
 .desktop-auth-actions {
   display: flex;
   align-items: center;
@@ -7340,16 +7359,105 @@ body::before {
   .navbar.site-pill {
     width: 100%;
     height: 48px;
-    padding: 4px 6px 4px 16px;
+    padding: 4px 6px 4px 14px;
+    gap: 8px;
   }
 
   .nav-desktop-links,
-  .desktop-auth-actions {
-    display: none;
+  .desktop-only-login {
+    display: none !important;
   }
 
   .mobile-only-nav {
     display: block !important;
+  }
+
+  .nav-actions {
+    gap: 6px;
+  }
+
+  .nav-auth-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-signup-button {
+    font-size: 10px !important;
+    padding: 6px 11px !important;
+    letter-spacing: 0.05em !important;
+    white-space: nowrap;
+  }
+
+  .nav-dashboard-pill {
+    font-size: 10px !important;
+    padding: 6px 11px !important;
+    letter-spacing: 0.05em !important;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    .navbar.site-pill {
+      padding: 4px 6px 4px 10px;
+      gap: 6px;
+    }
+
+    .navbar.site-pill .brand .brand-text {
+      font-size: 11.5px;
+      letter-spacing: 0.06em;
+    }
+
+    .nav-actions {
+      gap: 5px;
+    }
+
+    .nav-auth-actions {
+      gap: 5px;
+    }
+
+    .nav-signup-button,
+    .nav-dashboard-pill {
+      font-size: 9px !important;
+      padding: 5px 9px !important;
+      letter-spacing: 0.04em !important;
+    }
+
+    .sm-toggle {
+      padding: 0.35rem 0.65rem !important;
+      font-size: 0.75rem !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .navbar.site-pill {
+      padding: 3px 5px 3px 8px;
+      gap: 4px;
+    }
+
+    .navbar.site-pill .brand .brand-text {
+      font-size: 10px;
+      letter-spacing: 0.03em;
+    }
+
+    .nav-actions {
+      gap: 4px;
+    }
+
+    .nav-auth-actions {
+      gap: 4px;
+    }
+
+    .nav-signup-button,
+    .nav-dashboard-pill {
+      font-size: 8.5px !important;
+      padding: 4px 7px !important;
+      letter-spacing: 0.02em !important;
+    }
+
+    .sm-toggle {
+      padding: 0.3rem 0.5rem !important;
+      font-size: 0.7rem !important;
+    }
   }
 
   .bento-hero {
