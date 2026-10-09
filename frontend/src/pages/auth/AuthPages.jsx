@@ -8,7 +8,7 @@ import { requireSupabase } from '../../lib/supabase'
 import { Button, ErrorState, Input, Textarea, Badge } from '../../components/ui'
 
 
-function AuthCard({
+export function AuthCard({
   eyebrow = 'Brand2Influence Access',
   title,
   subtitle = null,
@@ -107,11 +107,135 @@ function GoogleIcon() {
   )
 }
 
+export function AuthModeSwitcher({ current = 'login' }) {
+  return (
+    <div className="auth-mode-switcher">
+      <Link
+        to="/auth/login"
+        className={`auth-mode-tab ${current === 'login' ? 'is-active' : ''}`}
+      >
+        Sign In
+      </Link>
+      <Link
+        to="/auth/signup"
+        className={`auth-mode-tab ${current === 'signup' ? 'is-active' : ''}`}
+      >
+        Create Account
+      </Link>
+    </div>
+  )
+}
+
+export function OtpInputGrid({ value = '', onChange, length = 6, disabled = false }) {
+  const inputsRef = useRef([])
+  const digits = Array.from({ length }, (_, i) => value[i] || '')
+
+  const handleChange = (e, index) => {
+    const val = e.target.value.replace(/\D/g, '')
+    if (!val) {
+      const next = digits.slice()
+      next[index] = ''
+      onChange(next.join(''))
+      return
+    }
+    const char = val[val.length - 1]
+    const next = digits.slice()
+    next[index] = char
+    onChange(next.join(''))
+    if (index < length - 1) {
+      inputsRef.current[index + 1]?.focus()
+    }
+  }
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+      inputsRef.current[index - 1]?.focus()
+    }
+  }
+
+  const handlePaste = (e) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length)
+    if (pasted) {
+      onChange(pasted)
+      const nextIndex = Math.min(pasted.length, length - 1)
+      inputsRef.current[nextIndex]?.focus()
+    }
+  }
+
+  return (
+    <div className="otp-digits-wrapper" onPaste={handlePaste}>
+      {Array.from({ length }).map((_, i) => (
+        <input
+          key={i}
+          ref={(el) => (inputsRef.current[i] = el)}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={1}
+          disabled={disabled}
+          value={digits[i] || ''}
+          onChange={(e) => handleChange(e, i)}
+          onKeyDown={(e) => handleKeyDown(e, i)}
+          className={`otp-digit-input ${digits[i] ? 'has-value' : ''}`}
+          autoFocus={i === 0}
+        />
+      ))}
+    </div>
+  )
+}
+
+export function AuthPortalPage() {
+  const nav = useNavigate()
+
+  return (
+    <AuthCard
+      wide={false}
+      eyebrow="[ 01 ] AUTHENTICATION PORTAL"
+      title="Brand2Influence"
+      showBack={false}
+    >
+      <div className="auth-portal-hero">
+
+        <div className="auth-portal-actions-stack">
+          <button
+            type="button"
+            className="auth-portal-btn-primary"
+            onClick={() => nav('/auth/signup')}
+          >
+            <div className="auth-portal-btn-content">
+              <span className="auth-portal-btn-title">Create New Account</span>
+
+            </div>
+            <span className="auth-portal-btn-arrow">→</span>
+          </button>
+
+          <button
+            type="button"
+            className="auth-portal-btn-secondary"
+            onClick={() => nav('/auth/login')}
+          >
+            <div className="auth-portal-btn-content">
+              <span className="auth-portal-btn-title">Sign In</span>
+            </div>
+            <span className="auth-portal-btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </AuthCard>
+  )
+}
+
 export function LoginPage() {
+
   const nav = useNavigate()
   const location = useLocation()
   const { user, profile, refreshProfile } = useAuth()
-  const [form, setForm] = useState({ identifier: '', password: '' })
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('brandhub_remember_me') === 'true')
+  const [form, setForm] = useState(() => ({
+    identifier: localStorage.getItem('brandhub_remember_identifier') || '',
+    password: ''
+  }))
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -147,6 +271,14 @@ export function LoginPage() {
         throw new Error('Please enter your email address or username.')
       }
 
+      if (rememberMe) {
+        localStorage.setItem('brandhub_remember_me', 'true')
+        localStorage.setItem('brandhub_remember_identifier', raw)
+      } else {
+        localStorage.removeItem('brandhub_remember_me')
+        localStorage.removeItem('brandhub_remember_identifier')
+      }
+
       let emailToUse = raw
       // If user typed username instead of an email (no @ or no domain .)
       if (!raw.includes('@') || !raw.includes('.')) {
@@ -174,13 +306,13 @@ export function LoginPage() {
         nav('/role-select')
       } else if (freshProfile?.role === 'influencer') {
         if (freshProfile?.onboarding_completed === false) {
-          nav('/onboarding/influencer')
+          nav('/signup/creator')
         } else {
           nav(location.state?.from || '/dashboard')
         }
       } else if (freshProfile?.role === 'brand') {
         if (freshProfile?.onboarding_completed === false) {
-          nav('/onboarding/brand')
+          nav('/signup/brand')
         } else {
           nav(location.state?.from || '/dashboard')
         }
@@ -202,7 +334,14 @@ export function LoginPage() {
   }
 
   return (
-    <AuthCard title="Welcome back" subtitle="Log in with your username or email address to access your workspace.">
+    <AuthCard
+      title="Sign In to Brand2Influence"
+      subtitle="Enter the username or email used during account creation and your password."
+      showBack={true}
+      onBack={() => nav('/')}
+    >
+      <AuthModeSwitcher current="login" />
+
       <button
         type="button"
         className="btn-google"
@@ -259,13 +398,35 @@ export function LoginPage() {
             {showPassword ? '👁️' : '🙈'}
           </button>
         </div>
-        <div style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', marginTop: '-6px', marginBottom: '14px' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', fontSize: '12.5px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ accentColor: 'var(--color-accent)', width: '15px', height: '15px', cursor: 'pointer' }}
+            />
+            <span>Remember me</span>
+          </label>
+          <Link to="/forgot-password" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 500 }}>
+            Forgot password?
+          </Link>
+        </div>
+
+        <div style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', marginTop: '-4px', marginBottom: '14px' }}>
           💡 Tip: You can sign in using your registered email address or your chosen <strong>@username</strong>.
         </div>
         {error && <ErrorState error={error} />}
         <Button disabled={busy} loading={busy} size="lg" className="full">
-          {busy ? 'Signing in…' : 'Sign in'}
+          {busy ? 'Logging in…' : 'Log In →'}
         </Button>
+        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+          Don't have an account?{' '}
+          <Link to="/signup" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none' }}>
+            Create an Account →
+          </Link>
+        </div>
       </form>
 
       {/* Admin Demo Shortcut */}
@@ -335,1902 +496,107 @@ const BRAND_NICHE_OPTIONS = [
   'Comedy & Entertainment'
 ]
 
-export function SignupPage() {
+export { SignupPage } from './SignupPage'
+
+
+export function ForgotPasswordPage() {
   const nav = useNavigate()
-  const { refreshProfile } = useAuth()
-  const [step, setStep] = useState(1) // 1: Role, 2: Basics & Contact, 3: Creator / Brand details
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-  const [successMsg, setSuccessMsg] = useState('')
-
-  // Form State
-  const [role, setRole] = useState('influencer') // 'influencer' | 'brand'
-  const [basics, setBasics] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    phone: '',
-    city: '',
-    pincode: ''
-  })
-
-  // Skippable social platforms for creators
-  const [skipYoutube, setSkipYoutube] = useState(false)
-  const [skipSnapchat, setSkipSnapchat] = useState(false)
-  const [skipFacebook, setSkipFacebook] = useState(true)
-  const [showPassword, setShowPassword] = useState(false)
-
-  // Profile Photo / Brand Logo state
-  const [profileImage, setProfileImage] = useState('')
-  const [profileImageFile, setProfileImageFile] = useState(null)
-  const photoInputRef = useRef(null)
-
-  // Instagram Phone OTP Verification state
-  const [instaPhone, setInstaPhone] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
+  const [mode, setMode] = useState('otp') // 'otp' | 'link'
+  const [identifier, setIdentifier] = useState('')
+  const [resolvedEmail, setResolvedEmail] = useState('')
+  const [maskedEmail, setMaskedEmail] = useState('')
+  const [otpStage, setOtpStage] = useState(1) // 1 = identifier, 2 = code & new password
   const [otpCode, setOtpCode] = useState('')
-  const [otpMaskedPhone, setOtpMaskedPhone] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [testOtp, setTestOtp] = useState('')
-  const [otpError, setOtpError] = useState('')
-  const [otpSuccess, setOtpSuccess] = useState('')
-  const [isInstaVerified, setIsInstaVerified] = useState(false)
-  const [sendingOtp, setSendingOtp] = useState(false)
-  const [verifyingOtp, setVerifyingOtp] = useState(false)
-  const [resendCooldown, setResendCooldown] = useState(0)
+  const [countdown, setCountdown] = useState(0)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  // YouTube Phone OTP Verification state
-  const [youtubePhone, setYoutubePhone] = useState('')
-  const [youtubeOtpSent, setYoutubeOtpSent] = useState(false)
-  const [youtubeOtpCode, setYoutubeOtpCode] = useState('')
-  const [youtubeOtpMaskedPhone, setYoutubeOtpMaskedPhone] = useState('')
-  const [youtubeTestOtp, setYoutubeTestOtp] = useState('')
-  const [youtubeOtpError, setYoutubeOtpError] = useState('')
-  const [youtubeOtpSuccess, setYoutubeOtpSuccess] = useState('')
-  const [isYoutubeVerified, setIsYoutubeVerified] = useState(false)
-  const [sendingYoutubeOtp, setSendingYoutubeOtp] = useState(false)
-  const [verifyingYoutubeOtp, setVerifyingYoutubeOtp] = useState(false)
-  const [resendYoutubeCooldown, setResendYoutubeCooldown] = useState(0)
-
-  // Live Fetched Followers Previews
-  const [instaPreviewCount, setInstaPreviewCount] = useState(null)
-  const [youtubePreviewCount, setYoutubePreviewCount] = useState(null)
-
+  // Countdown timer for resend
   useEffect(() => {
-    if (resendCooldown <= 0) return
-    const timer = setInterval(() => setResendCooldown((c) => c - 1), 1000)
+    if (countdown <= 0) return
+    const timer = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
     return () => clearInterval(timer)
-  }, [resendCooldown])
+  }, [countdown])
 
-  useEffect(() => {
-    if (resendYoutubeCooldown <= 0) return
-    const timer = setInterval(() => setResendYoutubeCooldown((c) => c - 1), 1000)
-    return () => clearInterval(timer)
-  }, [resendYoutubeCooldown])
-
-  // Sync mobile number from Basics step
-  useEffect(() => {
-    if (basics.phone) {
-      if (!instaPhone) setInstaPhone(basics.phone)
-      if (!youtubePhone) setYoutubePhone(basics.phone)
-    }
-  }, [basics.phone])
-
-  // Real-time unique username availability check
-  const [usernameStatus, setUsernameStatus] = useState({ checking: false, available: null, message: '' })
-
-  useEffect(() => {
-    const raw = (basics.username || '').trim()
-    if (!raw) {
-      setUsernameStatus({ checking: false, available: null, message: '' })
+  // Request OTP
+  const handleRequestOtp = async (e) => {
+    e?.preventDefault?.()
+    if (!identifier.trim()) {
+      setError('Please enter your account email, username, or phone number.')
       return
     }
-    if (raw.length < 3) {
-      setUsernameStatus({ checking: false, available: false, message: 'Username must be at least 3 characters' })
-      return
-    }
-    if (!/^[a-z0-9_]{3,30}$/.test(raw)) {
-      setUsernameStatus({ checking: false, available: false, message: 'Username can only contain letters, numbers, and underscores (max 30 chars)' })
-      return
-    }
-
-    setUsernameStatus({ checking: true, available: null, message: 'Checking availability...' })
-    const timer = setTimeout(async () => {
-      try {
-        const res = await authService.checkUsername(raw)
-        setUsernameStatus({
-          checking: false,
-          available: res.available,
-          message: res.message
-        })
-      } catch (err) {
-        setUsernameStatus({
-          checking: false,
-          available: null,
-          message: ''
-        })
-      }
-    }, 350)
-
-    return () => clearTimeout(timer)
-  }, [basics.username])
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB')
-      return
-    }
-    setProfileImageFile(file)
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      setProfileImage(ev.target.result)
-    }
-    reader.readAsDataURL(file)
-  }
-
-  const handleSendInstaOtp = async () => {
-    setOtpError('')
-    setOtpSuccess('')
-    const handleOrUrl = influencerData.instagram_url || influencerData.instagram_handle
-    if (!handleOrUrl || !handleOrUrl.trim()) {
-      setOtpError('Please enter your Instagram handle or profile URL first.')
-      return
-    }
-    const phone = (instaPhone || basics.phone || '').trim().replace(/\D/g, '')
-    if (phone.length < 10) {
-      setOtpError('Please enter a valid 10-digit mobile number connected to your Instagram account.')
-      return
-    }
-
-    setSendingOtp(true)
-    try {
-      const res = await influencersService.sendSocialOtp({
-        platform: 'instagram',
-        urlOrHandle: handleOrUrl.trim(),
-        phone
-      })
-      setOtpSent(true)
-      setOtpMaskedPhone(res.maskedPhone)
-      setTestOtp(res.testOtp || '')
-      setResendCooldown(45)
-      setOtpSuccess(`Verification code sent to ${res.maskedPhone}!`)
-      if (res.statsPreview?.followers) {
-        setInstaPreviewCount(res.statsPreview.followers)
-        setInfluencerData((prev) => ({
-          ...prev,
-          instagram_followers: prev.instagram_followers || String(res.statsPreview.followers)
-        }))
-      }
-    } catch (err) {
-      setOtpError(err.message || 'Failed to send OTP. Please check the handle and phone number.')
-    } finally {
-      setSendingOtp(false)
-    }
-  }
-
-  const handleVerifyInstaOtp = async () => {
-    setOtpError('')
-    setOtpSuccess('')
-    if (!otpCode || otpCode.trim().length < 6) {
-      setOtpError('Please enter the full 6-digit OTP code.')
-      return
-    }
-    const handleOrUrl = influencerData.instagram_url || influencerData.instagram_handle
-    const phone = (instaPhone || basics.phone || '').trim().replace(/\D/g, '')
-
-    setVerifyingOtp(true)
-    try {
-      const res = await influencersService.verifySocialOtp({
-        platform: 'instagram',
-        urlOrHandle: handleOrUrl.trim(),
-        phone,
-        otp: otpCode.trim()
-      })
-      setIsInstaVerified(true)
-      const count = res.stats?.followers ?? res.stats?.subscribers ?? 0
-      const finalCount = count > 0 ? count : (instaPreviewCount || 24500)
-      setInfluencerData((prev) => ({
-        ...prev,
-        instagram_followers: String(finalCount),
-        instagram_handle: res.stats?.handle ? res.stats.handle.replace('@', '') : prev.instagram_handle
-      }))
-      setOtpSuccess(`✓ Verified! ${Number(finalCount).toLocaleString()} Instagram followers confirmed and locked.`)
-    } catch (err) {
-      setOtpError(err.message || 'Invalid or expired OTP. Verification failed.')
-    } finally {
-      setVerifyingOtp(false)
-    }
-  }
-
-  const handleSendYoutubeOtp = async () => {
-    setYoutubeOtpError('')
-    setYoutubeOtpSuccess('')
-    const handleOrUrl = influencerData.youtube_url
-    if (!handleOrUrl || !handleOrUrl.trim()) {
-      setYoutubeOtpError('Please enter your YouTube channel URL or handle first.')
-      return
-    }
-    const phone = (youtubePhone || instaPhone || basics.phone || '').trim().replace(/\D/g, '')
-    if (phone.length < 10) {
-      setYoutubeOtpError('Please enter a valid 10-digit mobile number connected to your YouTube channel.')
-      return
-    }
-
-    setSendingYoutubeOtp(true)
-    try {
-      const res = await influencersService.sendSocialOtp({
-        platform: 'youtube',
-        urlOrHandle: handleOrUrl.trim(),
-        phone
-      })
-      setYoutubeOtpSent(true)
-      setYoutubeOtpMaskedPhone(res.maskedPhone)
-      setYoutubeTestOtp(res.testOtp || '')
-      setResendYoutubeCooldown(45)
-      setYoutubeOtpSuccess(`Verification code sent to ${res.maskedPhone}!`)
-      if (res.statsPreview?.subscribers || res.statsPreview?.followers) {
-        const c = res.statsPreview.subscribers || res.statsPreview.followers
-        setYoutubePreviewCount(c)
-        setInfluencerData((prev) => ({
-          ...prev,
-          youtube_subscribers: prev.youtube_subscribers || String(c)
-        }))
-      }
-    } catch (err) {
-      setYoutubeOtpError(err.message || 'Failed to send OTP. Please check channel handle and phone number.')
-    } finally {
-      setSendingYoutubeOtp(false)
-    }
-  }
-
-  const handleVerifyYoutubeOtp = async () => {
-    setYoutubeOtpError('')
-    setYoutubeOtpSuccess('')
-    if (!youtubeOtpCode || youtubeOtpCode.trim().length < 6) {
-      setYoutubeOtpError('Please enter the full 6-digit OTP code.')
-      return
-    }
-    const handleOrUrl = influencerData.youtube_url
-    const phone = (youtubePhone || instaPhone || basics.phone || '').trim().replace(/\D/g, '')
-
-    setVerifyingYoutubeOtp(true)
-    try {
-      const res = await influencersService.verifySocialOtp({
-        platform: 'youtube',
-        urlOrHandle: handleOrUrl.trim(),
-        phone,
-        otp: youtubeOtpCode.trim()
-      })
-      setIsYoutubeVerified(true)
-      const count = res.stats?.subscribers ?? res.stats?.followers ?? 0
-      const finalCount = count > 0 ? count : (youtubePreviewCount || 16200)
-      setInfluencerData((prev) => ({
-        ...prev,
-        youtube_subscribers: String(finalCount)
-      }))
-      setYoutubeOtpSuccess(`✓ Verified! ${Number(finalCount).toLocaleString()} YouTube subscribers confirmed and locked.`)
-    } catch (err) {
-      setYoutubeOtpError(err.message || 'Invalid or expired OTP. Verification failed.')
-    } finally {
-      setVerifyingYoutubeOtp(false)
-    }
-  }
-
-  // Influencer details state
-  const [influencerData, setInfluencerData] = useState({
-    niche: 'Fashion & Lifestyle',
-    instagram_handle: '',
-    instagram_url: '',
-    instagram_followers: '',
-    youtube_url: '',
-    youtube_subscribers: '',
-    snapchat_url: '',
-    snapchat_subscribers: '',
-    facebook_url: '',
-    facebook_followers: '',
-    other_platform: '',
-    other_followers: '',
-    reel_price: '',
-    story_price: '',
-    post_price: '',
-    bio: ''
-  })
-
-  // Dynamic calculated Total Reach & Combined Audience
-  const totalReach = (Number(influencerData.instagram_followers) || 0) +
-    (skipYoutube ? 0 : (Number(influencerData.youtube_subscribers) || 0)) +
-    (skipSnapchat ? 0 : (Number(influencerData.snapchat_subscribers) || 0)) +
-    (skipFacebook ? 0 : (Number(influencerData.facebook_followers) || 0))
-
-  // Social Fetch State (Live Auto-Fetch from Meta, YouTube, Snapchat)
-  const [fetchingSocial, setFetchingSocial] = useState(null) // 'instagram' | 'youtube' | 'snapchat' | null
-  const [fetchMsg, setFetchMsg] = useState({}) // { [platform]: { type: 'success' | 'error', text: string } }
-
-  const handleFetchSocial = async (platform) => {
-    let inputVal = ''
-    if (platform === 'instagram') {
-      inputVal = influencerData.instagram_url || influencerData.instagram_handle
-    } else if (platform === 'youtube') {
-      inputVal = influencerData.youtube_url
-    } else if (platform === 'snapchat') {
-      inputVal = influencerData.snapchat_url
-    }
-
-    if (!inputVal || !inputVal.trim()) {
-      setFetchMsg((prev) => ({
-        ...prev,
-        [platform]: { type: 'error', text: `Please enter a ${platform} handle or profile URL first.` }
-      }))
-      return
-    }
-
-    setFetchingSocial(platform)
-    setFetchMsg((prev) => ({ ...prev, [platform]: null }))
-
-    try {
-      const res = await api('/influencers/fetch-social', {
-        method: 'POST',
-        body: JSON.stringify({
-          platform,
-          urlOrHandle: inputVal.trim()
-        })
-      })
-
-      const data = res?.data || res?.stats || res
-      if (data) {
-        const count = data.followers ?? data.subscribers ?? 0
-        if (platform === 'instagram') {
-          setInfluencerData((prev) => ({
-            ...prev,
-            instagram_followers: count !== undefined ? String(count) : prev.instagram_followers,
-            instagram_handle: data.handle || prev.instagram_handle || inputVal.replace(/^@/, ''),
-            instagram_url: data.url || prev.instagram_url || (inputVal.startsWith('http') ? inputVal : `https://instagram.com/${inputVal.replace(/^@/, '')}`)
-          }))
-          setFetchMsg((prev) => ({
-            ...prev,
-            instagram: { type: 'success', text: `✓ Fetched: ${Number(count).toLocaleString()} followers` }
-          }))
-        } else if (platform === 'youtube') {
-          setInfluencerData((prev) => ({
-            ...prev,
-            youtube_subscribers: count !== undefined ? String(count) : prev.youtube_subscribers,
-            youtube_url: data.url || prev.youtube_url || (inputVal.startsWith('http') ? inputVal : `https://youtube.com/@${inputVal.replace(/^@/, '')}`)
-          }))
-          setFetchMsg((prev) => ({
-            ...prev,
-            youtube: { type: 'success', text: `✓ Fetched: ${Number(count).toLocaleString()} subscribers` }
-          }))
-        } else if (platform === 'snapchat') {
-          setInfluencerData((prev) => ({
-            ...prev,
-            snapchat_subscribers: count !== undefined ? String(count) : prev.snapchat_subscribers,
-            snapchat_url: data.url || prev.snapchat_url || (inputVal.startsWith('http') ? inputVal : `https://snapchat.com/add/${inputVal.replace(/^@/, '')}`)
-          }))
-          setFetchMsg((prev) => ({
-            ...prev,
-            snapchat: { type: 'success', text: `✓ Fetched: ${Number(count).toLocaleString()} subscribers` }
-          }))
-        }
-      }
-    } catch (err) {
-      setFetchMsg((prev) => ({
-        ...prev,
-        [platform]: {
-          type: 'error',
-          text: err.message ? `${err.message} (You can enter follower count manually below)` : 'Could not auto-fetch. Please enter count manually.'
-        }
-      }))
-    } finally {
-      setFetchingSocial(null)
-    }
-  }
-
-  // Brand details state (Completely separate from influencer)
-  const [brandData, setBrandData] = useState({
-    business_name: '',
-    category: 'E-commerce & Retail',
-    budget_range: '₹25,000 – ₹1,00,000',
-    website: '',
-    goals: ['🎥 Instagram Reels & Reach', '🌟 Brand Awareness & PR'],
-    preferred_niches: ['Fashion & Lifestyle', 'Beauty & Skincare'],
-    description: ''
-  })
-
-  const toggleBrandGoal = (goal) => {
-    setBrandData((prev) => {
-      const exists = prev.goals.includes(goal)
-      return {
-        ...prev,
-        goals: exists ? prev.goals.filter((g) => g !== goal) : [...prev.goals, goal]
-      }
-    })
-  }
-
-  const toggleBrandNiche = (niche) => {
-    setBrandData((prev) => {
-      const exists = prev.preferred_niches.includes(niche)
-      return {
-        ...prev,
-        preferred_niches: exists ? prev.preferred_niches.filter((n) => n !== niche) : [...prev.preferred_niches, niche]
-      }
-    })
-  }
-
-  const validateStep2 = () => {
-    if (!basics.name.trim()) return 'Please enter your full name.'
-    const u = (basics.username || '').trim().toLowerCase()
-    if (!u || u.length < 3) return 'Please choose a username of at least 3 characters (letters, numbers, underscores).'
-    if (!/^[a-z0-9_]{3,30}$/.test(u)) return 'Username can only contain letters, numbers, and underscores (3-30 characters).'
-    if (usernameStatus.available === false) {
-      return usernameStatus.message || 'This username is already taken. Please choose another one.'
-    }
-    if (usernameStatus.checking) {
-      return 'Please wait while we verify username availability...'
-    }
-    const cleanEmail = (basics.email || '').trim().toLowerCase()
-    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) return 'Please enter a valid email address.'
-    if (!basics.password || basics.password.length < 6) return 'Password must be at least 6 characters.'
-    const cleanPhone = (basics.phone || '').replace(/\D/g, '')
-    if (cleanPhone.length < 10) return 'Please enter a valid 10-digit mobile number (digits only).'
-    const cleanPin = (basics.pincode || '').replace(/\D/g, '')
-    if (cleanPin.length < 5 || cleanPin.length > 6) return 'Please enter a valid 5 or 6 digit pincode (digits only).'
-    return null
-  }
-
-  const handleNextStep = async (e) => {
-    e?.preventDefault()
     setError('')
-    if (step === 1) {
-      setStep(2)
-      return
-    }
-    if (step === 2) {
-      const err = validateStep2()
-      if (err) {
-        setError(err)
-        return
-      }
-
-      // Ensure username availability is confirmed before proceeding to Step 3
-      if (usernameStatus.available !== true) {
-        setBusy(true)
-        try {
-          const res = await authService.checkUsername(basics.username)
-          if (!res.available) {
-            setError(res.message || 'This username is already taken. Please choose another.')
-            setUsernameStatus({ checking: false, available: false, message: res.message })
-            setBusy(false)
-            return
-          }
-          setUsernameStatus({ checking: false, available: true, message: res.message })
-        } catch (checkErr) {
-          // If check error occurs, allow progressing and rely on backend validation
-        } finally {
-          setBusy(false)
-        }
-      }
-
-      if (!instaPhone && basics.phone) {
-        setInstaPhone(basics.phone)
-      }
-      if (role === 'brand' && !brandData.business_name) {
-        setBrandData((prev) => ({ ...prev, business_name: basics.name }))
-      }
-      setStep(3)
-      return
-    }
-  }
-
-  const handleFinalSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    setMessage('')
     setBusy(true)
-
     try {
-      const cleanUsername = (basics.username || basics.name || basics.email.split('@')[0])
-        .replace(/^@/, '')
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9_]/g, '')
-
-      const toInt = (val) => {
-        if (val === undefined || val === null || val === '') return 0
-        const n = parseInt(String(val).replace(/\D/g, ''), 10)
-        return isNaN(n) || n < 0 ? 0 : n
-      }
-
-      const cleanPhone = (basics.phone || '').replace(/\D/g, '')
-      const cleanPin = (basics.pincode || '').replace(/\D/g, '')
-
-      const payload = {
-        name: basics.name.trim(),
-        username: cleanUsername,
-        email: basics.email.trim().toLowerCase(),
-        password: basics.password,
-        phone: cleanPhone,
-        pincode: cleanPin,
-        location: basics.city.trim() || 'India',
-        role,
-        roleData: role === 'influencer' ? {
-          ...influencerData,
-          username: cleanUsername,
-          profile_image_url: profileImage || null,
-          profileImageUrl: profileImage || null,
-          is_instagram_verified: isInstaVerified,
-          is_youtube_verified: isYoutubeVerified,
-          instagram_handle: influencerData.instagram_handle || (influencerData.instagram_url ? influencerData.instagram_url.split('/').filter(Boolean).pop() : ''),
-          instagram_url: influencerData.instagram_url,
-          instagram_followers: toInt(influencerData.instagram_followers),
-          youtube_skipped: skipYoutube,
-          youtube_url: skipYoutube ? '' : influencerData.youtube_url,
-          youtube_subscribers: skipYoutube ? 0 : toInt(influencerData.youtube_subscribers),
-          total_reach: toInt(influencerData.instagram_followers) + (skipYoutube ? 0 : toInt(influencerData.youtube_subscribers)) + (skipSnapchat ? 0 : toInt(influencerData.snapchat_subscribers)) + (skipFacebook ? 0 : toInt(influencerData.facebook_followers)),
-          snapchat_skipped: skipSnapchat,
-          snapchat_url: skipSnapchat ? '' : influencerData.snapchat_url,
-          snapchat_subscribers: skipSnapchat ? 0 : toInt(influencerData.snapchat_subscribers),
-          facebook_skipped: skipFacebook,
-          facebook_url: skipFacebook ? '' : influencerData.facebook_url,
-          facebook_followers: skipFacebook ? 0 : toInt(influencerData.facebook_followers),
-          reel_price: toInt(influencerData.reel_price),
-          story_price: toInt(influencerData.story_price),
-          post_price: toInt(influencerData.post_price)
-        } : {
-          ...brandData,
-          username: cleanUsername,
-          business_name: brandData.business_name || basics.name,
-          business_type: brandData.category,
-          budget_range: brandData.budget_range,
-          website: brandData.website,
-          description: brandData.description,
-          goals: brandData.goals,
-          preferred_niches: brandData.preferred_niches,
-          profile_image_url: profileImage || null,
-          logo_url: profileImage || null
-        }
-      }
-
-      // 1. Call Backend auto-confirmed registration
-      await authService.register(payload)
-
-      // 2. Log in immediately with the new credentials
-      await authService.signIn({
-        email: basics.email.trim().toLowerCase(),
-        password: basics.password
-      })
-
-      // 3. Refresh user profile in context and redirect
-      await refreshProfile()
-      setSuccessMsg('Account created successfully! Taking you to your dashboard...')
-      setTimeout(() => {
-        nav('/dashboard')
-      }, 900)
+      const res = await authService.forgotPasswordOtp({ identifier: identifier.trim() })
+      setResolvedEmail(res.email)
+      setMaskedEmail(res.maskedEmail)
+      setTestOtp(res.testOtp || '')
+      setCountdown(res.cooldownSeconds || 60)
+      setOtpStage(2)
+      setMessage(res.message || 'Verification code sent to your contact!')
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.')
+      setError(err.message || 'Failed to send reset code. Please check your account details.')
     } finally {
       setBusy(false)
     }
   }
 
-  return (
-    <AuthCard
-      wide={true}
-      title={step === 1 ? 'Join Brand2Influence' : step === 2 ? 'Account & Contact Details' : role === 'influencer' ? 'Creator Stats & Rate Card' : 'Brand Profile & Marketing Goals'}
-      subtitle={step === 1 ? 'Choose your role to get started with instant access.' : step === 2 ? 'Set your unique username, email, password, and location.' : role === 'influencer' ? 'Showcase your audience reach, set rate card, and link social channels.' : 'Set up your company profile, industry, marketing budget, and campaign goals.'}
-      showBack={true}
-      onBack={step === 1 ? () => {
-        if (window.history.length > 1) {
-          nav(-1)
-        } else {
-          nav('/')
-        }
-      } : () => setStep((s) => s - 1)}
-    >
-      {/* Step Indicator */}
-      <div className="step-indicator">
-        <div className={`step-item ${step === 1 ? 'is-active' : 'is-done'}`}>
-          <span className="step-number">1</span> Role
-        </div>
-        <div className={`step-item ${step === 2 ? 'is-active' : step > 2 ? 'is-done' : ''}`}>
-          <span className="step-number">2</span> Basics
-        </div>
-        <div className={`step-item ${step === 3 ? 'is-active' : ''}`}>
-          <span className="step-number">3</span> {role === 'influencer' ? 'Rates' : 'Brand'}
-        </div>
-      </div>
-
-      {error && <div style={{ marginBottom: '16px' }}><ErrorState error={error} /></div>}
-      {successMsg && (
-        <div className="state" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', marginBottom: '16px' }}>
-          {successMsg}
-        </div>
-      )}
-
-      {/* STEP 1: ROLE SELECTION */}
-      {step === 1 && (
-        <div>
-          <div style={{
-            background: 'rgba(99, 102, 241, 0.08)',
-            border: '1px solid rgba(99, 102, 241, 0.25)',
-            borderRadius: '10px',
-            padding: '12px 14px',
-            marginTop: '12px',
-            marginBottom: '16px',
-            fontSize: '12.5px',
-            color: '#c7d2fe',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span>🔒</span>
-            <span><strong>Role Notice:</strong> Once chosen, your account role (Creator vs Brand) is permanently locked to keep collaboration workflows and rate cards separated.</span>
-          </div>
-
-          <div className="choice-grid" style={{ marginBottom: '24px' }}>
-            <button
-              type="button"
-              className={`role-choice-card ${role === 'influencer' ? 'selected' : ''}`}
-              onClick={() => setRole('influencer')}
-            >
-              <div className="choice-card-header">
-                <div className="choice-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-                  </svg>
-                </div>
-                {role === 'influencer' && <Badge variant="accent">Selected</Badge>}
-              </div>
-              <b>I’m an Influencer / Creator</b>
-              <span>Showcase your Instagram reach, verify account ownership via SMS OTP, set your rate card (Reel, Story, Post), and get sponsored brand deals.</span>
-            </button>
-
-            <button
-              type="button"
-              className={`role-choice-card ${role === 'brand' ? 'selected' : ''}`}
-              onClick={() => setRole('brand')}
-            >
-              <div className="choice-card-header">
-                <div className="choice-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-                    <path d="M3 6h18"/>
-                    <path d="M16 10a4 4 0 0 1-8 0"/>
-                  </svg>
-                </div>
-                {role === 'brand' && <Badge variant="accent">Selected</Badge>}
-              </div>
-              <b>I’m a Brand / Business</b>
-              <span>Set up your company profile, hire top verified creators, compare rates, define campaign goals, and launch marketing collaborations.</span>
-            </button>
-          </div>
-
-          {/* Google Sign Up Quick Option */}
-          <button
-            type="button"
-            className="btn-google"
-            onClick={() => authService.signInWithGoogle(role)}
-            style={{ marginBottom: '16px' }}
-          >
-            <GoogleIcon />
-            <span>Sign up with Google as {role === 'influencer' ? 'Creator' : 'Brand'}</span>
-          </button>
-
-          <div className="auth-divider">
-            <span>or continue with email setup</span>
-          </div>
-
-          <div className="auth-actions-row" style={{ marginTop: '16px' }}>
-            <button
-              type="button"
-              className="auth-back-btn"
-              onClick={() => {
-                if (window.history.length > 1) {
-                  nav(-1)
-                } else {
-                  nav('/')
-                }
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                padding: '11px 18px',
-                borderRadius: '0px',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                fontWeight: 600,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                border: '1px solid rgba(244, 241, 232, 0.18)',
-                background: 'rgba(244, 241, 232, 0.05)',
-                color: '#f4f1e8',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(244, 241, 232, 0.12)'
-                e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.35)'
-                e.currentTarget.style.transform = 'translateX(-2px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(244, 241, 232, 0.05)'
-                e.currentTarget.style.borderColor = 'rgba(244, 241, 232, 0.18)'
-                e.currentTarget.style.transform = 'translateX(0)'
-              }}
-              aria-label="Go back"
-            >
-              ← Back
-            </button>
-            <Button size="lg" className="full" onClick={() => setStep(2)}>
-              Continue with Email Setup →
-            </Button>
-          </div>
-
-          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px' }}>
-            Already registered? <Link to="/auth/login" style={{ fontWeight: 600 }}>Log in here</Link>
-          </p>
-        </div>
-      )}
-
-      {/* STEP 2: BASIC ACCOUNT & CONTACT */}
-      {step === 2 && (
-        <form onSubmit={handleNextStep}>
-          <div className="form-row-2">
-            <Input
-              label={role === 'influencer' ? 'Creator Full Name' : 'Contact Person Full Name'}
-              required
-              placeholder={role === 'influencer' ? 'e.g. Rahul Sharma' : 'e.g. Wasim Khan'}
-              value={basics.name}
-              onChange={(e) => setBasics({ ...basics, name: e.target.value })}
-            />
-            <div>
-              <Input
-                label="Choose Username (@handle)"
-                required
-                maxLength={30}
-                placeholder={role === 'influencer' ? 'e.g. rahul_creates' : 'e.g. brand_official'}
-                value={basics.username}
-                onChange={(e) => {
-                  const cleaned = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().slice(0, 30)
-                  setBasics({ ...basics, username: cleaned })
-                }}
-              />
-              {usernameStatus.checking && (
-                <span style={{ fontSize: '11.5px', color: '#6366f1', display: 'block', marginTop: '3px', fontWeight: 600 }}>
-                  ⏳ Checking availability for @{basics.username}...
-                </span>
-              )}
-              {!usernameStatus.checking && usernameStatus.available === true && (
-                <span style={{ fontSize: '11.5px', color: '#34d399', display: 'block', marginTop: '3px', fontWeight: 700 }}>
-                  ✓ @{basics.username} is available!
-                </span>
-              )}
-              {!usernameStatus.checking && usernameStatus.available === false && (
-                <span style={{ fontSize: '11.5px', color: '#f87171', display: 'block', marginTop: '3px', fontWeight: 700 }}>
-                  ⚠️ {usernameStatus.message || `@${basics.username} is already taken!`}
-                </span>
-              )}
-              <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginTop: '3px' }}>
-                🔑 Unique handle for your account. You can log in using <strong>@{basics.username || 'username'}</strong> or your email!
-              </span>
-            </div>
-          </div>
-
-          <div className="form-row-2">
-            <Input
-              label="Email Address"
-              type="email"
-              required
-              placeholder="name@example.com"
-              value={basics.email}
-              onChange={(e) => setBasics({ ...basics, email: e.target.value })}
-            />
-            <div style={{ position: 'relative' }}>
-              <Input
-                label="Create Password (min 6 chars)"
-                type={showPassword ? 'text' : 'password'}
-                minLength="6"
-                required
-                placeholder="••••••••"
-                value={basics.password}
-                onChange={(e) => setBasics({ ...basics, password: e.target.value })}
-                style={{ paddingRight: '42px' }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  bottom: '10px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  opacity: 0.7,
-                  padding: 0
-                }}
-                title={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-            </div>
-          </div>
-
-          <div className="form-row-2">
-            <Input
-              label="Mobile / WhatsApp Number"
-              type="tel"
-              inputMode="numeric"
-              maxLength={10}
-              required
-              placeholder="e.g. 9876543210"
-              value={basics.phone}
-              onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, '').slice(0, 10)
-                setBasics({ ...basics, phone: digits })
-              }}
-            />
-            <Input
-              label="City / Location"
-              required
-              placeholder="e.g. Mumbai, Delhi, Bangalore"
-              value={basics.city}
-              onChange={(e) => setBasics({ ...basics, city: e.target.value })}
-            />
-          </div>
-
-          <div className="pincode-field-wrap" style={{ maxWidth: '280px', marginBottom: '8px' }}>
-            <Input
-              label="Pincode (6 digits)"
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              required
-              placeholder="e.g. 400050"
-              value={basics.pincode}
-              onChange={(e) => {
-                const digits = e.target.value.replace(/\D/g, '').slice(0, 6)
-                setBasics({ ...basics, pincode: digits })
-              }}
-            />
-          </div>
-
-          <div className="auth-actions-row">
-            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)}>
-              ← Back
-            </Button>
-            <Button type="submit" size="lg">
-              Continue to {role === 'influencer' ? 'Creator Details' : 'Brand Details'} →
-            </Button>
-          </div>
-        </form>
-      )}
-
-      {/* STEP 3: ROLE DETAILS */}
-      {step === 3 && (
-        <form onSubmit={handleFinalSubmit}>
-          {role === 'influencer' ? (
-            <>
-              {/* INSTAGRAM-STYLE PROFILE PHOTO SETUP */}
-              <div className="insta-photo-setup">
-                <input
-                  type="file"
-                  ref={photoInputRef}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleImageUpload}
-                />
-                <div
-                  className="insta-avatar-ring"
-                  title="Click to set or change profile photo"
-                  onClick={() => photoInputRef.current?.click()}
-                >
-                  <div className="insta-avatar-inner">
-                    {profileImage ? (
-                      <img src={profileImage} alt="Profile preview" className="insta-avatar-img" />
-                    ) : (
-                      <div className="insta-avatar-placeholder">📸</div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className="insta-avatar-camera-btn"
-                    title="Upload profile picture"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      photoInputRef.current?.click()
-                    }}
-                  >
-                    📷
-                  </button>
-                </div>
-
-                <h4 className="insta-photo-title">
-                  {profileImage ? 'Creator Photo Added' : 'Add Profile Photo'}
-                </h4>
-                <p className="insta-photo-desc">
-                  Set a high-quality creator photo like Instagram to build instant trust with top brands.
-                </p>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => photoInputRef.current?.click()}
-                  >
-                    📁 Upload from Device
-                  </Button>
-                  {profileImage && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setProfileImage('')
-                        setProfileImageFile(null)
-                      }}
-                      style={{ color: '#ef4444' }}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </div>
-
-                {/* Quick Avatar Presets */}
-                <div className="insta-preset-container">
-                  <span className="insta-preset-label">Or choose a stylish creator avatar</span>
-                  <div className="insta-preset-row">
-                    {CREATOR_AVATAR_PRESETS.map((presetUrl, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`insta-preset-avatar ${profileImage === presetUrl ? 'is-active' : ''}`}
-                        onClick={() => {
-                          setProfileImage(presetUrl)
-                          setProfileImageFile(null)
-                        }}
-                        title={`Select avatar ${idx + 1}`}
-                      >
-                        <img src={presetUrl} alt={`Avatar option ${idx + 1}`} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label className="field">
-                  <span className="field-label">Primary Content Niche</span>
-                  <div className="field-input-wrap">
-                    <select
-                      className="field-input"
-                      value={influencerData.niche}
-                      onChange={(e) => setInfluencerData({ ...influencerData, niche: e.target.value })}
-                    >
-                      <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
-                      <option value="Tech & Gadgets">Tech & Gadgets</option>
-                      <option value="Fitness & Health">Fitness & Health</option>
-                      <option value="Food & Travel">Food & Travel</option>
-                      <option value="Beauty & Skincare">Beauty & Skincare</option>
-                      <option value="Comedy & Entertainment">Comedy & Entertainment</option>
-                      <option value="Education & Finance">Education & Finance</option>
-                      <option value="Gaming & Esports">Gaming & Esports</option>
-                      <option value="Parenting & Family">Parenting & Family</option>
-                      <option value="Other / Multi-niche">Other / Multi-niche</option>
-                    </select>
-                  </div>
-                </label>
-              </div>
-
-              {/* SOCIAL ACCOUNTS & LIVE SYNC SECTION */}
-              <div className="social-sync-container">
-                <div className="social-sync-header">
-                  <div className="social-sync-title-row">
-                    <h3 className="social-sync-title">
-                      <span>🔗</span> Social Media Accounts & Reach
-                    </h3>
-                    <span className="social-sync-badge">
-                      🛡️ SMS OTP Verified
-                    </span>
-                  </div>
-                  <p className="social-sync-desc">
-                    Connect your real Instagram account. You can skip any platforms you don't use (Snapchat, YouTube, Facebook).
-                  </p>
-                </div>
-
-                {/* 1. INSTAGRAM WITH PHONE OTP VERIFICATION */}
-                <div
-                  className={`social-platform-card ${isInstaVerified ? 'is-verified' : ''}`}
-                  style={{
-                    borderColor: isInstaVerified ? 'rgba(52, 211, 153, 0.6)' : undefined,
-                    background: isInstaVerified ? 'rgba(16, 185, 129, 0.04)' : undefined
-                  }}
-                >
-                  <div className="social-card-header">
-                    <div className="social-platform-label">
-                      <span style={{ fontSize: '15px' }}>📸</span> Instagram Profile (Primary Channel)
-                      {isInstaVerified && (
-                        <span style={{ fontSize: '11px', color: '#34d399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                          ✓ Ownership Verified
-                        </span>
-                      )}
-                    </div>
-                    <span className="social-platform-api-tag">Meta Security</span>
-                  </div>
-
-                  <div className="social-fetch-row">
-                    <Input
-                      label="Instagram Handle or URL"
-                      placeholder="e.g. @username or https://instagram.com/username"
-                      disabled={isInstaVerified}
-                      value={influencerData.instagram_url || influencerData.instagram_handle}
-                      onChange={(e) => {
-                        const val = e.target.value
-                        setInfluencerData((prev) => ({
-                          ...prev,
-                          instagram_handle: val.startsWith('http') ? (val.split('/').filter(Boolean).pop() || val) : val,
-                          instagram_url: val
-                        }))
-                        setIsInstaVerified(false)
-                        setOtpSent(false)
-                        setOtpError('')
-                        setOtpSuccess('')
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ marginTop: '10px' }}>
-                    <Input
-                      label="Instagram-Connected Mobile Number (For Ownership OTP)"
-                      type="tel"
-                      placeholder="e.g. 9876543210"
-                      disabled={isInstaVerified}
-                      value={instaPhone}
-                      onChange={(e) => {
-                        setInstaPhone(e.target.value)
-                        setIsInstaVerified(false)
-                        setOtpSent(false)
-                        setOtpError('')
-                        setOtpSuccess('')
-                      }}
-                    />
-                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginTop: '4px' }}>
-                      🔒 An OTP verification code is sent to your registered mobile number to confirm you are the true owner of this account.
-                    </span>
-                  </div>
-
-                  {!isInstaVerified ? (
-                    <div style={{ marginTop: '12px' }}>
-                      <Button
-                        type="button"
-                        size="md"
-                        className="full"
-                        style={{
-                          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                          color: '#fff',
-                          fontWeight: 700
-                        }}
-                        loading={sendingOtp}
-                        disabled={sendingOtp}
-                        onClick={handleSendInstaOtp}
-                      >
-                        ⚡ Fetch Followers & Send OTP
-                      </Button>
-                    </div>
-                  ) : null}
-
-                  {/* OTP Verification Prompt Card */}
-                  {otpSent && !isInstaVerified && (
-                    <div className="otp-verify-card">
-                      <div className="otp-verify-header">
-                        <span className="otp-verify-title">
-                          🛡️ Authenticate Instagram Ownership
-                        </span>
-                        {resendCooldown > 0 ? (
-                          <span style={{ fontSize: '11.5px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                            Resend in {resendCooldown}s
-                          </span>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={handleSendInstaOtp}
-                            style={{ background: 'none', border: 'none', color: '#818cf8', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer' }}
-                          >
-                            Resend Code
-                          </button>
-                        )}
-                      </div>
-
-                      <p className="otp-verify-desc">
-                        A 6-digit security OTP was sent to <strong>{otpMaskedPhone}</strong> to verify that you own <strong>@{influencerData.instagram_handle || 'this account'}</strong>.
-                      </p>
-
-                      {instaPreviewCount && (
-                        <div className="otp-preview-chip">
-                          <span>🔍 Live Profile Detected:</span> <strong>~{Number(instaPreviewCount).toLocaleString()} followers</strong> found! Enter code to verify & lock.
-                        </div>
-                      )}
-
-                      {testOtp && (
-                        <div
-                          className="dev-test-otp-chip"
-                          onClick={() => setOtpCode(testOtp)}
-                          title="Click to auto-fill test code"
-                        >
-                          <span>🧪 Dev / Test OTP: <b>{testOtp}</b></span>
-                          <span style={{ opacity: 0.7 }}>(Click to fill)</span>
-                        </div>
-                      )}
-
-                      <div className="otp-input-row">
-                        <input
-                          type="text"
-                          maxLength="6"
-                          className="otp-code-field"
-                          placeholder="••••••"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                        />
-                        <Button
-                          type="button"
-                          size="md"
-                          loading={verifyingOtp}
-                          disabled={verifyingOtp || otpCode.length < 6}
-                          onClick={handleVerifyInstaOtp}
-                          style={{
-                            background: '#10b981',
-                            borderColor: '#10b981',
-                            color: '#fff',
-                            fontWeight: 700
-                          }}
-                        >
-                          Verify OTP
-                        </Button>
-                      </div>
-
-                      {otpError && (
-                        <div style={{ color: '#f87171', fontSize: '12px', fontWeight: 600, marginTop: '6px' }}>
-                          ⚠️ {otpError}
-                        </div>
-                      )}
-                      {otpSuccess && (
-                        <div style={{ color: '#34d399', fontSize: '12px', fontWeight: 600, marginTop: '6px' }}>
-                          ✓ {otpSuccess}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Verified Success Badge & Follower Stat Display */}
-                  {isInstaVerified && (
-                    <div className="verified-stat-box">
-                      <div className="verified-stat-top">
-                        <div className="verified-stat-title-group">
-                          <span className="verified-stat-icon">📸</span>
-                          <span className="verified-stat-title">Instagram Ownership Verified (@{influencerData.instagram_handle})</span>
-                        </div>
-                        <Badge variant="accent">Verified ✓</Badge>
-                      </div>
-
-                      <div className="verified-stat-hero">
-                        <span className="verified-stat-number">{Number(influencerData.instagram_followers || 0).toLocaleString()}</span>
-                        <span className="verified-stat-hero-label">Live Verified Followers Locked</span>
-                      </div>
-
-                      <div className="verified-stat-footer">
-                        <span>🛡️ 100% Authentic Creator · OTP Verified on {otpMaskedPhone || `+91 •••••• ${(instaPhone || basics.phone || '').slice(-4)}`}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ marginTop: '12px' }}>
-                    <Input
-                      label="Instagram Followers"
-                      type="number"
-                      min="0"
-                      step="1"
-                      required
-                      placeholder="e.g. 25000"
-                      disabled={isInstaVerified}
-                      value={influencerData.instagram_followers}
-                      onChange={(e) => setInfluencerData({ ...influencerData, instagram_followers: e.target.value.replace(/\D/g, '') })}
-                    />
-                    {isInstaVerified ? (
-                      <span style={{ fontSize: '12px', color: '#34d399', marginTop: '5px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                        <span>✓</span>
-                        <span>{Number(influencerData.instagram_followers || 0).toLocaleString()} Verified Followers locked to your profile</span>
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: '11.5px', color: '#f59e0b', marginTop: '4px', display: 'block' }}>
-                        ⚠️ Followers must be verified via OTP to receive the authentic creator badge and unlock brand sponsorships.
-                      </span>
-                    )}
-                  </div>
-
-                  {totalReach > 0 && (
-                    <div className="insta-reach-indicator">
-                      <span>🌐 Combined Social Reach: <strong>{Number(totalReach).toLocaleString()} Total Followers</strong> across accounts</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* 2. YOUTUBE WITH PHONE OTP VERIFICATION */}
-                <div
-                  className={`social-platform-card ${isYoutubeVerified ? 'is-verified' : ''}`}
-                  style={{
-                    borderColor: isYoutubeVerified ? 'rgba(52, 211, 153, 0.6)' : undefined,
-                    background: isYoutubeVerified ? 'rgba(16, 185, 129, 0.04)' : undefined
-                  }}
-                >
-                  <div className="social-card-header">
-                    <div className="social-platform-label">
-                      <span style={{ fontSize: '15px' }}>▶️</span> YouTube Channel
-                      {isYoutubeVerified && (
-                        <span style={{ fontSize: '11px', color: '#34d399', background: 'rgba(16, 185, 129, 0.15)', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>
-                          ✓ Ownership Verified
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      className={`skip-toggle-btn ${skipYoutube ? 'is-skipped' : ''}`}
-                      onClick={() => {
-                        setSkipYoutube(!skipYoutube)
-                        if (!skipYoutube) {
-                          setInfluencerData((prev) => ({ ...prev, youtube_url: '', youtube_subscribers: '' }))
-                          setIsYoutubeVerified(false)
-                          setYoutubeOtpSent(false)
-                        }
-                      }}
-                    >
-                      {skipYoutube ? '✓ Skipped (No YouTube)' : 'Skip YouTube (No Channel)'}
-                    </button>
-                  </div>
-
-                  {skipYoutube ? (
-                    <div className="skipped-platform-notice">
-                      <span>ℹ️</span> YouTube skipped. You can still monetize based on your verified Instagram audience.
-                    </div>
-                  ) : (
-                    <>
-                      <div className="social-fetch-row">
-                        <Input
-                          label="YouTube Handle or Channel URL"
-                          placeholder="e.g. @channel or https://youtube.com/@channel"
-                          disabled={isYoutubeVerified}
-                          value={influencerData.youtube_url}
-                          onChange={(e) => {
-                            setInfluencerData({ ...influencerData, youtube_url: e.target.value })
-                            setIsYoutubeVerified(false)
-                            setYoutubeOtpSent(false)
-                            setYoutubeOtpError('')
-                            setYoutubeOtpSuccess('')
-                          }}
-                        />
-                      </div>
-
-                      <div style={{ marginTop: '10px' }}>
-                        <Input
-                          label="YouTube-Connected Mobile Number (For Ownership OTP)"
-                          type="tel"
-                          placeholder="e.g. 9876543210"
-                          disabled={isYoutubeVerified}
-                          value={youtubePhone}
-                          onChange={(e) => {
-                            setYoutubePhone(e.target.value)
-                            setIsYoutubeVerified(false)
-                            setYoutubeOtpSent(false)
-                            setYoutubeOtpError('')
-                            setYoutubeOtpSuccess('')
-                          }}
-                        />
-                        <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginTop: '4px' }}>
-                          🔒 An OTP code is sent to your registered mobile number to authenticate ownership of this YouTube channel.
-                        </span>
-                      </div>
-
-                      {!isYoutubeVerified ? (
-                        <div style={{ marginTop: '12px' }}>
-                          <Button
-                            type="button"
-                            size="md"
-                            className="full"
-                            style={{
-                              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                              color: '#fff',
-                              fontWeight: 700
-                            }}
-                            loading={sendingYoutubeOtp}
-                            disabled={sendingYoutubeOtp}
-                            onClick={handleSendYoutubeOtp}
-                          >
-                            ⚡ Fetch Subscribers & Send OTP
-                          </Button>
-                        </div>
-                      ) : null}
-
-                      {/* YouTube OTP Verification Prompt Card */}
-                      {youtubeOtpSent && !isYoutubeVerified && (
-                        <div className="otp-verify-card">
-                          <div className="otp-verify-header">
-                            <span className="otp-verify-title">
-                              🛡️ Authenticate YouTube Channel Ownership
-                            </span>
-                            {resendYoutubeCooldown > 0 ? (
-                              <span style={{ fontSize: '11.5px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                                Resend in {resendYoutubeCooldown}s
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={handleSendYoutubeOtp}
-                                style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer' }}
-                              >
-                                Resend Code
-                              </button>
-                            )}
-                          </div>
-
-                          <p className="otp-verify-desc">
-                            A 6-digit security OTP was sent to <strong>{youtubeOtpMaskedPhone}</strong> to verify that you own <strong>{influencerData.youtube_url || 'this channel'}</strong>.
-                          </p>
-
-                          {youtubePreviewCount && (
-                            <div className="otp-preview-chip">
-                              <span>🔍 Live Channel Detected:</span> <strong>~{Number(youtubePreviewCount).toLocaleString()} subscribers</strong> found! Enter code to verify & lock.
-                            </div>
-                          )}
-
-                          {youtubeTestOtp && (
-                            <div
-                              className="dev-test-otp-chip"
-                              onClick={() => setYoutubeOtpCode(youtubeTestOtp)}
-                              title="Click to auto-fill test code"
-                            >
-                              <span>🧪 Dev / Test OTP: <b>{youtubeTestOtp}</b></span>
-                              <span style={{ opacity: 0.7 }}>(Click to fill)</span>
-                            </div>
-                          )}
-
-                          <div className="otp-input-row">
-                            <input
-                              type="text"
-                              maxLength="6"
-                              className="otp-code-field"
-                              placeholder="••••••"
-                              value={youtubeOtpCode}
-                              onChange={(e) => setYoutubeOtpCode(e.target.value.replace(/\D/g, ''))}
-                            />
-                            <Button
-                              type="button"
-                              size="md"
-                              loading={verifyingYoutubeOtp}
-                              disabled={verifyingYoutubeOtp || youtubeOtpCode.length < 6}
-                              onClick={handleVerifyYoutubeOtp}
-                              style={{
-                                background: '#10b981',
-                                borderColor: '#10b981',
-                                color: '#fff',
-                                fontWeight: 700
-                              }}
-                            >
-                              Verify OTP
-                            </Button>
-                          </div>
-
-                          {youtubeOtpError && (
-                            <div style={{ color: '#f87171', fontSize: '12px', fontWeight: 600, marginTop: '6px' }}>
-                              ⚠️ {youtubeOtpError}
-                            </div>
-                          )}
-                          {youtubeOtpSuccess && (
-                            <div style={{ color: '#34d399', fontSize: '12px', fontWeight: 600, marginTop: '6px' }}>
-                              ✓ {youtubeOtpSuccess}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* YouTube Verified Success Badge & Stat Display */}
-                      {isYoutubeVerified && (
-                        <div className="verified-stat-box youtube-stat-box" style={{ marginTop: '12px' }}>
-                          <div className="verified-stat-top">
-                            <div className="verified-stat-title-group">
-                              <span className="verified-stat-icon">▶️</span>
-                              <span className="verified-stat-title">YouTube Channel Ownership Verified ({influencerData.youtube_url})</span>
-                            </div>
-                            <Badge variant="accent">Verified ✓</Badge>
-                          </div>
-
-                          <div className="verified-stat-hero">
-                            <span className="verified-stat-number" style={{ color: '#f87171' }}>{Number(influencerData.youtube_subscribers || 0).toLocaleString()}</span>
-                            <span className="verified-stat-hero-label">Live Verified Subscribers Locked</span>
-                          </div>
-
-                          <div className="verified-stat-footer">
-                            <span>🛡️ 100% Authentic Creator · OTP Verified on {youtubeOtpMaskedPhone || `+91 •••••• ${(youtubePhone || instaPhone || basics.phone || '').slice(-4)}`}</span>
-                          </div>
-                        </div>
-                      )}
-
-                      <div style={{ marginTop: '12px' }}>
-                        <Input
-                          label="YouTube Subscribers"
-                          type="number"
-                          min="0"
-                          step="1"
-                          placeholder="e.g. 10000"
-                          disabled={isYoutubeVerified}
-                          value={influencerData.youtube_subscribers}
-                          onChange={(e) => setInfluencerData({ ...influencerData, youtube_subscribers: e.target.value.replace(/\D/g, '') })}
-                        />
-                        {isYoutubeVerified ? (
-                          <span style={{ fontSize: '12px', color: '#34d399', marginTop: '5px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600 }}>
-                            <span>✓</span>
-                            <span>{Number(influencerData.youtube_subscribers || 0).toLocaleString()} Verified Subscribers locked to your profile</span>
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: '11.5px', color: '#f59e0b', marginTop: '4px', display: 'block' }}>
-                            ⚠️ Subscribers must be verified via OTP to receive the verified YouTube creator badge.
-                          </span>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* 3. SNAPCHAT WITH SKIP TOGGLE */}
-                <div className="social-platform-card">
-                  <div className="social-card-header">
-                    <div className="social-platform-label">
-                      <span style={{ fontSize: '15px' }}>👻</span> Snapchat Profile
-                    </div>
-                    <button
-                      type="button"
-                      className={`skip-toggle-btn ${skipSnapchat ? 'is-skipped' : ''}`}
-                      onClick={() => {
-                        setSkipSnapchat(!skipSnapchat)
-                        if (!skipSnapchat) {
-                          setInfluencerData((prev) => ({ ...prev, snapchat_url: '', snapchat_subscribers: '' }))
-                        }
-                      }}
-                    >
-                      {skipSnapchat ? '✓ Skipped (No Snapchat)' : 'Skip Snapchat (No Profile)'}
-                    </button>
-                  </div>
-
-                  {skipSnapchat ? (
-                    <div className="skipped-platform-notice">
-                      <span>ℹ️</span> Snapchat skipped. Top brands can still hire you based on your verified Instagram reach.
-                    </div>
-                  ) : (
-                    <>
-                      <div className="social-fetch-row">
-                        <Input
-                          label="Snapchat Username or Profile URL"
-                          placeholder="e.g. username or https://snapchat.com/add/username"
-                          value={influencerData.snapchat_url}
-                          onChange={(e) => setInfluencerData({ ...influencerData, snapchat_url: e.target.value })}
-                        />
-                        <div className="social-fetch-btn-wrap">
-                          <Button
-                            type="button"
-                            size="sm"
-                            className="btn-fetch"
-                            loading={fetchingSocial === 'snapchat'}
-                            disabled={fetchingSocial === 'snapchat'}
-                            onClick={() => handleFetchSocial('snapchat')}
-                          >
-                            ⚡ Fetch
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div style={{ marginTop: '10px' }}>
-                        <Input
-                          label="Snapchat Subscribers / Audience"
-                          type="number"
-                          min="0"
-                          step="1"
-                          placeholder="e.g. 15000"
-                          value={influencerData.snapchat_subscribers}
-                          onChange={(e) => setInfluencerData({ ...influencerData, snapchat_subscribers: e.target.value.replace(/\D/g, '') })}
-                        />
-                      </div>
-
-                      {fetchMsg.snapchat && (
-                        <div
-                          style={{
-                            marginTop: '6px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            color: fetchMsg.snapchat.type === 'success' ? '#34d399' : '#f87171'
-                          }}
-                        >
-                          {fetchMsg.snapchat.text}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* 4. FACEBOOK WITH SKIP TOGGLE */}
-                <div className="social-platform-card">
-                  <div className="social-card-header">
-                    <div className="social-platform-label">
-                      <span style={{ fontSize: '15px' }}>📘</span> Facebook Page / Profile (Optional)
-                    </div>
-                    <button
-                      type="button"
-                      className={`skip-toggle-btn ${skipFacebook ? 'is-skipped' : ''}`}
-                      onClick={() => {
-                        setSkipFacebook(!skipFacebook)
-                        if (!skipFacebook) {
-                          setInfluencerData((prev) => ({ ...prev, facebook_url: '', facebook_followers: '' }))
-                        }
-                      }}
-                    >
-                      {skipFacebook ? '✓ Skipped' : 'Skip Facebook (No Page)'}
-                    </button>
-                  </div>
-                  {!skipFacebook && (
-                    <div className="form-row-2" style={{ marginTop: '10px' }}>
-                      <Input
-                        label="Facebook Page URL"
-                        placeholder="https://facebook.com/yourpage"
-                        value={influencerData.facebook_url}
-                        onChange={(e) => setInfluencerData({ ...influencerData, facebook_url: e.target.value })}
-                      />
-                      <Input
-                        label="Facebook Followers"
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder="e.g. 5000"
-                        value={influencerData.facebook_followers}
-                        onChange={(e) => setInfluencerData({ ...influencerData, facebook_followers: e.target.value.replace(/\D/g, '') })}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* TOTAL COMBINED AUDIENCE & VERIFIED REACH SUMMARY */}
-              <div className="total-reach-summary-card">
-                <div className="total-reach-header">
-                  <div>
-                    <div className="total-reach-badge">🔥 LIVE COMBINED AUDIENCE REACH</div>
-                    <h3 className="total-reach-title">Total Verified Followers & Audience</h3>
-                    <p className="total-reach-subtitle">
-                      Combined reach calculated from all connected social platforms ({isInstaVerified ? 'Instagram ✓' : 'Instagram'} {isYoutubeVerified ? '+ YouTube ✓' : (!skipYoutube && influencerData.youtube_subscribers ? '+ YouTube' : '')})
-                    </p>
-                  </div>
-                  <div className="total-reach-stat-box">
-                    <div className="total-reach-number">
-                      {Number(totalReach).toLocaleString()}
-                    </div>
-                    <div className="total-reach-unit">Combined Followers & Subscribers</div>
-                  </div>
-                </div>
-
-                <div className="total-reach-chips-row">
-                  {Number(influencerData.instagram_followers) > 0 && (
-                    <div className={`reach-chip ${isInstaVerified ? 'is-verified' : ''}`}>
-                      <span className="reach-chip-icon">📸</span>
-                      <span className="reach-chip-label">Instagram:</span>
-                      <strong className="reach-chip-count">{Number(influencerData.instagram_followers).toLocaleString()}</strong>
-                      {isInstaVerified && <span className="reach-chip-status">✓ OTP Verified</span>}
-                    </div>
-                  )}
-
-                  {!skipYoutube && Number(influencerData.youtube_subscribers) > 0 && (
-                    <div className={`reach-chip ${isYoutubeVerified ? 'is-verified' : ''}`}>
-                      <span className="reach-chip-icon">▶️</span>
-                      <span className="reach-chip-label">YouTube:</span>
-                      <strong className="reach-chip-count">{Number(influencerData.youtube_subscribers).toLocaleString()}</strong>
-                      {isYoutubeVerified && <span className="reach-chip-status">✓ OTP Verified</span>}
-                    </div>
-                  )}
-
-                  {!skipSnapchat && Number(influencerData.snapchat_subscribers) > 0 && (
-                    <div className="reach-chip">
-                      <span className="reach-chip-icon">👻</span>
-                      <span className="reach-chip-label">Snapchat:</span>
-                      <strong className="reach-chip-count">{Number(influencerData.snapchat_subscribers).toLocaleString()}</strong>
-                    </div>
-                  )}
-
-                  {!skipFacebook && Number(influencerData.facebook_followers) > 0 && (
-                    <div className="reach-chip">
-                      <span className="reach-chip-icon">📘</span>
-                      <span className="reach-chip-label">Facebook:</span>
-                      <strong className="reach-chip-count">{Number(influencerData.facebook_followers).toLocaleString()}</strong>
-                    </div>
-                  )}
-                </div>
-
-                {totalReach > 0 && (
-                  <div className="total-reach-tier-banner">
-                    <span className="tier-icon">⚡</span>
-                    <span>
-                      Monetization Tier: <strong>{totalReach >= 100000 ? '⭐ Macro Influencer (Highest Brand Sponsorship Deals)' : totalReach >= 20000 ? '🚀 Established Creator (High Sponsorship Deal Priority)' : '🌱 Rising Micro-Creator (High Engagement Campaign Matching)'}</strong>
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* PRICING & RATE CARD */}
-              <div style={{ marginTop: '8px', marginBottom: '14px' }}>
-                <p className="rate-card-title">
-                  Pricing & Rate Card (₹ INR)
-                </p>
-                <div className="form-row-3">
-                  <Input
-                    label="Reel Rate (₹)"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="e.g. 5000"
-                    value={influencerData.reel_price}
-                    onChange={(e) => setInfluencerData({ ...influencerData, reel_price: e.target.value.replace(/\D/g, '') })}
-                  />
-                  <Input
-                    label="Story Rate (₹)"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="e.g. 2000"
-                    value={influencerData.story_price}
-                    onChange={(e) => setInfluencerData({ ...influencerData, story_price: e.target.value.replace(/\D/g, '') })}
-                  />
-                  <Input
-                    label="Post Rate (₹)"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="e.g. 3500"
-                    value={influencerData.post_price}
-                    onChange={(e) => setInfluencerData({ ...influencerData, post_price: e.target.value.replace(/\D/g, '') })}
-                  />
-                </div>
-              </div>
-
-              <Textarea
-                label="Creator Bio & Pitch"
-                rows={3}
-                placeholder="Tell brands what makes your content unique and how you engage your audience..."
-                value={influencerData.bio}
-                onChange={(e) => setInfluencerData({ ...influencerData, bio: e.target.value })}
-              />
-            </>
-          ) : (
-            /* BRAND QUESTIONS - DEDICATED COMPANY & CAMPAIGN DETAILS */
-            <>
-              {/* BRAND LOGO SETUP */}
-              <div className="insta-photo-setup" style={{ marginBottom: '20px' }}>
-                <input
-                  type="file"
-                  ref={photoInputRef}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleImageUpload}
-                />
-                <div
-                  className="insta-avatar-ring"
-                  style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', boxShadow: '0 8px 24px rgba(99, 102, 241, 0.35)' }}
-                  title="Click to set Brand Logo"
-                  onClick={() => photoInputRef.current?.click()}
-                >
-                  <div className="insta-avatar-inner" style={{ borderRadius: '16px' }}>
-                    {profileImage ? (
-                      <img src={profileImage} alt="Brand Logo preview" className="insta-avatar-img" />
-                    ) : (
-                      <div className="insta-avatar-placeholder" style={{ fontSize: '32px' }}>🏢</div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className="insta-avatar-camera-btn"
-                    title="Upload Brand Logo"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      photoInputRef.current?.click()
-                    }}
-                  >
-                    📷
-                  </button>
-                </div>
-
-                <h4 className="insta-photo-title">
-                  {profileImage ? 'Brand Logo Added' : 'Upload Brand Logo'}
-                </h4>
-                <p className="insta-photo-desc">
-                  Showcase your official brand or company logo to stand out in creator discovery and campaign briefs.
-                </p>
-
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => photoInputRef.current?.click()}
-                  >
-                    📁 Upload Brand Logo
-                  </Button>
-                  {profileImage && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setProfileImage('')
-                        setProfileImageFile(null)
-                      }}
-                      style={{ color: '#ef4444' }}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </div>
-
-                {/* Brand Logo Presets */}
-                <div className="insta-preset-container">
-                  <span className="insta-preset-label">Or choose a brand icon preset</span>
-                  <div className="insta-preset-row">
-                    {BRAND_LOGO_PRESETS.map((presetUrl, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`insta-preset-avatar ${profileImage === presetUrl ? 'is-active' : ''}`}
-                        onClick={() => {
-                          setProfileImage(presetUrl)
-                          setProfileImageFile(null)
-                        }}
-                        title={`Select logo preset ${idx + 1}`}
-                      >
-                        <img src={presetUrl} alt={`Logo preset ${idx + 1}`} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-row-2">
-                <Input
-                  label="Brand / Business Name"
-                  required
-                  placeholder="e.g. Blue Tokai Coffee Roasters"
-                  value={brandData.business_name}
-                  onChange={(e) => setBrandData({ ...brandData, business_name: e.target.value })}
-                />
-
-                <label className="field">
-                  <span className="field-label">Industry Category</span>
-                  <div className="field-input-wrap">
-                    <select
-                      className="field-input"
-                      value={brandData.category}
-                      onChange={(e) => setBrandData({ ...brandData, category: e.target.value })}
-                    >
-                      <option value="E-commerce & Retail">E-commerce & Retail</option>
-                      <option value="Food & Beverage">Food & Beverage</option>
-                      <option value="Fashion & Apparel">Fashion & Apparel</option>
-                      <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-                      <option value="Technology & SaaS">Technology & SaaS</option>
-                      <option value="Fitness & Health">Fitness & Health</option>
-                      <option value="Education & EdTech">Education & EdTech</option>
-                      <option value="Travel & Hospitality">Travel & Hospitality</option>
-                      <option value="Marketing Agency">Marketing Agency</option>
-                    </select>
-                  </div>
-                </label>
-              </div>
-
-              <div className="form-row-2">
-                <Input
-                  label="Official Website or Store URL"
-                  placeholder="https://yourbrand.com or @brandhandle"
-                  value={brandData.website}
-                  onChange={(e) => setBrandData({ ...brandData, website: e.target.value })}
-                />
-
-                <label className="field">
-                  <span className="field-label">Typical Monthly Campaign Budget</span>
-                  <div className="field-input-wrap">
-                    <select
-                      className="field-input"
-                      value={brandData.budget_range}
-                      onChange={(e) => setBrandData({ ...brandData, budget_range: e.target.value })}
-                    >
-                      <option value="₹10,000 – ₹25,000">₹10,000 – ₹25,000</option>
-                      <option value="₹25,000 – ₹1,00,000">₹25,000 – ₹1,00,000</option>
-                      <option value="₹1,00,000 – ₹5,00,000">₹1,00,000 – ₹5,00,000</option>
-                      <option value="₹5,00,000+">₹5,00,000+</option>
-                    </select>
-                  </div>
-                </label>
-              </div>
-
-              {/* Primary Collaboration Goals */}
-              <div style={{ marginBottom: '16px' }}>
-                <label className="field-label" style={{ display: 'block', marginBottom: '4px' }}>
-                  Primary Collaboration Goals (Select all that apply)
-                </label>
-                <div className="brand-goals-grid">
-                  {BRAND_GOAL_OPTIONS.map((goal, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`brand-goal-pill ${brandData.goals.includes(goal) ? 'is-active' : ''}`}
-                      onClick={() => toggleBrandGoal(goal)}
-                    >
-                      {brandData.goals.includes(goal) ? '✓ ' : ''}{goal}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Preferred Creator Categories */}
-              <div style={{ marginBottom: '16px' }}>
-                <label className="field-label" style={{ display: 'block', marginBottom: '4px' }}>
-                  Target Creator Niches
-                </label>
-                <div className="brand-goals-grid">
-                  {BRAND_NICHE_OPTIONS.map((niche, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`brand-goal-pill ${brandData.preferred_niches.includes(niche) ? 'is-active' : ''}`}
-                      onClick={() => toggleBrandNiche(niche)}
-                    >
-                      {brandData.preferred_niches.includes(niche) ? '✓ ' : ''}{niche}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <Textarea
-                label="Brand Overview & Campaign Expectations"
-                rows={3}
-                placeholder="Describe your brand and the types of content, deliverables, or creators you look for..."
-                value={brandData.description}
-                onChange={(e) => setBrandData({ ...brandData, description: e.target.value })}
-              />
-            </>
-          )}
-
-          <div className="auth-actions-row">
-            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(2)} disabled={busy}>
-              ← Back
-            </Button>
-            <Button type="submit" size="lg" disabled={busy} loading={busy}>
-              {busy ? 'Creating Your Account…' : 'Complete Registration →'}
-            </Button>
-          </div>
-        </form>
-      )}
-    </AuthCard>
-  )
-}
-
-export function ForgotPasswordPage() {
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-
-  const submit = async (e) => {
+  // Verify OTP and update password
+  const handleResetWithOtp = async (e) => {
+    e?.preventDefault?.()
+    if (!otpCode || otpCode.length !== 6) {
+      setError('Please enter the complete 6-digit OTP code.')
+      return
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setError('New password must be at least 6 characters long.')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match. Please re-enter.')
+      return
+    }
+    setError('')
+    setMessage('')
+    setBusy(true)
+    try {
+      const res = await authService.resetPasswordOtp({
+        email: resolvedEmail,
+        otp: otpCode,
+        newPassword
+      })
+      setMessage(res.message || 'Password reset successfully! Redirecting to login...')
+      setTimeout(() => {
+        nav('/auth/login')
+      }, 1500)
+    } catch (err) {
+      setError(err.message || 'Failed to reset password. Please verify the code.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Classic magic link submission
+  const handleSendLink = async (e) => {
     e.preventDefault()
+    if (!identifier.trim()) {
+      setError('Please enter your account email.')
+      return
+    }
     setBusy(true)
     setError('')
+    setMessage('')
     try {
-      await authService.forgotPassword(email)
-      setMessage('Password reset link sent! Check your inbox.')
+      await authService.forgotPassword(identifier.trim())
+      setMessage('Password reset link sent! Please check your email inbox.')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -2239,28 +605,203 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <AuthCard title="Reset your password" subtitle="Enter your email to receive recovery instructions.">
-      <form onSubmit={submit}>
-        <Input
-          label="Account email"
-          type="email"
-          required
-          placeholder="name@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {error && <ErrorState error={error} />}
-        <Button disabled={busy} loading={busy} size="lg" className="full">
-          {busy ? 'Sending link…' : 'Send reset link'}
-        </Button>
-      </form>
-      {message && (
-        <div className="state" style={{ background: 'var(--color-primary-subtle)', color: 'var(--color-accent)' }}>
-          {message}
+    <AuthCard
+      title="Reset Your Password"
+      subtitle={
+        otpStage === 2
+          ? `Enter the 6-digit code sent to ${maskedEmail || 'your email'} to choose a new password.`
+          : 'Recover access to your BrandHUB account via 6-digit security OTP or reset link.'
+      }
+      showBack={true}
+      onBack={() => {
+        if (otpStage === 2) {
+          setOtpStage(1)
+          setOtpCode('')
+          setError('')
+        } else {
+          nav('/auth/login')
+        }
+      }}
+    >
+      {/* Mode switcher */}
+      {otpStage === 1 && (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          <button
+            type="button"
+            className={`auth-mode-tab ${mode === 'otp' ? 'is-active' : ''}`}
+            onClick={() => {
+              setMode('otp')
+              setError('')
+              setMessage('')
+            }}
+            style={{ flex: 1, padding: '10px' }}
+          >
+            ⚡ 6-Digit OTP (Fast)
+          </button>
+          <button
+            type="button"
+            className={`auth-mode-tab ${mode === 'link' ? 'is-active' : ''}`}
+            onClick={() => {
+              setMode('link')
+              setError('')
+              setMessage('')
+            }}
+            style={{ flex: 1, padding: '10px' }}
+          >
+            ✉️ Email Reset Link
+          </button>
         </div>
       )}
-      <div style={{ textAlign: 'center', marginTop: '16px' }}>
-        <Link to="/auth/login">Back to log in</Link>
+
+      {error && <ErrorState error={error} />}
+
+      {message && (
+        <div
+          className="state"
+          style={{
+            background: 'rgba(52, 211, 153, 0.12)',
+            border: '1px solid rgba(52, 211, 153, 0.3)',
+            color: '#34d399',
+            padding: '12px 14px',
+            borderRadius: '8px',
+            marginBottom: '18px',
+            fontSize: '13px'
+          }}
+        >
+          ✓ {message}
+        </div>
+      )}
+
+      {mode === 'otp' && otpStage === 1 && (
+        <form onSubmit={handleRequestOtp}>
+          <Input
+            label="Account Email, Username, or Phone Number"
+            type="text"
+            required
+            placeholder="e.g. alex_creator, alex@example.com, or 9876543210"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+          <div style={{ marginTop: '16px' }}>
+            <Button disabled={busy} loading={busy} size="lg" className="full">
+              {busy ? 'Locating Account & Sending Code…' : 'Send 6-Digit Verification Code →'}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {mode === 'otp' && otpStage === 2 && (
+        <form onSubmit={handleResetWithOtp}>
+          <div className="otp-standalone-container" style={{ marginBottom: '16px' }}>
+            <div className="otp-target-info">
+              Enter the 6-digit verification code sent to <strong>{maskedEmail}</strong>
+            </div>
+
+            <OtpInputGrid
+              value={otpCode}
+              onChange={setOtpCode}
+              length={6}
+              disabled={busy}
+            />
+
+            {/* Dev / Test OTP quick fill */}
+            {testOtp && (
+              <div
+                className="dev-test-otp-chip"
+                onClick={() => setOtpCode(testOtp)}
+                title="Click to auto-fill test code"
+              >
+                <span>🧪 Dev / Test OTP: <b>{testOtp}</b></span>
+                <span style={{ opacity: 0.7 }}>(Click to fill)</span>
+              </div>
+            )}
+
+            <div className="otp-timer-row">
+              {countdown > 0 ? (
+                <span>Resend new code in <strong>{countdown}s</strong></span>
+              ) : (
+                <button
+                  type="button"
+                  className="otp-resend-btn"
+                  onClick={handleRequestOtp}
+                  disabled={busy}
+                >
+                  ↻ Resend 6-Digit Code
+                </button>
+              )}
+            </div>
+          </div>
+
+          <Input
+            label="New Password"
+            type="password"
+            minLength="6"
+            required
+            placeholder="At least 6 characters"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+
+          <div style={{ marginTop: '12px' }}>
+            <Input
+              label="Confirm New Password"
+              type="password"
+              minLength="6"
+              required
+              placeholder="Re-enter your new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-actions-row" style={{ marginTop: '20px' }}>
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
+              onClick={() => {
+                setOtpStage(1)
+                setOtpCode('')
+                setError('')
+              }}
+              disabled={busy}
+            >
+              ← Back
+            </Button>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={busy || otpCode.length < 6 || !newPassword}
+              loading={busy}
+            >
+              {busy ? 'Updating Password…' : 'Reset Password & Log In →'}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {mode === 'link' && (
+        <form onSubmit={handleSendLink}>
+          <Input
+            label="Account Registered Email"
+            type="email"
+            required
+            placeholder="name@example.com"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+          <div style={{ marginTop: '16px' }}>
+            <Button disabled={busy} loading={busy} size="lg" className="full">
+              {busy ? 'Sending Reset Link…' : 'Send Reset Link via Email'}
+            </Button>
+          </div>
+        </form>
+      )}
+
+      <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px' }}>
+        <Link to="/auth/login" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600 }}>
+          ← Back to Sign In
+        </Link>
       </div>
     </AuthCard>
   )

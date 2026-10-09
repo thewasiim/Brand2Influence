@@ -85,4 +85,50 @@ export const googleCallback = async (req, res, next) => {
   }
 }
 
+export const sendOtp = async (req, res, next) => {
+  try {
+    const result = await service.sendRegistrationOtp(req.body)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const verifyOtp = async (req, res, next) => {
+  try {
+    const result = await service.verifyRegistrationOtp(req.body)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const forgotPasswordOtp = async (req, res, next) => {
+  try {
+    const result = await service.sendForgotPasswordOtp(req.body)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const resetPasswordOtp = async (req, res, next) => {
+  try {
+    const result = await service.verifyAndResetPasswordOtp(req.body)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('token')
+    res.json({ success: true, message: 'Logged out successfully' })
+  } catch (e) {
+    next(e)
+  }
+}
+
+
 

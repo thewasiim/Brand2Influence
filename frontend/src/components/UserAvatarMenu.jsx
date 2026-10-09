@@ -42,10 +42,17 @@ export function UserAvatarMenu() {
     roleBadgeVariant = 'primary'
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setOpen(false)
-    signOut()
+    try {
+      await authService.logoutBackend()
+    } catch (e) {
+      // ignore
+    }
+    await signOut()
+    navigate('/auth/login')
   }
+
 
   return (
     <div className="nav-user-menu-wrap" ref={menuRef}>

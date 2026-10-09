@@ -7,7 +7,7 @@ import { UserLayout } from './layouts/UserLayout'
 import { AdminLayout } from './layouts/AdminLayout'
 import { ProtectedRoute, RoleProtectedRoute, AdminRoute } from './components/ProtectedRoute'
 import LandingPage from './pages/LandingPage'
-import { LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage } from './pages/auth/AuthPages'
+import { LoginPage, SignupPage, ForgotPasswordPage, ResetPasswordPage, AuthCallbackPage, AuthPortalPage } from './pages/auth/AuthPages'
 import RoleSelectionPage from './pages/RoleSelectionPage'
 import { BrandOnboardingPage, BrandDiscoveryPage, BrandProfilePage } from './pages/brand/BrandPages'
 import { InfluencerOnboardingPage, DiscoveryPage, InfluencerProfilePage } from './pages/influencer/InfluencerPages'
@@ -88,8 +88,8 @@ export default function App() {
         <Route path="/how-it-works" element={<LandingPage />} />
         <Route path="/for-brands" element={<LandingPage />} />
         <Route path="/for-influencers" element={<LandingPage />} />
-        <Route path="/login" element={<Navigate to="/auth/login" replace />} />
-        <Route path="/signup" element={<Navigate to="/auth/signup" replace />} />
+        <Route path="/portal" element={<Navigate to="/auth/portal" replace />} />
+        <Route path="/auth" element={<Navigate to="/auth/portal" replace />} />
       </Route>
 
       {/* Adaptive Campaign Routes (UserLayout with sidebar when logged-in, PublicLayout when guest) */}
@@ -99,6 +99,18 @@ export default function App() {
       <Route path="/brand-deals" element={<AdaptiveCampaignsRoute />} />
 
       <Route element={<AuthLayout />}>
+        {/* Primary Instagram-inspired Authentication & Onboarding Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/signup/brand" element={<BrandOnboardingPage />} />
+        <Route path="/signup/creator" element={<InfluencerOnboardingPage />} />
+        <Route path="/signup/creator/social-accounts" element={<InfluencerOnboardingPage />} />
+        <Route path="/signup/creator/metrics" element={<InfluencerOnboardingPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        {/* Backward-compatible /auth routes */}
+        <Route path="/auth/portal" element={<AuthPortalPage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />

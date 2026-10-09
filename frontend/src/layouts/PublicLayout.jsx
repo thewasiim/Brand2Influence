@@ -70,7 +70,7 @@ export function PublicLayout({ children }) {
                 <Link to="/login" className="nav-login-link">
                   Sign In
                 </Link>
-                <Link to="/signup" className="nav-signup-button">
+                <Link to="/auth/portal" className="nav-signup-button">
                   Go Beyond →
                 </Link>
               </div>
@@ -92,7 +92,7 @@ export function PublicLayout({ children }) {
                 loginLabel={user ? 'Dashboard' : 'Sign In'}
                 loginLink={user ? (profile?.role === 'admin' ? '/admin' : '/dashboard') : '/login'}
                 ctaLabel={user ? 'My Profile' : 'Go Beyond →'}
-                ctaLink={user ? '/profile' : '/signup'}
+                ctaLink={user ? '/profile' : '/auth/portal'}
               />
             </div>
           </div>

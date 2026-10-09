@@ -40,116 +40,528 @@ const BRAND_LOCATIONS = [
   'Remote / Pan-India',
 ]
 
+const COMPANY_SIZES = [
+  '1-10 employees',
+  '11-50 employees',
+  '51-200 employees',
+  '201-500 employees',
+  '500+ employees'
+]
+
+const BRAND_GOAL_OPTIONS = [
+  '🌟 Brand Awareness',
+  '📦 Product Launch',
+  '🛒 Conversions & Sales',
+  '📱 User-Generated Content (UGC)',
+  '🤝 Long-Term Ambassador',
+  '🎥 Social Reach & Engagement'
+]
+
+const BRAND_BUDGET_RANGES = [
+  '₹25,000 - ₹50,000',
+  '₹50,000 - ₹1,50,000',
+  '₹1,50,000 - ₹5,00,000',
+  '₹5,00,000+'
+]
+
 export function BrandOnboardingPage() {
   const nav = useNavigate()
-  const { refreshProfile } = useAuth()
-  const [form, setForm] = useState({
-    businessName: '',
-    businessType: '',
-    budgetRange: '',
-    location: '',
-    website: '',
-    deckLink: '',
-    description: '',
-  })
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
+  const { user, profile, refreshProfile } = useAuth()
 
-  const submit = async (e) => {
+  // Retrieve initial draft if available
+  const draft = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('brandhub_onboarding_draft') || '{}')
+    } catch {
+      return {}
+    }
+  })()
+
+  // Step state: 1: Brand Info, 2: Brand Profile, 3: Review, 4: Complete
+  const [step, setStep] = useState(1)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  // Step 1: Brand Info
+  const [brandName, setBrandName] = useState(draft.name || profile?.name || '')
+  const [category, setCategory] = useState(BRAND_CATEGORIES[1] || 'Fashion & Apparel')
+  const [website, setWebsite] = useState(draft.website || '')
+  const [companySize, setCompanySize] = useState(COMPANY_SIZES[1])
+  const [location, setLocation] = useState(draft.location || draft.country || 'Mumbai, India')
+  const [logoUrl, setLogoUrl] = useState(draft.profileImageUrl || '')
+
+  // Step 2: Brand Profile Details
+  const [description, setDescription] = useState(
+    draft.description || `${brandName || 'Our brand'} crafts high-quality products and collaborates with authentic creators.`
+  )
+  const [targetAudience, setTargetAudience] = useState('Gen Z & Millennials interested in lifestyle, fashion, and tech')
+  const [goals, setGoals] = useState(['🌟 Brand Awareness', '🛒 Conversions & Sales'])
+  const [budgetRange, setBudgetRange] = useState(BRAND_BUDGET_RANGES[1])
+  const [contactEmail, setContactEmail] = useState(draft.email || user?.email || '')
+  const [contactPerson, setContactPerson] = useState(draft.name || '')
+
+  const logoInputRef = React.useRef(null)
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setLogoUrl(ev.target.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // --- Step 1 Submit ---
+  const handleStep1Submit = (e) => {
     e.preventDefault()
+    setError('')
+    if (!brandName.trim()) {
+      setError('Please provide your brand or business name.')
+      return
+    }
+    setStep(2)
+  }
+
+  // --- Step 2 Submit ---
+  const handleStep2Submit = (e) => {
+    e.preventDefault()
+    setError('')
+    if (!description.trim()) {
+      setError('Please provide a short description about your brand.')
+      return
+    }
+    setStep(3)
+  }
+
+  // --- Step 3 Submit: Save & Confirm ---
+  const handleConfirmProfile = async () => {
     setBusy(true)
     setError('')
     try {
-      await brandsService.saveProfile(form)
+      const payload = {
+        businessName: brandName.trim(),
+        businessType: category,
+        website: website.trim(),
+        budgetRange,
+        location: location.trim(),
+        description: `${description.trim()}\n\n[Target Audience: ${targetAudience.trim()}]\n[Goals: ${goals.join(', ')}]\n[Company Size: ${companySize}]\n[Contact: ${contactPerson} <${contactEmail}>]`,
+        logoUrl
+      }
+
+      await brandsService.saveProfile(payload)
       if (typeof refreshProfile === 'function') {
         await refreshProfile()
       }
-      nav('/dashboard')
+      setStep(4)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Failed to save brand profile. Please check your information.')
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <main className="setup">
-      <div className="overline">
-        <i /> Brand Profile Setup
+    <main className="setup" style={{ maxWidth: '780px', margin: '40px auto', padding: '0 20px' }}>
+      {/* Top Breadcrumb & Step Tracker */}
+      <div style={{ marginBottom: '28px' }}>
+        <div className="overline" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <i /> Brand Onboarding Workspace &bull; Step {step} of 4
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <h1 style={{ fontSize: '26px', margin: 0, color: '#F4F1E8' }}>
+            {step === 1 ? 'Brand Information' :
+             step === 2 ? 'Brand Profile & Goals' :
+             step === 3 ? 'Review Information' :
+             'Complete Brand Setup'}
+          </h1>
+          <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>
+            {Math.round((step / 4) * 100)}% Complete
+          </span>
+        </div>
+        <div style={{ width: '100%', height: '4px', background: 'rgba(244, 241, 232, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+          <div
+            style={{
+              width: `${(step / 4) * 100}%`,
+              height: '100%',
+              background: 'linear-gradient(90deg, #0047AB 0%, #2563EB 100%)',
+              transition: 'width 0.3s ease'
+            }}
+          />
+        </div>
       </div>
-      <h1 style={{ marginTop: '8px' }}>Tell creators about your brand.</h1>
-      <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
-        This profile helps creators discover your company, visit your store/website, and review your campaign expectations.
-      </p>
 
-      <form onSubmit={submit}>
-        <Input
-          label="Business / Brand Name"
-          required
-          placeholder="e.g. Blue Tokai, Kiro Beauty, Mokobara"
-          value={form.businessName}
-          onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-        />
+      {error && <ErrorState error={error} />}
 
-        <Input
-          label="Industry / Business Category"
-          required
-          placeholder="e.g. Specialty Café, Organic Skincare, Travel Luggage"
-          value={form.businessType}
-          onChange={(e) => setForm({ ...form, businessType: e.target.value })}
-        />
+      {/* ================= STEP 1: BRAND INFORMATION ================= */}
+      {step === 1 && (
+        <form onSubmit={handleStep1Submit} className="auth-card" style={{ maxWidth: '100%' }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
+            Provide basic business information so creators can recognize and research your company.
+          </p>
 
-        <div className="form-row-2">
+          {/* Logo Upload */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '22px' }}>
+            <div
+              style={{
+                width: '68px',
+                height: '68px',
+                borderRadius: '8px',
+                background: logoUrl ? `url(${logoUrl}) center/cover no-repeat` : 'rgba(244, 241, 232, 0.06)',
+                border: '1px solid rgba(244, 241, 232, 0.16)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '26px',
+                color: '#F4F1E8',
+                flexShrink: 0
+              }}
+            >
+              {!logoUrl && (brandName ? brandName[0]?.toUpperCase() : '🏢')}
+            </div>
+            <div>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                style={{ display: 'none' }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button type="button" variant="secondary" size="sm" onClick={() => logoInputRef.current?.click()}>
+                  {logoUrl ? 'Change Logo' : 'Upload Brand Logo'}
+                </Button>
+                {logoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setLogoUrl('')}
+                    style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer' }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px', margin: 0 }}>
+                Square PNG/JPEG recommended. Max 5MB.
+              </p>
+            </div>
+          </div>
+
           <Input
-            label="Estimated Campaign Budget"
+            label="Brand / Company Name"
             required
-            placeholder="e.g. ₹5,000–₹25,000"
-            value={form.budgetRange}
-            onChange={(e) => setForm({ ...form, budgetRange: e.target.value })}
+            placeholder="e.g. Aura Living, Blue Tokai, Mokobara"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
           />
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            <div className="input-group">
+              <label className="input-label">Industry Category</label>
+              <select
+                className="input-field"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                style={{ background: 'rgba(244, 241, 232, 0.04)', color: '#F4F1E8', border: '1px solid rgba(244, 241, 232, 0.12)', padding: '12px 14px' }}
+              >
+                {BRAND_CATEGORIES.filter((c) => c !== 'All Categories').map((c) => (
+                  <option key={c} value={c} style={{ background: '#0B0B0A' }}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">Company Size</label>
+              <select
+                className="input-field"
+                value={companySize}
+                onChange={(e) => setCompanySize(e.target.value)}
+                style={{ background: 'rgba(244, 241, 232, 0.04)', color: '#F4F1E8', border: '1px solid rgba(244, 241, 232, 0.12)', padding: '12px 14px' }}
+              >
+                {COMPANY_SIZES.map((s) => (
+                  <option key={s} value={s} style={{ background: '#0B0B0A' }}>{s}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            <Input
+              label="Official Website URL"
+              type="url"
+              placeholder="https://yourbrand.com"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+            />
+
+            <Input
+              label="Headquarters / Country Location"
+              required
+              placeholder="e.g. Mumbai, India or San Francisco, USA"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-actions-row" style={{ marginTop: '20px' }}>
+            <Button type="submit" size="lg" className="full">
+              Continue to Brand Profile →
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* ================= STEP 2: BRAND PROFILE ================= */}
+      {step === 2 && (
+        <form onSubmit={handleStep2Submit} className="auth-card" style={{ maxWidth: '100%' }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
+            Describe your brand values, target audience, and creator collaboration objectives.
+          </p>
+
+          <div className="input-group">
+            <label className="input-label">Brand Description / About</label>
+            <textarea
+              className="input-field"
+              rows={4}
+              required
+              placeholder="Tell creators what your brand does, what makes your products unique, and what aesthetic you look for…"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{ background: 'rgba(244, 241, 232, 0.04)', color: '#F4F1E8', border: '1px solid rgba(244, 241, 232, 0.12)', padding: '12px 14px', width: '100%', resize: 'vertical' }}
+            />
+          </div>
+
           <Input
-            label="Primary City / Headquarters"
-            required
-            placeholder="e.g. Mumbai, Bengaluru"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            label="Target Audience"
+            placeholder="e.g. Gen Z & Millennials interested in skincare, wellness, and conscious fashion"
+            value={targetAudience}
+            onChange={(e) => setTargetAudience(e.target.value)}
           />
+
+          <div style={{ marginBottom: '20px' }}>
+            <label className="input-label" style={{ display: 'block', marginBottom: '10px' }}>
+              Primary Campaign Collaboration Goals
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
+              {BRAND_GOAL_OPTIONS.map((goal) => {
+                const isSelected = goals.includes(goal)
+                return (
+                  <button
+                    key={goal}
+                    type="button"
+                    onClick={() => {
+                      const next = isSelected ? goals.filter((g) => g !== goal) : [...goals, goal]
+                      setGoals(next)
+                    }}
+                    style={{
+                      background: isSelected ? 'rgba(0, 71, 171, 0.2)' : 'rgba(244, 241, 232, 0.03)',
+                      border: isSelected ? '1px solid var(--color-accent)' : '1px solid rgba(244, 241, 232, 0.1)',
+                      color: isSelected ? '#60A5FA' : '#F4F1E8',
+                      padding: '10px 14px',
+                      fontSize: '12px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      borderRadius: '4px',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {isSelected ? '✓ ' : '+ '} {goal}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            <div className="input-group">
+              <label className="input-label">Estimated Monthly Creator Budget</label>
+              <select
+                className="input-field"
+                value={budgetRange}
+                onChange={(e) => setBudgetRange(e.target.value)}
+                style={{ background: 'rgba(244, 241, 232, 0.04)', color: '#F4F1E8', border: '1px solid rgba(244, 241, 232, 0.12)', padding: '12px 14px' }}
+              >
+                {BRAND_BUDGET_RANGES.map((b) => (
+                  <option key={b} value={b} style={{ background: '#0B0B0A' }}>{b}</option>
+                ))}
+              </select>
+            </div>
+
+            <Input
+              label="Contact Person Name"
+              placeholder="e.g. Elena Vance"
+              value={contactPerson}
+              onChange={(e) => setContactPerson(e.target.value)}
+            />
+          </div>
+
+          <Input
+            label="Business Contact Email"
+            type="email"
+            placeholder="collaborations@yourbrand.com"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+          />
+
+          <div className="auth-actions-row" style={{ marginTop: '20px' }}>
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)}>
+              ← Back
+            </Button>
+            <Button type="submit" size="lg">
+              Review Information →
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* ================= STEP 3: REVIEW INFORMATION ================= */}
+      {step === 3 && (
+        <div className="auth-card" style={{ maxWidth: '100%' }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
+            Verify your brand profile details before publishing to creator discovery.
+          </p>
+
+          <div style={{
+            background: 'rgba(244, 241, 232, 0.02)',
+            border: '1px solid rgba(244, 241, 232, 0.12)',
+            padding: '24px',
+            borderRadius: '6px',
+            marginBottom: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(244, 241, 232, 0.08)', paddingBottom: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '6px',
+                  background: logoUrl ? `url(${logoUrl}) center/cover no-repeat` : 'rgba(0, 71, 171, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  color: '#F4F1E8'
+                }}>
+                  {!logoUrl && brandName[0]?.toUpperCase()}
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#F4F1E8', margin: 0 }}>{brandName}</h3>
+                  <span style={{ fontSize: '12px', color: '#60A5FA', fontFamily: 'var(--font-mono)' }}>{category} &bull; {companySize}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontSize: '12px', textDecoration: 'underline' }}
+              >
+                Edit Info
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Website</span>
+                <p style={{ fontSize: '13px', color: '#F4F1E8', margin: '2px 0 0' }}>{website || 'Not specified'}</p>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Location</span>
+                <p style={{ fontSize: '13px', color: '#F4F1E8', margin: '2px 0 0' }}>{location}</p>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Monthly Budget</span>
+                <p style={{ fontSize: '13px', color: '#34D399', margin: '2px 0 0', fontWeight: 600 }}>{budgetRange}</p>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contact</span>
+                <p style={{ fontSize: '13px', color: '#F4F1E8', margin: '2px 0 0' }}>{contactPerson ? `${contactPerson} (${contactEmail})` : contactEmail}</p>
+              </div>
+            </div>
+
+            <div style={{ borderTop: '1px solid rgba(244, 241, 232, 0.08)', paddingTop: '16px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Brand Mission</span>
+              <p style={{ fontSize: '13px', color: '#F4F1E8', lineHeight: 1.6, margin: '6px 0 12px' }}>{description}</p>
+
+              <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Campaign Goals</span>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                {goals.map((g) => (
+                  <Badge key={g} variant="neutral">{g}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(2)} disabled={busy}>
+              ← Back to Details
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              disabled={busy}
+              loading={busy}
+              onClick={handleConfirmProfile}
+            >
+              {busy ? 'Launching Profile…' : 'Confirm & Launch Brand Profile →'}
+            </Button>
+          </div>
         </div>
+      )}
 
-        <div className="form-row-2">
-          <Input
-            label="Official Website URL"
-            placeholder="https://yourbrand.com"
-            value={form.website}
-            onChange={(e) => setForm({ ...form, website: e.target.value })}
-          />
-          <Input
-            label="Pitch Deck / Brief / Upload Link"
-            placeholder="https://drive.google.com/... or brand deck link"
-            value={form.deckLink}
-            onChange={(e) => setForm({ ...form, deckLink: e.target.value })}
-          />
+      {/* ================= STEP 4: COMPLETE BRAND SETUP ================= */}
+      {step === 4 && (
+        <div className="auth-card" style={{ maxWidth: '100%', textAlign: 'center', padding: '40px 24px' }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            background: 'rgba(16, 185, 129, 0.15)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '30px',
+            margin: '0 auto 20px',
+            color: '#10B981'
+          }}>
+            ✓
+          </div>
+
+          <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#F4F1E8', marginBottom: '8px' }}>
+            Your Brand Profile Is Ready!
+          </h2>
+
+          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', maxWidth: '460px', margin: '0 auto 28px', lineHeight: 1.6 }}>
+            Welcome to Brand2Influence! Your company profile is now published. You can now discover verified creators, review their audience metrics, and invite them to your brand campaigns.
+          </p>
+
+          <div style={{
+            background: 'rgba(244, 241, 232, 0.02)',
+            border: '1px solid rgba(244, 241, 232, 0.1)',
+            padding: '18px',
+            borderRadius: '6px',
+            maxWidth: '460px',
+            margin: '0 auto 30px',
+            textAlign: 'left'
+          }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-accent)', display: 'block', marginBottom: '8px' }}>
+              Recommended Next Steps
+            </span>
+            <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#F4F1E8', lineHeight: 1.8 }}>
+              <li>Browse top-tier creators across Fashion, Tech, and Lifestyle</li>
+              <li>Create your first campaign brief with target deliverables</li>
+              <li>Review verified audience metrics before sending collaboration offers</li>
+            </ul>
+          </div>
+
+          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button size="lg" onClick={() => nav('/dashboard')}>
+              Go to Brand Dashboard →
+            </Button>
+            <Button size="lg" variant="secondary" onClick={() => nav('/discover')}>
+              Explore Creators
+            </Button>
+          </div>
         </div>
-
-        <Input
-          label="Brand Story / Overview"
-          placeholder="Tell creators what makes your brand unique, your visual aesthetic, and what you look for in creators..."
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
-
-        {error && <ErrorState error={error} />}
-
-        <Button
-          disabled={busy}
-          loading={busy}
-          size="lg"
-          className="full"
-          style={{ marginTop: '16px' }}
-        >
-          {busy ? 'Saving profile…' : 'Complete Setup & Enter Workspace'}
-        </Button>
-      </form>
+      )}
     </main>
   )
 }

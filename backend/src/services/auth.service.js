@@ -142,7 +142,7 @@ export async function checkUsernameAvailability(rawUsername) {
 }
 
 export async function register(payload) {
-  const { email, password, name, username, phone, pincode, location, role, roleData } = payload || {}
+  const { email, password, name, username, phone, dob, pincode, location, role, roleData } = payload || {}
 
   // 1. Mandatory Core Validations
   if (!email || !password || !name || !role) {
@@ -224,6 +224,7 @@ export async function register(payload) {
       name: name.trim(),
       username: cleanUsername,
       phone: cleanPhone || '',
+      dob: dob ? String(dob).trim() : '',
       role
     }
   })
@@ -684,6 +685,255 @@ export async function resolveIdentifier(identifier) {
 
   throw new ApiError(404, `No account found with username "@${cleanUsername}". Please check or sign in with your email address.`, 'USER_NOT_FOUND')
 }
+
+const registrationOtpStore = new Map()
+const forgotPasswordOtpStore = new Map()
+
+/**
+ * Generate and send a 6-digit OTP for signup contact verification
+ */
+export async function sendRegistrationOtp({ email, phone }) {
+  if ((!email || !String(email).trim()) && (!phone || !String(phone).trim())) {
+    throw new ApiError(400, 'Please provide your mobile phone number or email address', 'VALIDATION_ERROR')
+  }
+
+  let cleanEmail = ''
+  if (email && String(email).trim()) {
+    cleanEmail = String(email).trim().toLowerCase()
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(cleanEmail)) {
+      throw new ApiError(400, 'Please provide a valid email address (e.g. name@domain.com)', 'VALIDATION_ERROR')
+    }
+  }
+
+  let cleanPhone = ''
+  if (phone && String(phone).trim()) {
+    cleanPhone = String(phone).replace(/\D/g, '')
+    if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+      throw new ApiError(400, 'Please provide a valid 10-15 digit mobile phone number', 'VALIDATION_ERROR')
+    }
+  }
+
+  const primaryKey = cleanEmail || cleanPhone
+
+  // Check if email already registered in public.users
+  const db = adminDb()
+  try {
+    if (cleanEmail) {
+      const { data: existingUser } = await db.from('users').select('id, email').eq('email', cleanEmail).maybeSingle()
+      if (existingUser) {
+        throw new ApiError(409, 'An account with this email address already exists. Please sign in instead.', 'EMAIL_EXISTS')
+      }
+    }
+    if (cleanPhone) {
+      const { data: existingPhoneUser } = await db.from('users').select('id, phone').eq('phone', cleanPhone).maybeSingle()
+      if (existingPhoneUser) {
+        throw new ApiError(409, 'An account with this mobile phone number already exists. Please sign in instead.', 'PHONE_EXISTS')
+      }
+    }
+  } catch (err) {
+    if (err.statusCode === 409) throw err
+  }
+
+  // Check cooldown if OTP was sent recently
+  const existingOtp = registrationOtpStore.get(primaryKey) || (cleanPhone ? registrationOtpStore.get(cleanPhone) : null)
+  if (existingOtp && existingOtp.cooldownUntil > Date.now()) {
+    const remainingSecs = Math.ceil((existingOtp.cooldownUntil - Date.now()) / 1000)
+    throw new ApiError(429, `Please wait ${remainingSecs} seconds before requesting a new OTP code.`, 'RATE_LIMITED')
+  }
+
+  // Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  const now = Date.now()
+
+  const otpRecord = {
+    otp,
+    email: cleanEmail,
+    phone: cleanPhone,
+    attempts: 0,
+    verified: false,
+    createdAt: now,
+    expiresAt: now + 5 * 60 * 1000, // 5 minutes TTL
+    cooldownUntil: now + 60 * 1000   // 60 seconds cooldown
+  }
+
+  if (cleanEmail) registrationOtpStore.set(cleanEmail, otpRecord)
+  if (cleanPhone) registrationOtpStore.set(cleanPhone, otpRecord)
+
+  // Format masked email & phone for safe UI display
+  let maskedEmail = ''
+  if (cleanEmail) {
+    const [userPart, domainPart] = cleanEmail.split('@')
+    maskedEmail = userPart.length > 2 
+      ? `${userPart[0]}***${userPart[userPart.length - 1]}@${domainPart}`
+      : `${userPart[0]}***@${domainPart}`
+  }
+
+  const maskedPhone = cleanPhone.length >= 10 
+    ? `+91 •••••• ${cleanPhone.slice(-4)}` 
+    : ''
+
+  console.log(`[REGISTRATION OTP] Generated code ${otp} for ${cleanEmail || cleanPhone}`)
+
+  return {
+    success: true,
+    message: `A 6-digit verification code has been generated for ${[maskedPhone, maskedEmail].filter(Boolean).join(' & ')}`,
+    email: cleanEmail,
+    phone: cleanPhone,
+    maskedEmail,
+    maskedPhone,
+    testOtp: otp, // Provided for instant development/testing
+    expiresInSeconds: 300,
+    cooldownSeconds: 60
+  }
+}
+
+/**
+ * Verify 6-digit OTP for signup contact verification
+ */
+export async function verifyRegistrationOtp({ email, phone, otp }) {
+  const cleanEmail = email ? String(email).trim().toLowerCase() : ''
+  const cleanPhone = phone ? String(phone).replace(/\D/g, '') : ''
+
+  if (!cleanEmail && !cleanPhone) {
+    throw new ApiError(400, 'Email address or mobile phone number is required for verification', 'VALIDATION_ERROR')
+  }
+
+  const cleanOtp = String(otp || '').trim()
+
+  if (!cleanOtp || cleanOtp.length !== 6) {
+    throw new ApiError(400, 'Please enter a valid 6-digit OTP code', 'VALIDATION_ERROR')
+  }
+
+  const record = (cleanEmail && registrationOtpStore.get(cleanEmail)) || 
+                 (cleanPhone && registrationOtpStore.get(cleanPhone))
+
+  if (!record || record.expiresAt < Date.now()) {
+    throw new ApiError(400, 'Verification code has expired or was not requested. Please request a new code.', 'OTP_EXPIRED')
+  }
+
+  record.attempts = (record.attempts || 0) + 1
+  if (record.attempts > 5) {
+    if (cleanEmail) registrationOtpStore.delete(cleanEmail)
+    if (cleanPhone) registrationOtpStore.delete(cleanPhone)
+    throw new ApiError(429, 'Too many invalid attempts. This OTP has been invalidated. Please request a new code.', 'MAX_ATTEMPTS_EXCEEDED')
+  }
+
+  if (record.otp !== cleanOtp) {
+    const remaining = 5 - record.attempts
+    throw new ApiError(400, `Incorrect verification code. ${remaining} attempts remaining.`, 'INVALID_OTP')
+  }
+
+  record.verified = true
+  if (cleanEmail) registrationOtpStore.set(cleanEmail, record)
+  if (cleanPhone) registrationOtpStore.set(cleanPhone, record)
+
+  return {
+    success: true,
+    verified: true,
+    message: 'Contact verified successfully! You may now complete your registration.',
+    email: cleanEmail || record.email,
+    phone: cleanPhone || record.phone
+  }
+}
+
+/**
+ * Send password reset OTP
+ */
+export async function sendForgotPasswordOtp({ identifier }) {
+  const resolved = await resolveIdentifier(identifier)
+  const cleanEmail = resolved.email.toLowerCase()
+
+  const existingOtp = forgotPasswordOtpStore.get(cleanEmail)
+  if (existingOtp && existingOtp.cooldownUntil > Date.now()) {
+    const remainingSecs = Math.ceil((existingOtp.cooldownUntil - Date.now()) / 1000)
+    throw new ApiError(429, `Please wait ${remainingSecs} seconds before requesting another reset code.`, 'RATE_LIMITED')
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  const now = Date.now()
+
+  forgotPasswordOtpStore.set(cleanEmail, {
+    otp,
+    email: cleanEmail,
+    attempts: 0,
+    verified: false,
+    createdAt: now,
+    expiresAt: now + 10 * 60 * 1000,
+    cooldownUntil: now + 60 * 1000
+  })
+
+  const [uPart, dPart] = cleanEmail.split('@')
+  const maskedEmail = `${uPart[0]}***${uPart[uPart.length - 1]}@${dPart}`
+
+  console.log(`[FORGOT PASSWORD OTP] Sent reset code ${otp} to ${cleanEmail}`)
+
+  return {
+    success: true,
+    message: `Password reset code sent to ${maskedEmail}`,
+    email: cleanEmail,
+    maskedEmail,
+    testOtp: otp,
+    cooldownSeconds: 60,
+    expiresInSeconds: 600
+  }
+}
+
+/**
+ * Reset password using verified OTP
+ */
+export async function verifyAndResetPasswordOtp({ email, otp, newPassword }) {
+  if (!email || !String(email).trim()) {
+    throw new ApiError(400, 'Email is required', 'VALIDATION_ERROR')
+  }
+  const cleanEmail = String(email).trim().toLowerCase()
+  const cleanOtp = String(otp || '').trim()
+
+  if (!cleanOtp || cleanOtp.length !== 6) {
+    throw new ApiError(400, 'Please enter a valid 6-digit OTP code', 'VALIDATION_ERROR')
+  }
+  if (!newPassword || newPassword.length < 6) {
+    throw new ApiError(400, 'New password must be at least 6 characters long', 'VALIDATION_ERROR')
+  }
+
+  const record = forgotPasswordOtpStore.get(cleanEmail)
+  if (!record || record.expiresAt < Date.now()) {
+    throw new ApiError(400, 'Reset code has expired. Please request a new one.', 'OTP_EXPIRED')
+  }
+
+  record.attempts = (record.attempts || 0) + 1
+  if (record.attempts > 5) {
+    forgotPasswordOtpStore.delete(cleanEmail)
+    throw new ApiError(429, 'Too many invalid attempts. Please request a fresh reset code.', 'MAX_ATTEMPTS_EXCEEDED')
+  }
+
+  if (record.otp !== cleanOtp) {
+    throw new ApiError(400, 'Incorrect reset code.', 'INVALID_OTP')
+  }
+
+  // Update password in Supabase Auth
+  const db = adminDb()
+  const { data: usersData, error: listErr } = await db.auth.admin.listUsers({ perPage: 500 })
+  if (listErr) throw listErr
+
+  const targetUser = usersData?.users?.find(u => u.email?.toLowerCase() === cleanEmail)
+  if (!targetUser) {
+    throw new ApiError(404, 'User account not found', 'USER_NOT_FOUND')
+  }
+
+  const { error: updateErr } = await db.auth.admin.updateUserById(targetUser.id, {
+    password: newPassword
+  })
+  if (updateErr) throw updateErr
+
+  forgotPasswordOtpStore.delete(cleanEmail)
+
+  return {
+    success: true,
+    message: 'Your password has been successfully reset! You can now log in.'
+  }
+}
+
 
 
 

@@ -412,24 +412,24 @@ export default function LandingPage() {
             </FadeIn>
             <FadeIn delay={0.12} distance={22}>
               <h1 className="hero-title">
-                <span className="hero-title__line">TURN INFLUENCE</span>
+                <span className="hero-title__line">WHERE BRANDS AND</span>
                 <span className="hero-title__line hero-title__line--accent">
-                  <em>into</em> <strong>IMPACT<span className="dot-accent">.</span></strong>
+                  <em>creators</em> <strong>CONNECT<span className="dot-accent">.</span></strong>
                 </span>
               </h1>
             </FadeIn>
             <FadeIn delay={0.2} distance={20}>
               <p className="hero-desc">
-                Discover independent creators who truly understand your brand, and explore verified sponsorship campaigns. Direct messaging, upfront rates, zero middleman markups.
+                Build your professional presence, connect your social accounts, and unlock new opportunities to collaborate.
               </p>
             </FadeIn>
             <FadeIn delay={0.28} distance={18}>
               <div className="hero-cta-group">
-                <Button size="lg" variant="primary" onClick={() => scrollTo('marketplace')}>
-                  Explore Creators
+                <Button size="lg" variant="primary" onClick={() => navigate('/signup')}>
+                  Create an Account →
                 </Button>
-                <Button size="lg" variant="secondary" onClick={() => navigate('/campaigns')}>
-                  Browse Brand Deals
+                <Button size="lg" variant="secondary" onClick={() => navigate('/login')}>
+                  Log In
                 </Button>
               </div>
             </FadeIn>
@@ -1062,7 +1062,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="codeastra-footer-btn"
-                onClick={() => navigate('/auth/signup')}
+                onClick={() => navigate('/auth/portal')}
               >
                 GO BEYOND <span className="codeastra-footer-btn-arrow">→</span>
               </button>
