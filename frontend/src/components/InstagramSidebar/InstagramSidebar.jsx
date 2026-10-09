@@ -108,7 +108,92 @@ export function InstagramSidebar() {
               <span className="ig-item-label">Home</span>
             </NavLink>
 
-            {/* 2. Search */}
+            {/* BRAND: Search Creators */}
+            {isBrand && (
+              <NavLink
+                to="/creators"
+                className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
+                title="Search Creators"
+              >
+                <div className="ig-item-icon-box">
+                  <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <circle cx="19" cy="11" r="3" />
+                    <path d="m21 13 2 2" />
+                  </svg>
+                </div>
+                <span className="ig-item-label">Search Creators</span>
+              </NavLink>
+            )}
+
+            {/* CREATOR: Campaigns */}
+            {isInfluencer && (
+              <NavLink
+                to="/campaigns"
+                className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
+                title="Campaigns"
+              >
+                <div className="ig-item-icon-box">
+                  <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                  </svg>
+                </div>
+                <span className="ig-item-label">Campaigns</span>
+              </NavLink>
+            )}
+
+            {/* BRAND: My Campaigns */}
+            {isBrand && (
+              <NavLink
+                to="/brand/campaigns"
+                className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
+                title="My Campaigns"
+              >
+                <div className="ig-item-icon-box">
+                  <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  </svg>
+                </div>
+                <span className="ig-item-label">My Campaigns</span>
+              </NavLink>
+            )}
+
+            {/* Default for guests or unassigned roles */}
+            {!isBrand && !isInfluencer && (
+              <>
+                <NavLink
+                  to="/creators"
+                  className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
+                  title="Search Creators"
+                >
+                  <div className="ig-item-icon-box">
+                    <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <circle cx="19" cy="11" r="3" />
+                      <path d="m21 13 2 2" />
+                    </svg>
+                  </div>
+                  <span className="ig-item-label">Search Creators</span>
+                </NavLink>
+                <NavLink
+                  to="/campaigns"
+                  className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
+                  title="Campaigns"
+                >
+                  <div className="ig-item-icon-box">
+                    <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                    </svg>
+                  </div>
+                  <span className="ig-item-label">Campaigns</span>
+                </NavLink>
+              </>
+            )}
+
+            {/* Search */}
             <NavLink
               to="/search"
               className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
@@ -123,7 +208,7 @@ export function InstagramSidebar() {
               <span className="ig-item-label">Search</span>
             </NavLink>
 
-            {/* 3. Explore */}
+            {/* Explore */}
             <NavLink
               to="/explore"
               className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
@@ -138,20 +223,6 @@ export function InstagramSidebar() {
                 </svg>
               </div>
               <span className="ig-item-label">Explore</span>
-            </NavLink>
-
-            {/* 3.5 Campaigns */}
-            <NavLink
-              to="/campaigns"
-              className={({ isActive }) => `ig-nav-item ${isActive ? 'is-active' : ''}`}
-              title="Campaigns"
-            >
-              <div className="ig-item-icon-box">
-                <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 11l19-9-9 19-2-8-8-2z" />
-                </svg>
-              </div>
-              <span className="ig-item-label">Campaigns</span>
             </NavLink>
 
             {/* 4. Messages */}

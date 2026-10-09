@@ -237,6 +237,16 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.ep-modal-author:hover {
+  opacity: 0.85;
+}
+
+.ep-modal-author:hover .ep-modal-author-name {
+  text-decoration: underline;
 }
 
 .ep-modal-avatar {

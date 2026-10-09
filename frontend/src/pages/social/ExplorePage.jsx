@@ -37,6 +37,9 @@ function PostModal({ post, onClose, onLike }) {
   const author = post.author || {}
   const initials = (author.name || 'U').slice(0, 1).toUpperCase()
   const isVideo = post.media_type === 'video'
+  const authorId = author.id || post.user_id
+  const authorRole = author.role || 'influencer'
+  const profileLink = authorRole === 'brand' ? `/brands/${authorId}` : `/creators/${authorId}`
 
   return (
     <div className="ep-modal-overlay" onClick={onClose} role="dialog" aria-label="Post detail">
@@ -57,20 +60,30 @@ function PostModal({ post, onClose, onLike }) {
             </svg>
           </button>
 
-          <div className="ep-modal-author">
-            <div className="ep-modal-avatar">
-              {author.avatarUrl ? <img src={author.avatarUrl} alt={author.name} /> : <span>{initials}</span>}
-            </div>
-            <div className="ep-modal-author-text">
-              <span className="ep-modal-author-name">{author.name || 'Creator'}</span>
-              <span className={`hfp-role-pill ${author.role === 'brand' ? 'brand' : 'creator'}`}>
-                {author.role === 'brand' ? '🏷️ Brand' : '✨ Creator'}
-              </span>
-            </div>
-            {!following
-              ? <button className="hfp-follow-btn" onClick={handleFollow} style={{ marginLeft: 'auto' }}>Follow</button>
-              : <span className="hfp-following-label" style={{ marginLeft: 'auto' }}>Following</span>
-            }
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '8px' }}>
+            <Link
+              to={profileLink}
+              className="ep-modal-author"
+              style={{ textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}
+              onClick={onClose}
+              title={`View ${author.name || 'creator'}'s profile`}
+            >
+              <div className="ep-modal-avatar">
+                {author.avatarUrl ? <img src={author.avatarUrl} alt={author.name} /> : <span>{initials}</span>}
+              </div>
+              <div className="ep-modal-author-text">
+                <span className="ep-modal-author-name">{author.name || 'Creator'}</span>
+                <span className={`hfp-role-pill ${authorRole === 'brand' ? 'brand' : 'creator'}`}>
+                  {authorRole === 'brand' ? '🏷️ Brand' : '✨ Creator'}
+                </span>
+              </div>
+            </Link>
+            {!following && authorId && (
+              <button className="hfp-follow-btn" onClick={handleFollow} style={{ marginLeft: 'auto', flexShrink: 0 }}>Follow</button>
+            )}
+            {following && (
+              <span className="hfp-following-label" style={{ marginLeft: 'auto', flexShrink: 0 }}>Following</span>
+            )}
           </div>
 
           <div className="ep-modal-caption">{post.caption}</div>

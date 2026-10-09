@@ -4,7 +4,8 @@
 export const CURATED_CREATORS = [
   {
     id: 'c-1',
-    userId: 'c-1',
+    userId: '806f7e5d-754c-4c74-8bba-e03f34164a70',
+    legacyId: 'c-1',
     name: 'Aanya Kapoor',
     username: 'aanyakapoor',
     niche: 'Fashion & Style',

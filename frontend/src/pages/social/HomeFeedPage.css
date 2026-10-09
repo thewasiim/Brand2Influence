@@ -92,6 +92,16 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.hfp-author-wrap:hover {
+  opacity: 0.85;
+}
+
+.hfp-author-wrap:hover .hfp-author-name {
+  text-decoration: underline;
 }
 
 .hfp-avatar {

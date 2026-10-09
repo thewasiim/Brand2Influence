@@ -36,12 +36,20 @@ function PostCard({ post, onLike }) {
   const isVideo = post.media_type === 'video'
   const author = post.author || {}
   const initials = (author.name || 'U').slice(0, 1).toUpperCase()
+  const authorId = author.id || post.user_id
+  const authorRole = author.role || 'influencer'
+  const profileLink = authorRole === 'brand' ? `/brands/${authorId}` : `/creators/${authorId}`
 
   return (
     <article className="hfp-card">
       {/* Author header */}
       <div className="hfp-card-header">
-        <div className="hfp-author-wrap">
+        <Link
+          to={profileLink}
+          className="hfp-author-wrap"
+          style={{ textDecoration: 'none', color: 'inherit' }}
+          title={`View ${author.name || 'creator'}'s profile`}
+        >
           <div className="hfp-avatar">
             {author.avatarUrl
               ? <img src={author.avatarUrl} alt={author.name} />
@@ -50,12 +58,12 @@ function PostCard({ post, onLike }) {
           </div>
           <div className="hfp-author-info">
             <span className="hfp-author-name">{author.name || 'Creator'}</span>
-            <span className={`hfp-role-pill ${author.role === 'brand' ? 'brand' : 'creator'}`}>
-              {author.role === 'brand' ? '🏷️ Brand' : '✨ Creator'}
+            <span className={`hfp-role-pill ${authorRole === 'brand' ? 'brand' : 'creator'}`}>
+              {authorRole === 'brand' ? '🏷️ Brand' : '✨ Creator'}
             </span>
           </div>
-        </div>
-        {!following && author.id && (
+        </Link>
+        {!following && authorId && (
           <button className="hfp-follow-btn" onClick={handleFollow}>Follow</button>
         )}
         {following && <span className="hfp-following-label">Following</span>}
@@ -106,7 +114,15 @@ function PostCard({ post, onLike }) {
       {/* Caption */}
       {post.caption && (
         <div className="hfp-caption">
-          <span className="hfp-caption-author">{author.name || 'Creator'}</span> {post.caption}
+          <Link
+            to={profileLink}
+            className="hfp-caption-author"
+            style={{ textDecoration: 'none', color: '#FFFFFF', fontWeight: 600 }}
+            title={`View ${author.name || 'creator'}'s profile`}
+          >
+            {author.name || 'Creator'}
+          </Link>{' '}
+          {post.caption}
         </div>
       )}
 
@@ -128,21 +144,31 @@ function SuggestedCard({ user, onFollow }) {
     } catch {/* ignore */}
   }
   const initials = (user.name || 'U').slice(0, 1).toUpperCase()
+  const profileLink = user.role === 'brand'
+    ? `/brands/${user.userId || user.id}`
+    : `/creators/${user.userId || user.id}`
+
   return (
     <div className="hfp-suggested-card">
-      <div className="hfp-sug-avatar">
-        {user.profileImageUrl
-          ? <img src={user.profileImageUrl} alt={user.name} />
-          : <span>{initials}</span>
-        }
-      </div>
-      <div className="hfp-sug-info">
-        <span className="hfp-sug-name">{user.name}</span>
-        <span className="hfp-sug-niche">{user.niche || user.businessType || ''}</span>
-        <span className="hfp-sug-followers">
-          {user.followersCount ? `${(user.followersCount / 1000).toFixed(0)}K followers` : ''}
-        </span>
-      </div>
+      <Link
+        to={profileLink}
+        style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}
+        title={`View ${user.name}'s profile`}
+      >
+        <div className="hfp-sug-avatar">
+          {user.profileImageUrl
+            ? <img src={user.profileImageUrl} alt={user.name} />
+            : <span>{initials}</span>
+          }
+        </div>
+        <div className="hfp-sug-info">
+          <span className="hfp-sug-name">{user.name}</span>
+          <span className="hfp-sug-niche">{user.niche || user.businessType || ''}</span>
+          <span className="hfp-sug-followers">
+            {user.followersCount ? `${(user.followersCount / 1000).toFixed(0)}K followers` : ''}
+          </span>
+        </div>
+      </Link>
       {following
         ? <span className="hfp-following-label">Following</span>
         : <button className="hfp-follow-btn" onClick={handleFollow}>Follow</button>
@@ -261,9 +287,9 @@ export default function HomeFeedPage() {
           )}
         </div>
 
-        {/* Sidebar — Suggested */}
-        {suggested.length > 0 && (
-          <div className="hfp-sidebar-col">
+        {/* Sidebar — Suggested & Shortcuts */}
+        <div className="hfp-sidebar-col">
+          {suggested.length > 0 && (
             <div className="hfp-sidebar-section">
               <h3 className="hfp-sidebar-title">Suggested for you</h3>
               {suggested.map(u => (
@@ -271,31 +297,66 @@ export default function HomeFeedPage() {
               ))}
               <Link to="/search" className="hfp-see-all">See all →</Link>
             </div>
+          )}
 
-            {/* Quick stats */}
-            <div className="hfp-sidebar-section hfp-quick-links">
-              <Link to="/explore" className="hfp-quick-link">
+          {/* Quick stats & role-based shortcuts */}
+          <div className="hfp-sidebar-section hfp-quick-links">
+            <h3 className="hfp-sidebar-title" style={{ marginBottom: '8px' }}>
+              {isBrand ? 'Brand Hub' : 'Creator Hub'}
+            </h3>
+
+            {isBrand ? (
+              <Link to="/creators" className="hfp-quick-link" style={{ background: 'rgba(0, 71, 171, 0.14)', borderColor: 'rgba(0, 71, 171, 0.35)', color: '#93C5FD' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/>
-                  <rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <circle cx="19" cy="11" r="3" />
+                  <path d="m21 13 2 2" />
                 </svg>
-                Explore All Posts
+                <span>Search Creators</span>
               </Link>
-              <Link to="/search" className="hfp-quick-link">
+            ) : (
+              <Link to="/campaigns" className="hfp-quick-link" style={{ background: 'rgba(0, 71, 171, 0.14)', borderColor: 'rgba(0, 71, 171, 0.35)', color: '#93C5FD' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <path d="M3 11l19-9-9 19-2-8-8-2z" />
                 </svg>
-                {isBrand ? 'Find Creators' : 'Find Brands'}
+                <span>Browse Campaigns</span>
               </Link>
-              <Link to="/conversations" className="hfp-quick-link">
+            )}
+
+            {isBrand && (
+              <Link to="/brand/campaigns" className="hfp-quick-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                 </svg>
-                Messages
+                <span>Manage Briefs</span>
               </Link>
-            </div>
+            )}
+
+            <Link to="/explore" className="hfp-quick-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/>
+                <rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>
+              </svg>
+              <span>Explore All Posts</span>
+            </Link>
+
+            <Link to="/search" className="hfp-quick-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span>Search Database</span>
+            </Link>
+
+            <Link to="/conversations" className="hfp-quick-link">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              <span>Messages</span>
+            </Link>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

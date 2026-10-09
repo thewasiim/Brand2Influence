@@ -337,31 +337,28 @@ export function SignupPage() {
 
   return (
     <AuthCard
-      eyebrow={`Step ${step} of 5 — Account Creation`}
+      eyebrow={null}
       title={
         step === 1 ? 'Create an Account' :
-        step === 2 ? 'Choose Account Type' :
-        step === 3 ? 'Verify Email or Phone' :
-        step === 4 ? 'Create a Password' :
-        'Set Up Your Profile'
+          step === 2 ? 'Choose Account Type' :
+            step === 3 ? 'Verify Email or Phone' :
+              step === 4 ? 'Create a Password' :
+                'Set Up Your Profile'
       }
       subtitle={
-        step === 1 ? 'Join Brand2Influence to connect, collaborate, and grow your audience.' :
-        step === 2 ? 'Select the account type that best describes your goals.' :
-        step === 3 ? `Enter the 6-digit code sent to ${maskedContact || email || 'your contact details'}.` :
-        step === 4 ? 'Choose a secure password to protect your account.' :
-        'Introduce yourself to brands and collaborators across the platform.'
+        step === 1 ? null :
+          step === 2 ? null :
+            step === 3 ? `Enter the 6-digit code sent to ${maskedContact || email || 'your contact details'}.` :
+              step === 4 ? 'Choose a secure password to protect your account.' :
+                null
       }
-      wide={step === 2}
-      showBack={step > 1}
+      wide={false}
+      showBack={step > 1 && step !== 5}
       onBack={() => setStep((s) => Math.max(1, s - 1))}
     >
       {/* Step Progress Pill Indicator */}
       <div className="signup-progress-wrap">
-        <div className="signup-progress-header">
-          <span className="signup-progress-label">
-            Step {step} of 5 — Account Setup
-          </span>
+        <div className="signup-progress-header" style={{ justifyContent: 'flex-end' }}>
           <span className="signup-progress-pct">
             {Math.round((step / 5) * 100)}% Completed
           </span>
@@ -420,114 +417,45 @@ export function SignupPage() {
         </form>
       )}
 
-      {/* ================= STEP 2: CHOOSE ACCOUNT TYPE (MOVED FROM STEP 5) ================= */}
+      {/* ================= STEP 2: CHOOSE ACCOUNT TYPE ================= */}
       {step === 2 && (
-        <div>
-          <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-            <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', maxWidth: '440px', margin: '0 auto', lineHeight: 1.5 }}>
-              Choose your role below to tailor your workspace and unlock the right tools for your goals.
-            </p>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
+          <Button
+            type="button"
+            size="lg"
+            className="full"
+            onClick={() => handleSelectRole('brand')}
+            style={{
+              padding: '16px 20px',
+              fontSize: '15px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            As a Brand
+          </Button>
 
-          <div className="role-selection-grid">
-            {/* BRAND OPTION */}
-            <div
-              className={`role-choice-card ${selectedRole === 'brand' ? 'is-selected' : ''}`}
-              onClick={() => handleSelectRole('brand')}
-            >
-              <div>
-                <div style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '6px',
-                  background: 'rgba(0, 71, 171, 0.2)',
-                  border: '1px solid rgba(0, 71, 171, 0.4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '22px',
-                  marginBottom: '16px'
-                }}>
-                  🏢
-                </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#F4F1E8', marginBottom: '8px' }}>
-                  Brand
-                </h3>
-                <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#60A5FA', marginBottom: '10px', lineHeight: 1.4 }}>
-                  "I want to hire creators and run campaigns."
-                </h4>
-                <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                  Discover influencers, review verified audience metrics, send proposals, and manage collaboration budgets.
-                </p>
-              </div>
-
-              <Button
-                type="button"
-                size="md"
-                className="full"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleSelectRole('brand')
-                }}
-              >
-                Continue as Brand →
-              </Button>
-            </div>
-
-            {/* CREATOR OPTION */}
-            <div
-              className={`role-choice-card role-choice-card--creator ${selectedRole === 'influencer' ? 'is-selected' : ''}`}
-              onClick={() => handleSelectRole('influencer')}
-            >
-              <div>
-                <div style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '6px',
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  border: '1px solid rgba(245, 158, 11, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '22px',
-                  marginBottom: '16px'
-                }}>
-                  ✨
-                </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#F4F1E8', marginBottom: '8px' }}>
-                  Creator
-                </h3>
-                <h4 style={{ fontSize: '14px', fontWeight: 500, color: '#FBBF24', marginBottom: '10px', lineHeight: 1.4 }}>
-                  "I want to share my content and work with brands."
-                </h4>
-                <p style={{ fontSize: '12.5px', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px' }}>
-                  Build your creator profile, connect your Instagram, YouTube, or TikTok accounts, showcase verified metrics, and get discovered.
-                </p>
-              </div>
-
-              <Button
-                type="button"
-                size="md"
-                className="full"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleSelectRole('influencer')
-                }}
-              >
-                Continue as Creator →
-              </Button>
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => setStep(1)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', fontSize: '13px' }}
-            >
-              ← Back to Contact Details
-            </button>
-          </div>
+          <Button
+            type="button"
+            size="lg"
+            variant="secondary"
+            className="full"
+            onClick={() => handleSelectRole('influencer')}
+            style={{
+              padding: '16px 20px',
+              fontSize: '15px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            As a Creator
+          </Button>
         </div>
       )}
 
@@ -848,7 +776,7 @@ export function SignupPage() {
           </div>
 
           <div className="auth-actions-row" style={{ marginTop: '20px' }}>
-            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(4)} disabled={busy}>
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(4)} disabled={busy} style={{ flexShrink: 0 }}>
               ← Back
             </Button>
             <Button
@@ -856,12 +784,13 @@ export function SignupPage() {
               size="lg"
               disabled={!fullName.trim() || username.trim().length < 3 || usernameStatus.available === false || busy}
               loading={busy}
+              style={{ fontSize: '13.5px', whiteSpace: 'nowrap' }}
             >
               {busy
                 ? 'Creating Account…'
                 : selectedRole === 'brand'
-                ? 'Complete & Continue to Brand Setup →'
-                : 'Complete & Connect Social Accounts →'}
+                  ? 'Continue to Setup →'
+                  : 'Connect Social Media →'}
             </Button>
           </div>
         </form>

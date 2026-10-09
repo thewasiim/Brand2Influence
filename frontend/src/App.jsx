@@ -22,34 +22,32 @@ import SearchPage from './pages/social/SearchPage'
 
 function AdaptiveCampaignsRoute() {
   const { user } = useAuth()
-  if (user) {
-    return (
-      <UserLayout>
-        <CampaignDiscoveryPage />
-      </UserLayout>
-    )
-  }
-  return (
-    <PublicLayout>
-      <CampaignDiscoveryPage />
-    </PublicLayout>
-  )
+  return user ? <UserLayout><CampaignDiscoveryPage /></UserLayout> : <PublicLayout><CampaignDiscoveryPage /></PublicLayout>
 }
 
 function AdaptiveCampaignDetailRoute() {
   const { user } = useAuth()
-  if (user) {
-    return (
-      <UserLayout>
-        <CampaignDetailPage />
-      </UserLayout>
-    )
-  }
-  return (
-    <PublicLayout>
-      <CampaignDetailPage />
-    </PublicLayout>
-  )
+  return user ? <UserLayout><CampaignDetailPage /></UserLayout> : <PublicLayout><CampaignDetailPage /></PublicLayout>
+}
+
+function AdaptiveDiscoveryRoute() {
+  const { user } = useAuth()
+  return user ? <UserLayout><DiscoveryPage /></UserLayout> : <PublicLayout><DiscoveryPage /></PublicLayout>
+}
+
+function AdaptiveInfluencerProfileRoute() {
+  const { user } = useAuth()
+  return user ? <UserLayout><InfluencerProfilePage /></UserLayout> : <PublicLayout><InfluencerProfilePage /></PublicLayout>
+}
+
+function AdaptiveBrandDiscoveryRoute() {
+  const { user } = useAuth()
+  return user ? <UserLayout><BrandDiscoveryPage /></UserLayout> : <PublicLayout><BrandDiscoveryPage /></PublicLayout>
+}
+
+function AdaptiveBrandProfileRoute() {
+  const { user } = useAuth()
+  return user ? <UserLayout><BrandProfilePage /></UserLayout> : <PublicLayout><BrandProfilePage /></PublicLayout>
 }
 
 export default function App() {
@@ -78,19 +76,21 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<LandingPage />} />
         <Route path="/contact" element={<LandingPage />} />
-        <Route path="/discover" element={<DiscoveryPage />} />
-        <Route path="/creators" element={<DiscoveryPage />} />
-        <Route path="/creators/:id" element={<InfluencerProfilePage />} />
-        <Route path="/influencers" element={<DiscoveryPage />} />
-        <Route path="/influencers/:id" element={<InfluencerProfilePage />} />
-        <Route path="/brands" element={<BrandDiscoveryPage />} />
-        <Route path="/brands/:id" element={<BrandProfilePage />} />
         <Route path="/how-it-works" element={<LandingPage />} />
         <Route path="/for-brands" element={<LandingPage />} />
         <Route path="/for-influencers" element={<LandingPage />} />
         <Route path="/portal" element={<Navigate to="/auth/portal" replace />} />
         <Route path="/auth" element={<Navigate to="/auth/portal" replace />} />
       </Route>
+
+      {/* Adaptive Creator & Brand Routes (UserLayout with sidebar when logged-in, PublicLayout when guest) */}
+      <Route path="/discover" element={<AdaptiveDiscoveryRoute />} />
+      <Route path="/creators" element={<AdaptiveDiscoveryRoute />} />
+      <Route path="/influencers" element={<AdaptiveDiscoveryRoute />} />
+      <Route path="/creators/:id" element={<AdaptiveInfluencerProfileRoute />} />
+      <Route path="/influencers/:id" element={<AdaptiveInfluencerProfileRoute />} />
+      <Route path="/brands" element={<AdaptiveBrandDiscoveryRoute />} />
+      <Route path="/brands/:id" element={<AdaptiveBrandProfileRoute />} />
 
       {/* Adaptive Campaign Routes (UserLayout with sidebar when logged-in, PublicLayout when guest) */}
       <Route path="/campaigns" element={<AdaptiveCampaignsRoute />} />

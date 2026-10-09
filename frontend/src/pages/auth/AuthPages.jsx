@@ -9,7 +9,7 @@ import { Button, ErrorState, Input, Textarea, Badge } from '../../components/ui'
 
 
 export function AuthCard({
-  eyebrow = 'Brand2Influence Access',
+  eyebrow = null,
   title,
   subtitle = null,
   wide = false,
@@ -75,7 +75,7 @@ export function AuthCard({
         </div>
       )}
       <div className="auth-card-header">
-        <p className="eyebrow">{eyebrow}</p>
+        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>
         {subtitle && <p className="auth-subtitle">{subtitle}</p>}
       </div>
