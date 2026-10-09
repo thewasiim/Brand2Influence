@@ -775,8 +775,8 @@ export function SignupPage() {
             </select>
           </div>
 
-          <div className="auth-actions-row" style={{ marginTop: '20px' }}>
-            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(4)} disabled={busy} style={{ flexShrink: 0 }}>
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(4)} disabled={busy}>
               ← Back
             </Button>
             <Button
@@ -784,7 +784,6 @@ export function SignupPage() {
               size="lg"
               disabled={!fullName.trim() || username.trim().length < 3 || usernameStatus.available === false || busy}
               loading={busy}
-              style={{ fontSize: '13.5px', whiteSpace: 'nowrap' }}
             >
               {busy
                 ? 'Creating Account…'

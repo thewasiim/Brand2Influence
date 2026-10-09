@@ -400,14 +400,14 @@ export function CreatorOnboardingPage() {
   }
 
   return (
-    <main className="setup" style={{ maxWidth: '820px', margin: '40px auto', padding: '0 20px' }}>
+    <main className="setup onboarding-main" style={{ width: '100%', maxWidth: '820px', margin: '0 auto', boxSizing: 'border-box' }}>
       {/* Top Breadcrumb & Step Tracker */}
-      <div style={{ marginBottom: '28px' }}>
+      <div style={{ marginBottom: '24px' }}>
         <div className="overline" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <i /> Creator Onboarding Workspace &bull; Step {step} of 5
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <h1 style={{ fontSize: '26px', margin: 0, color: '#F4F1E8' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+          <h1 style={{ fontSize: 'clamp(20px, 4.5vw, 26px)', margin: 0, color: '#F4F1E8' }}>
             {step === 1 ? 'Creator Information' :
              step === 2 ? 'Creator Profile Details' :
              step === 3 ? 'Connect Social Accounts' :
@@ -1011,19 +1011,11 @@ export function CreatorOnboardingPage() {
             </div>
           </div>
 
-          <div className="auth-actions-row" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '14px',
-            marginTop: '28px',
-            width: '100%',
-            boxSizing: 'border-box'
-          }}>
-            <Button type="button" variant="secondary" size="lg" onClick={() => goToStep(2)} style={{ minWidth: '120px' }}>
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => goToStep(2)}>
               ← Back
             </Button>
-            <Button type="button" size="lg" onClick={handleStep3Submit} style={{ minWidth: '240px', padding: '14px 28px', fontSize: '13px', fontWeight: 700, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+            <Button type="button" size="lg" onClick={handleStep3Submit}>
               Review Social Metrics →
             </Button>
           </div>
@@ -1135,22 +1127,13 @@ export function CreatorOnboardingPage() {
             </div>
           </div>
 
-          <div className="auth-actions-row" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '14px',
-            marginTop: '28px',
-            width: '100%',
-            boxSizing: 'border-box'
-          }}>
+          <div className="auth-actions-row">
             <Button
               type="button"
               variant="secondary"
               size="lg"
               onClick={() => goToStep(3)}
               disabled={busy}
-              style={{ minWidth: '120px' }}
             >
               ← Back
             </Button>
@@ -1160,14 +1143,6 @@ export function CreatorOnboardingPage() {
               disabled={busy}
               loading={busy}
               onClick={handleFinalSaveProfile}
-              style={{
-                minWidth: '240px',
-                padding: '14px 28px',
-                fontSize: '13px',
-                fontWeight: 700,
-                letterSpacing: '0.06em',
-                whiteSpace: 'nowrap'
-              }}
             >
               {busy ? 'Publishing Profile…' : 'Publish Verified Creator Profile →'}
             </Button>

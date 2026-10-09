@@ -8128,7 +8128,8 @@ body::before {
 
   .auth-card,
   .auth-card--wide,
-  .setup {
+  .setup,
+  .onboarding-main {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -8136,12 +8137,13 @@ body::before {
     border-radius: 14px !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
-    overflow-x: clip !important;
+    overflow-x: hidden !important;
   }
 
   .auth-card *,
   .auth-card--wide *,
-  .setup * {
+  .setup *,
+  .onboarding-main * {
     box-sizing: border-box !important;
     min-width: 0 !important;
   }
@@ -8807,31 +8809,33 @@ body::before {
 
 @media (max-width: 540px) {
   .otp-digits-wrapper {
-    gap: 8px !important;
+    gap: clamp(4px, 1.5vw, 7px) !important;
     width: 100% !important;
     max-width: 100% !important;
     justify-content: center !important;
+    box-sizing: border-box !important;
   }
 
   .otp-digit-input {
-    width: clamp(38px, 12.5vw, 48px) !important;
-    height: clamp(48px, 14vw, 58px) !important;
-    font-size: clamp(20px, 5.5vw, 24px) !important;
+    width: clamp(34px, 11.5vw, 44px) !important;
+    height: clamp(44px, 13vw, 54px) !important;
+    font-size: clamp(18px, 5vw, 22px) !important;
     border-radius: 8px !important;
     padding: 0 !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    box-sizing: border-box !important;
   }
 }
 
 @media (max-width: 375px) {
   .otp-digits-wrapper {
-    gap: 5px !important;
+    gap: 4px !important;
   }
 
   .otp-digit-input {
-    width: clamp(32px, 11vw, 40px) !important;
-    height: 46px !important;
-    font-size: 18px !important;
+    width: clamp(32px, 10.5vw, 38px) !important;
+    height: 44px !important;
+    font-size: 17px !important;
     border-radius: 6px !important;
   }
 }
@@ -9045,25 +9049,19 @@ body::before {
 
 /* Total Followers Live Reach Showcase Card */
 .total-reach-live-banner {
-  background: linear-gradient(135deg, rgba(30, 27, 75, 0.85) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(88, 28, 135, 0.7) 100%);
-  border: 1.5px solid rgba(168, 85, 247, 0.4);
-  border-radius: 14px;
-  padding: 20px;
+  background: rgba(244, 241, 232, 0.03);
+  border: 1px solid rgba(244, 241, 232, 0.12);
+  border-left: 4px solid #0047AB;
+  border-radius: 8px;
+  padding: clamp(16px, 4vw, 24px) clamp(14px, 4vw, 24px);
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 36px -8px rgba(147, 51, 234, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: none;
 }
 
 .total-reach-live-banner::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 60%);
-  pointer-events: none;
+  display: none;
 }
 
 .total-reach-header {
