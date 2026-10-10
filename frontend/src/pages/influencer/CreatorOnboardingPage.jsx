@@ -584,42 +584,6 @@ export function CreatorOnboardingPage() {
       {/* ================= STEP 2: CREATOR PROFILE DETAILS ================= */}
       {step === 2 && (
         <form onSubmit={handleStep2Submit} className="auth-card" style={{ width: '100%', maxWidth: '100%', textAlign: 'left', boxSizing: 'border-box' }}>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', marginBottom: '24px' }}>
-            Configure your deliverables, pricing rate card, and spoken languages.
-          </p>
-
-          {/* Content Specialties */}
-          <div style={{ marginBottom: '20px' }}>
-            <label className="input-label" style={{ display: 'block', marginBottom: '8px' }}>
-              Content Format Specialties
-            </label>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {CONTENT_SPECIALTIES.map((spec) => {
-                const isSelected = specialties.includes(spec)
-                return (
-                  <button
-                    key={spec}
-                    type="button"
-                    onClick={() => {
-                      const next = isSelected ? specialties.filter((s) => s !== spec) : [...specialties, spec]
-                      setSpecialties(next)
-                    }}
-                    style={{
-                      background: isSelected ? 'rgba(0, 71, 171, 0.2)' : 'rgba(244, 241, 232, 0.03)',
-                      border: isSelected ? '1px solid var(--color-accent)' : '1px solid rgba(244, 241, 232, 0.1)',
-                      color: isSelected ? '#60A5FA' : '#F4F1E8',
-                      padding: '8px 14px',
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    {isSelected ? '✓ ' : '+ '} {spec}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
 
           {/* Rate Card Grid */}
           <div style={{

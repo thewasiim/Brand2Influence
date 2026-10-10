@@ -1176,6 +1176,21 @@ p {
   box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.25);
 }
 
+.field-input.has-suffix {
+  padding-right: 44px !important;
+}
+
+.field-suffix {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
 .field select option,
 .field-select option,
 select option {
@@ -8088,9 +8103,9 @@ body::before {
     flex-direction: column !important;
     justify-content: flex-start !important;
     align-items: center !important;
-    padding: 14px 10px 48px !important;
+    padding: 16px 14px 48px !important;
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 100vw !important;
     min-width: 0 !important;
     overflow-x: clip !important;
     box-sizing: border-box !important;
@@ -8101,10 +8116,10 @@ body::before {
     top: auto !important;
     left: auto !important;
     right: auto !important;
-    margin-bottom: 14px !important;
+    margin: 0 auto 16px !important;
     padding: 0 4px !important;
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 440px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -8126,15 +8141,25 @@ body::before {
     flex-shrink: 0 !important;
   }
 
-  .auth-card,
+  .auth-card {
+    width: 100% !important;
+    max-width: 440px !important;
+    min-width: 0 !important;
+    padding: clamp(20px, 4.5vw, 28px) clamp(16px, 4.5vw, 24px) !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+    overflow-x: hidden !important;
+  }
+
   .auth-card--wide,
   .setup,
   .onboarding-main {
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: min(720px, 100%) !important;
     min-width: 0 !important;
-    padding: 20px 12px !important;
-    border-radius: 14px !important;
+    padding: clamp(20px, 4.5vw, 28px) clamp(16px, 4.5vw, 24px) !important;
+    border-radius: 16px !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
     overflow-x: hidden !important;
@@ -8645,7 +8670,7 @@ body::before {
   .field-select-wrap,
   .field-select,
   .field-textarea,
-  input,
+  input:not(.otp-digit-input),
   select,
   textarea {
     width: 100% !important;
@@ -8658,14 +8683,18 @@ body::before {
 
 @media (max-width: 400px) {
   .auth-layout {
-    padding: 10px 6px 36px !important;
+    padding: 12px 10px 36px !important;
   }
 
-  .auth-card,
+  .auth-card {
+    padding: 18px 14px !important;
+    border-radius: 12px !important;
+  }
+
   .auth-card--wide,
   .setup {
-    padding: 16px 8px !important;
-    border-radius: 10px !important;
+    padding: 18px 12px !important;
+    border-radius: 12px !important;
   }
 
   .step-item {
@@ -8807,35 +8836,39 @@ body::before {
   background: rgba(30, 27, 75, 0.4);
 }
 
-@media (max-width: 540px) {
+@media (max-width: 600px) {
   .otp-digits-wrapper {
-    gap: clamp(4px, 1.5vw, 7px) !important;
+    gap: clamp(4px, 1.6vw, 8px) !important;
     width: 100% !important;
     max-width: 100% !important;
     justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
     box-sizing: border-box !important;
+    margin: 6px auto 16px !important;
   }
 
   .otp-digit-input {
-    width: clamp(34px, 11.5vw, 44px) !important;
-    height: clamp(44px, 13vw, 54px) !important;
+    width: clamp(34px, 11vw, 46px) !important;
+    height: clamp(44px, 13vw, 56px) !important;
     font-size: clamp(18px, 5vw, 22px) !important;
     border-radius: 8px !important;
     padding: 0 !important;
+    flex: none !important;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5) !important;
     box-sizing: border-box !important;
   }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 360px) {
   .otp-digits-wrapper {
-    gap: 4px !important;
+    gap: 3px !important;
   }
 
   .otp-digit-input {
-    width: clamp(32px, 10.5vw, 38px) !important;
-    height: 44px !important;
-    font-size: 17px !important;
+    width: 32px !important;
+    height: 42px !important;
+    font-size: 16px !important;
     border-radius: 6px !important;
   }
 }
@@ -8908,7 +8941,8 @@ body::before {
 .signup-progress-pct {
   font-size: 11px;
   font-family: var(--font-mono, monospace);
-  color: var(--color-accent, #0047AB);
+  color: #60A5FA;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -8922,15 +8956,28 @@ body::before {
 
 .signup-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #0047AB 0%, #2563EB 100%);
+  background: linear-gradient(90deg, #2563EB 0%, #60A5FA 100%);
   transition: width 0.3s ease;
+}
+
+.signup-step-container,
+.signup-step-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.signup-step-form {
+  gap: 16px;
+  margin: 16px 0 8px;
 }
 
 .signup-verify-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   font-size: 12.5px;
   flex-wrap: wrap;
   gap: 10px;
@@ -8940,10 +8987,10 @@ body::before {
 .signup-avatar-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 18px;
   width: 100%;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .signup-role-badge-row {
@@ -8953,10 +9000,11 @@ body::before {
   background: rgba(244, 241, 232, 0.03);
   border: 1px solid rgba(244, 241, 232, 0.1);
   padding: 10px 14px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  border-radius: 8px;
+  margin-bottom: 18px;
   width: 100%;
   box-sizing: border-box;
+  gap: 10px;
 }
 
 @media (max-width: 680px) {

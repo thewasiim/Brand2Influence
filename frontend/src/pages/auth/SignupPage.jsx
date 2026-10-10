@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/auth'
 import { useAuth } from '../../context/AuthContext'
-import { Button, ErrorState, Input, Badge } from '../../components/ui'
+import { Button, ErrorState, Input, Select, Badge } from '../../components/ui'
 import { AuthCard, OtpInputGrid } from './AuthPages'
 
 export const COUNTRY_OPTIONS = [
@@ -29,6 +29,14 @@ export const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400',
   'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400'
 ]
+
+export const STEP_LABELS = {
+  1: 'Contact Details',
+  2: 'Account Type',
+  3: 'Verification',
+  4: 'Security',
+  5: 'Profile Setup'
+}
 
 export function SignupPage() {
   const nav = useNavigate()
@@ -348,17 +356,19 @@ export function SignupPage() {
       subtitle={
         step === 1 ? null :
           step === 2 ? null :
-            step === 3 ? `Enter the 6-digit code sent to ${maskedContact || email || 'your contact details'}.` :
+            step === 3 ? null :
               step === 4 ? 'Choose a secure password to protect your account.' :
                 null
       }
       wide={false}
-      showBack={step > 1 && step !== 5}
-      onBack={() => setStep((s) => Math.max(1, s - 1))}
+      showBack={false}
     >
       {/* Step Progress Pill Indicator */}
       <div className="signup-progress-wrap">
-        <div className="signup-progress-header" style={{ justifyContent: 'flex-end' }}>
+        <div className="signup-progress-header">
+          <span className="signup-progress-label">
+            Step {step} of 5 &bull; {STEP_LABELS[step]}
+          </span>
           <span className="signup-progress-pct">
             {Math.round((step / 5) * 100)}% Completed
           </span>
@@ -373,14 +383,14 @@ export function SignupPage() {
 
       {error && <ErrorState error={error} />}
       {successMsg && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34D399', padding: '10px 14px', borderRadius: '4px', fontSize: '12.5px', marginBottom: '16px' }}>
+        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#34D399', padding: '10px 14px', borderRadius: '6px', fontSize: '12.5px', marginBottom: '16px' }}>
           {successMsg}
         </div>
       )}
 
       {/* ================= STEP 1: CREATE AN ACCOUNT ================= */}
       {step === 1 && (
-        <form onSubmit={handleStep1Submit}>
+        <form onSubmit={handleStep1Submit} className="signup-step-form">
           <Input
             label="Email Address"
             type="email"
@@ -400,7 +410,7 @@ export function SignupPage() {
             onChange={(e) => setPhone(e.target.value)}
           />
 
-          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '-4px', marginBottom: '18px', lineHeight: 1.5 }}>
+          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '-4px', marginBottom: '16px', lineHeight: 1.5 }}>
             🔒 We'll send a 6-digit verification code to confirm your email or mobile.
           </div>
 
@@ -408,9 +418,9 @@ export function SignupPage() {
             {busy ? 'Sending Code…' : 'Continue to Account Type →'}
           </Button>
 
-          <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
             Already have an account?{' '}
-            <Link to="/login" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none' }}>
+            <Link to="/login" style={{ color: '#60A5FA', fontWeight: 600, textDecoration: 'none' }}>
               Log In →
             </Link>
           </div>
@@ -419,7 +429,7 @@ export function SignupPage() {
 
       {/* ================= STEP 2: CHOOSE ACCOUNT TYPE ================= */}
       {step === 2 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '20px', width: '100%' }}>
           <Button
             type="button"
             size="lg"
@@ -456,33 +466,89 @@ export function SignupPage() {
           >
             As a Creator
           </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="full"
+            onClick={() => setStep(1)}
+            style={{
+              padding: '14px 20px',
+              fontSize: '14px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            ← Back
+          </Button>
         </div>
       )}
 
       {/* ================= STEP 3: VERIFY EMAIL OR PHONE ================= */}
       {step === 3 && (
-        <form onSubmit={handleStep3VerifyOtp}>
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
-              Enter the 6-digit code sent to:
-            </p>
-            <p style={{ fontSize: '15px', fontWeight: 600, color: '#F4F1E8', fontFamily: 'var(--font-mono)' }}>
-              {maskedContact || email}
-            </p>
-          </div>
-
-          {testOtp && (
-            <div style={{ background: 'rgba(0, 71, 171, 0.12)', border: '1px solid rgba(0, 71, 171, 0.35)', padding: '10px 14px', borderRadius: '4px', textAlign: 'center', marginBottom: '18px' }}>
-              <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.7)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '2px' }}>
-                Development Testing Code
-              </span>
-              <strong style={{ fontSize: '18px', letterSpacing: '0.25em', color: '#60A5FA', fontFamily: 'var(--font-mono)' }}>
-                {testOtp}
+        <form onSubmit={handleStep3VerifyOtp} className="signup-step-form">
+          <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(244, 241, 232, 0.04)',
+              border: '1px solid rgba(244, 241, 232, 0.1)',
+              borderRadius: '20px',
+              padding: '5px 12px',
+              fontSize: '12px',
+              color: 'var(--color-text-secondary)',
+              marginBottom: '10px',
+              maxWidth: '100%',
+              flexWrap: 'wrap',
+              justifyContent: 'center'
+            }}>
+              <span>Code sent to:</span>
+              <strong style={{ color: '#F4F1E8', fontFamily: 'var(--font-mono)', wordBreak: 'break-all' }}>
+                {maskedContact || email}
               </strong>
             </div>
-          )}
 
-          <div style={{ marginBottom: '22px' }}>
+            {testOtp && (
+              <button
+                type="button"
+                id="dev-test-otp-btn"
+                onClick={() => setOtp(testOtp)}
+                style={{
+                  background: 'rgba(0, 71, 171, 0.12)',
+                  border: '1px solid rgba(96, 165, 250, 0.35)',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  width: '100%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'background 0.2s',
+                  marginBottom: '12px',
+                  fontFamily: 'inherit'
+                }}
+                title="Tap to auto-fill development testing code"
+              >
+                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  DEV TEST CODE:
+                </span>
+                <strong style={{ fontSize: '16px', letterSpacing: '0.2em', color: '#60A5FA', fontFamily: 'var(--font-mono)' }}>
+                  {testOtp}
+                </strong>
+                <span style={{ fontSize: '10px', color: '#93C5FD', background: 'rgba(96, 165, 250, 0.2)', padding: '2px 6px', borderRadius: '4px' }}>
+                  Tap to fill
+                </span>
+              </button>
+            )}
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
             <OtpInputGrid
               value={otp}
               onChange={setOtp}
@@ -495,13 +561,13 @@ export function SignupPage() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', textDecoration: 'underline' }}
+              style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}
             >
               Change email or phone
             </button>
 
             {resendCooldown > 0 ? (
-              <span style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '12px' }}>
                 Resend in {resendCooldown}s
               </span>
             ) : (
@@ -509,7 +575,7 @@ export function SignupPage() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={busy}
-                style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 600 }}
+                style={{ background: 'none', border: 'none', color: '#60A5FA', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
               >
                 Resend Code
               </button>
@@ -529,40 +595,40 @@ export function SignupPage() {
 
       {/* ================= STEP 4: CREATE A PASSWORD ================= */}
       {step === 4 && (
-        <form onSubmit={handleStep4Password}>
-          <div style={{ position: 'relative' }}>
-            <Input
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              required
-              minLength="8"
-              placeholder="••••••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ paddingRight: '42px' }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: 'absolute',
-                right: '12px',
-                top: '38px',
-                background: 'none',
-                border: 'none',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '15px',
-                padding: '4px'
-              }}
-              title={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? '👁️' : '🙈'}
-            </button>
-          </div>
+        <form onSubmit={handleStep4Password} className="signup-step-form">
+          <Input
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            required
+            minLength="8"
+            placeholder="••••••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            suffix={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  padding: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '👁️' : '🙈'}
+              </button>
+            }
+          />
 
           {password && (
-            <div style={{ marginTop: '-8px', marginBottom: '14px' }}>
+            <div style={{ marginTop: '-8px', marginBottom: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                 <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
                   Password Strength
@@ -587,44 +653,44 @@ export function SignupPage() {
             </div>
           )}
 
-          <div style={{ position: 'relative' }}>
-            <Input
-              label="Confirm Password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              required
-              minLength="8"
-              placeholder="••••••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              style={{ paddingRight: '42px' }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={{
-                position: 'absolute',
-                right: '12px',
-                top: '38px',
-                background: 'none',
-                border: 'none',
-                color: 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontSize: '15px',
-                padding: '4px'
-              }}
-              title={showConfirmPassword ? 'Hide password' : 'Show password'}
-            >
-              {showConfirmPassword ? '👁️' : '🙈'}
-            </button>
-          </div>
+          <Input
+            label="Confirm Password"
+            type={showConfirmPassword ? 'text' : 'password'}
+            required
+            minLength="8"
+            placeholder="••••••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            suffix={
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  padding: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? '👁️' : '🙈'}
+              </button>
+            }
+          />
 
           {confirmPassword && password !== confirmPassword && (
-            <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '-8px', marginBottom: '12px' }}>
+            <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '-8px', marginBottom: '8px' }}>
               ✕ Passwords do not match
             </div>
           )}
 
-          <div style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', marginBottom: '18px', lineHeight: 1.5 }}>
+          <div style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: 1.5 }}>
             • Minimum 8 characters<br />
             • Include numbers and special characters for a stronger rating
           </div>
@@ -644,14 +710,14 @@ export function SignupPage() {
         </form>
       )}
 
-      {/* ================= STEP 5: BASIC PROFILE & COMPLETE (MOVED FROM STEP 4) ================= */}
+      {/* ================= STEP 5: BASIC PROFILE & COMPLETE ================= */}
       {step === 5 && (
-        <form onSubmit={handleStep5FinalSubmit}>
+        <form onSubmit={handleStep5FinalSubmit} className="signup-step-form">
           {/* Active Role Confirmation Badge */}
           <div className="signup-role-badge-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px' }}>{selectedRole === 'brand' ? '🏢' : '✨'}</span>
-              <span style={{ fontSize: '12.5px', color: '#F4F1E8' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <span style={{ fontSize: '16px', flexShrink: 0 }}>{selectedRole === 'brand' ? '🏢' : '✨'}</span>
+              <span style={{ fontSize: '12.5px', color: '#F4F1E8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 Account Type:{' '}
                 <strong style={{ color: selectedRole === 'brand' ? '#60A5FA' : '#FBBF24', textTransform: 'capitalize' }}>
                   {selectedRole === 'brand' ? 'Brand' : 'Creator'}
@@ -661,7 +727,7 @@ export function SignupPage() {
             <button
               type="button"
               onClick={() => setStep(2)}
-              style={{ background: 'none', border: 'none', color: 'var(--color-accent)', fontSize: '11.5px', cursor: 'pointer', textDecoration: 'underline' }}
+              style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
             >
               Change
             </button>
@@ -671,8 +737,8 @@ export function SignupPage() {
           <div className="signup-avatar-row">
             <div
               style={{
-                width: '64px',
-                height: '64px',
+                width: '56px',
+                height: '56px',
                 borderRadius: '50%',
                 background: profileImageUrl ? `url(${profileImageUrl}) center/cover no-repeat` : 'rgba(244, 241, 232, 0.08)',
                 border: '2px solid rgba(244, 241, 232, 0.16)',
@@ -680,14 +746,14 @@ export function SignupPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#F4F1E8',
-                fontSize: '22px',
+                fontSize: '20px',
                 fontWeight: 600,
                 flexShrink: 0
               }}
             >
               {!profileImageUrl && (fullName ? fullName[0]?.toUpperCase() : (selectedRole === 'brand' ? '🏢' : '👤'))}
             </div>
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <input
                 ref={photoInputRef}
                 type="file"
@@ -695,20 +761,20 @@ export function SignupPage() {
                 onChange={handlePhotoUpload}
                 style={{ display: 'none' }}
               />
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <Button
                   type="button"
                   variant="secondary"
                   size="sm"
                   onClick={() => photoInputRef.current?.click()}
                 >
-                  {profileImageUrl ? 'Change Photo' : (selectedRole === 'brand' ? 'Upload Brand Logo' : 'Upload Photo')}
+                  {profileImageUrl ? 'Change Photo' : (selectedRole === 'brand' ? 'Upload Logo' : 'Upload Photo')}
                 </Button>
                 {profileImageUrl && (
                   <button
                     type="button"
                     onClick={() => setProfileImageUrl('')}
-                    style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer', padding: '4px 8px' }}
+                    style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer', padding: '4px 6px' }}
                   >
                     Remove
                   </button>
@@ -744,7 +810,7 @@ export function SignupPage() {
               <div style={{
                 fontSize: '12px',
                 marginTop: '-8px',
-                marginBottom: '14px',
+                marginBottom: '10px',
                 color: usernameStatus.available ? '#10B981' : usernameStatus.available === false ? '#EF4444' : 'var(--color-text-secondary)'
               }}>
                 {usernameStatus.message}
@@ -752,28 +818,17 @@ export function SignupPage() {
             )}
           </div>
 
-          <div className="input-group">
-            <label className="input-label">Country / Region</label>
-            <select
-              className="input-field"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              style={{
-                background: 'rgba(244, 241, 232, 0.04)',
-                color: '#F4F1E8',
-                border: '1px solid rgba(244, 241, 232, 0.12)',
-                padding: '12px 14px',
-                width: '100%',
-                outline: 'none'
-              }}
-            >
-              {COUNTRY_OPTIONS.map((c) => (
-                <option key={c} value={c} style={{ background: '#0B0B0A', color: '#F4F1E8' }}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Country / Region"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          >
+            {COUNTRY_OPTIONS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
 
           <div className="auth-actions-row">
             <Button type="button" variant="secondary" size="lg" onClick={() => setStep(4)} disabled={busy}>

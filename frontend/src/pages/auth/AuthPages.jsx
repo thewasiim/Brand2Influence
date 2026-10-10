@@ -138,6 +138,14 @@ export function OtpInputGrid({ value = '', onChange, length = 6, disabled = fals
       onChange(next.join(''))
       return
     }
+    // Handle multi-digit paste or mobile SMS one-time-code autofill
+    if (val.length > 1) {
+      const pasted = val.slice(0, length)
+      onChange(pasted)
+      const nextIndex = Math.min(pasted.length, length - 1)
+      inputsRef.current[nextIndex]?.focus()
+      return
+    }
     const char = val[val.length - 1]
     const next = digits.slice()
     next[index] = char
@@ -148,8 +156,10 @@ export function OtpInputGrid({ value = '', onChange, length = 6, disabled = fals
   }
 
   const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !digits[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus()
+    if (e.key === 'Backspace') {
+      if (!digits[index] && index > 0) {
+        inputsRef.current[index - 1]?.focus()
+      }
     }
   }
 
@@ -172,13 +182,13 @@ export function OtpInputGrid({ value = '', onChange, length = 6, disabled = fals
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          maxLength={1}
+          maxLength={i === 0 ? length : 1}
+          autoComplete={i === 0 ? 'one-time-code' : 'off'}
           disabled={disabled}
           value={digits[i] || ''}
           onChange={(e) => handleChange(e, i)}
           onKeyDown={(e) => handleKeyDown(e, i)}
           className={`otp-digit-input ${digits[i] ? 'has-value' : ''}`}
-          autoFocus={i === 0}
         />
       ))}
     </div>

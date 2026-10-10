@@ -49,7 +49,7 @@ export function Button({
 }
 
 // 2. Input
-export function Input({ label, error, hint, icon, className = '', id, required, ...props }) {
+export function Input({ label, error, hint, icon, suffix, className = '', id, required, style, ...props }) {
   const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined)
   return (
     <label className={`field ${error ? 'has-error' : ''} ${className}`} htmlFor={inputId}>
@@ -58,9 +58,20 @@ export function Input({ label, error, hint, icon, className = '', id, required, 
           {label} {required && <span style={{ color: 'var(--color-primary)' }}>*</span>}
         </span>
       )}
-      <div className="field-input-wrap">
+      <div className="field-input-wrap" style={{ position: 'relative', width: '100%' }}>
         {icon && <span className="field-icon">{icon}</span>}
-        <input id={inputId} required={required} className={`field-input ${icon ? 'has-icon' : ''}`} {...props} />
+        <input
+          id={inputId}
+          required={required}
+          className={`field-input ${icon ? 'has-icon' : ''} ${suffix ? 'has-suffix' : ''}`}
+          style={{ ...(suffix ? { paddingRight: '44px' } : {}), ...style }}
+          {...props}
+        />
+        {suffix && (
+          <div className="field-suffix" style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 2 }}>
+            {suffix}
+          </div>
+        )}
       </div>
       {hint && !error && <small className="field-hint">{hint}</small>}
       {error && <small className="field-error" role="alert">{error}</small>}
