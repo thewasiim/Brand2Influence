@@ -26,6 +26,15 @@ export const register = async (req, res, next) => {
   }
 }
 
+export const login = async (req, res, next) => {
+  try {
+    const result = await service.login(req.body)
+    res.json(result)
+  } catch (e) {
+    next(e)
+  }
+}
+
 export const checkUsername = async (req, res, next) => {
   try {
     const username = req.query.username || req.body.username || ''

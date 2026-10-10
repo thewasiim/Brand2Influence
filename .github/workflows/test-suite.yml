@@ -1,0 +1,62 @@
+name: SQA Automation Test Suite
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  software-quality-assurance:
+    runs-on: ubuntu-latest
+
+    services:
+      # Optional backend dependencies if using containerized db
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python Test Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest requests selenium
+
+      - name: Install Frontend & Backend Dependencies
+        run: |
+          npm --prefix backend install
+          npm --prefix frontend install
+
+      - name: Start Backend Dev Server
+        run: |
+          npm --prefix backend run dev &
+          npx wait-on http://localhost:3001/api/health -t 30000
+
+      - name: Start Frontend Dev Server
+        run: |
+          npm --prefix frontend run dev &
+          npx wait-on http://localhost:5173 -t 30000
+
+      - name: Run PyTest Suite (T3.1 Unit, Integration, System)
+        run: |
+          pytest tests/test_unit_tactics.py tests/test_integration_apis.py tests/test_system_e2e.py --junitxml=tests/reports/junit_report.xml -v
+
+      - name: Run Selenium Headless UI Tests (3.3 Automation)
+        run: |
+          pytest tests/test_selenium_automation.py -v
+
+      - name: Publish JUnit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: tests/reports/junit_report.xml

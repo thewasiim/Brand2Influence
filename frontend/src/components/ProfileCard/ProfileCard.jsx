@@ -38,6 +38,8 @@ const ProfileCardComponent = ({
   instagramUrl,
   youtubeUrl,
   snapchatUrl,
+  onClick,
+  onCardClick,
   onContactClick
 }) => {
   const wrapRef = useRef(null);
@@ -311,7 +313,15 @@ const ProfileCardComponent = ({
     <div ref={wrapRef} className={`pc-card-wrapper ${className}`.trim()} style={cardStyle}>
       {behindGlowEnabled && <div className="pc-behind" />}
       <div ref={shellRef} className="pc-card-shell">
-        <article className="pc-card">
+        <article
+          className="pc-card"
+          onClick={(e) => {
+            if (onClick) onClick(e);
+            else if (onCardClick) onCardClick(e);
+            else if (onContactClick) onContactClick(e);
+          }}
+          style={{ cursor: (onClick || onCardClick || onContactClick) ? 'pointer' : 'default' }}
+        >
           <div className="pc-inside">
             {/* Background Image of Creator */}
             <img
@@ -376,7 +386,12 @@ const ProfileCardComponent = ({
                 <button
                   type="button"
                   className="pc-contact-btn"
-                  onClick={onContactClick}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onContactClick) onContactClick(e);
+                    else if (onClick) onClick(e);
+                    else if (onCardClick) onCardClick(e);
+                  }}
                 >
                   {contactText}
                 </button>

@@ -1,5 +1,7 @@
 import { adminDb } from '../config/supabase.js'
 import { ApiError, boundedText, required } from '../utils/api-error.js'
+import { CURATED_BRANDS } from './brand.service.js'
+import { getMemoryPostsForUser } from './social.service.js'
 
 export const CURATED_CREATORS = [
   {
@@ -274,12 +276,12 @@ const dto = (p, user = {}) => {
     name: user.name || p.name || 'Creator',
     username: p.username || (user.name ? user.name.toLowerCase().replace(/\s+/g, '') : 'creator'),
     niche: p.niche || 'Digital Creator',
-    followersCount: p.followers_count || 10000,
-    engagementRate: p.engagement_rate || 4.2,
+    followersCount: (p.followers_count !== undefined && p.followers_count !== null) ? Number(p.followers_count) : 0,
+    engagementRate: (p.engagement_rate !== undefined && p.engagement_rate !== null) ? Number(p.engagement_rate) : 0,
     rateCard: p.rate_card || {},
     portfolioLinks: p.portfolio_links || [],
     location: p.location || 'India',
-    bio: p.bio || 'Independent content creator collaborating on brand sponsorships and creative campaigns.',
+    bio: p.bio || '',
     profileImageUrl: p.profile_image_url || null,
     status: p.status || 'published',
     posts: posts
@@ -367,61 +369,157 @@ export async function list(filters = {}) {
 const IS_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function getById(id) {
-  // Check curated creators first by id, userId, username, or lowercase name
+  if (!id) throw new ApiError(404, 'Creator profile not found', 'NOT_FOUND')
+  const cleanId = String(id).replace(/^@/, '').trim()
+
+  // 1. Check curated creators first by id, userId, username, or name
   const curated = CURATED_CREATORS.find(
-    c => c.id === id ||
-         c.userId === id ||
-         c.username === id ||
-         c.name?.toLowerCase() === id?.toLowerCase() ||
-         (id === '806f7e5d-754c-4c74-8bba-e03f34164a70' && c.id === 'c-1')
+    c => c.id === cleanId ||
+         c.userId === cleanId ||
+         c.username === cleanId ||
+         c.name?.toLowerCase() === cleanId.toLowerCase() ||
+         c.name?.toLowerCase().replace(/\s+/g, '') === cleanId.toLowerCase().replace(/\s+/g, '') ||
+         (cleanId === '806f7e5d-754c-4c74-8bba-e03f34164a70' && c.id === 'c-1')
   )
   if (curated) return curated
 
-  const db = adminDb()
-
-  // If id is not a valid UUID, attempt looking up by name or username
-  if (!IS_UUID.test(id)) {
-    try {
-      const { data: userByName } = await db.from('users').select('id, name, email').ilike('name', id).maybeSingle()
-      if (userByName) {
-        return getById(userByName.id)
-      }
-    } catch {
-      // ignore
-    }
-    throw new ApiError(404, 'Creator profile not found', 'NOT_FOUND')
-  }
-
-  const { data, error } = await db.from('influencer_profiles').select('*').eq('user_id', id).maybeSingle()
-  if (error) throw error
-
-  if (data) {
-    const { data: user } = await db.from('users').select('id,name').eq('id', id).maybeSingle()
-    return dto(data, user)
-  }
-
-  // Check if user exists in users table with role 'influencer'
-  const { data: user } = await db.from('users').select('id, name, email').eq('id', id).maybeSingle()
-  if (user) {
+  // 2. Check curated brands if opened from creator route
+  const curatedBrand = CURATED_BRANDS.find(
+    b => b.id === cleanId ||
+         b.userId === cleanId ||
+         b.businessName?.toLowerCase() === cleanId.toLowerCase() ||
+         b.businessName?.toLowerCase().replace(/\s+/g, '') === cleanId.toLowerCase().replace(/\s+/g, '')
+  )
+  if (curatedBrand) {
     return {
-      id: user.id,
-      userId: user.id,
-      name: user.name || 'Creator',
-      username: user.name?.toLowerCase().replace(/\s+/g, '') || 'creator',
-      niche: 'Digital Creator',
-      followersCount: 15000,
-      engagementRate: 4.5,
-      rateCard: { reel: 3000 },
+      id: curatedBrand.id,
+      userId: curatedBrand.userId,
+      name: curatedBrand.businessName,
+      username: curatedBrand.businessName.toLowerCase().replace(/\s+/g, ''),
+      niche: curatedBrand.businessType || 'Brand',
+      role: 'brand',
+      followersCount: 0,
+      engagementRate: 0,
+      rateCard: {},
       portfolioLinks: [],
-      location: 'Pan-India',
-      bio: 'Independent content creator collaborating on brand sponsorships and creative campaigns.',
+      location: curatedBrand.location || 'India',
+      bio: curatedBrand.description || '',
       profileImageUrl: null,
       status: 'published',
       posts: []
     }
   }
 
-  throw new ApiError(404, 'Influencer profile not found', 'NOT_FOUND')
+  const db = adminDb()
+
+  // 3. If cleanId is not a valid UUID, attempt looking up by name, email, or handle
+  if (!IS_UUID.test(cleanId)) {
+    try {
+      const { data: userByName } = await db.from('users').select('id, name, email').ilike('name', cleanId).maybeSingle()
+      if (userByName) return getById(userByName.id)
+
+      const { data: userByEmail } = await db.from('users').select('id').ilike('email', cleanId).maybeSingle()
+      if (userByEmail) return getById(userByEmail.id)
+
+      const { data: infProfiles } = await db.from('influencer_profiles').select('user_id, rate_card')
+      const matched = (infProfiles || []).find(inf => {
+        const handle = inf.rate_card?.instagram_handle?.replace(/^@/, '')?.toLowerCase()
+        const u = inf.rate_card?.username?.toLowerCase()
+        return handle === cleanId.toLowerCase() || u === cleanId.toLowerCase()
+      })
+      if (matched) return getById(matched.user_id)
+    } catch {
+      // ignore
+    }
+    throw new ApiError(404, 'Creator profile not found', 'NOT_FOUND')
+  }
+
+  // 4. Fetch posts for this user (both DB and in-memory posts)
+  let userPosts = []
+  try {
+    const { data: pData } = await db.from('posts').select('id, media_url, media_type, thumbnail_url, caption, likes_count, created_at').eq('user_id', cleanId).order('created_at', { ascending: false })
+    if (pData && pData.length > 0) {
+      userPosts = pData.map(p => ({
+        id: p.id,
+        type: p.media_type || (p.media_url?.includes('.mp4') ? 'video' : 'image'),
+        mediaUrl: p.media_url,
+        thumbnailUrl: p.thumbnail_url || p.media_url,
+        caption: p.caption || '',
+        likesCount: p.likes_count || 0,
+        createdAt: p.created_at
+      }))
+    }
+  } catch (err) {
+    console.warn('Posts lookup warning in getById:', err.message)
+  }
+
+  // Merge in-memory posts
+  const memPosts = getMemoryPostsForUser(cleanId).map(p => ({
+    id: p.id,
+    type: p.media_type || (p.media_url?.includes('.mp4') ? 'video' : 'image'),
+    mediaUrl: p.media_url,
+    thumbnailUrl: p.thumbnail_url || p.media_url,
+    caption: p.caption || '',
+    likesCount: p.likes_count || 0,
+    createdAt: p.created_at
+  }))
+  const seenPostIds = new Set(userPosts.map(p => p.id))
+  userPosts = [...memPosts.filter(p => !seenPostIds.has(p.id)), ...userPosts]
+
+  // 5. Query influencer_profiles table
+  const { data, error } = await db.from('influencer_profiles').select('*').eq('user_id', cleanId).maybeSingle()
+  if (error) throw error
+
+  if (data) {
+    const { data: user } = await db.from('users').select('id,name').eq('id', cleanId).maybeSingle()
+    const result = dto(data, user)
+    result.posts = userPosts.length > 0 ? userPosts : (result.posts || [])
+    return result
+  }
+
+  // 6. Check if user exists in users table with role 'influencer' or 'brand'
+  const { data: user } = await db.from('users').select('id, name, email, role').eq('id', cleanId).maybeSingle()
+  if (user) {
+    const { data: brandProfile } = await db.from('brand_profiles').select('*').eq('user_id', cleanId).maybeSingle()
+    if (brandProfile || user.role === 'brand') {
+      return {
+        id: user.id,
+        userId: user.id,
+        name: brandProfile?.business_name || user.name || 'Brand Partner',
+        username: (brandProfile?.business_name || user.name || 'brand').toLowerCase().replace(/\s+/g, ''),
+        niche: brandProfile?.business_type || 'Brand',
+        role: 'brand',
+        followersCount: 0,
+        engagementRate: 0,
+        rateCard: {},
+        portfolioLinks: [],
+        location: brandProfile?.location || 'India',
+        bio: brandProfile?.description || '',
+        profileImageUrl: null,
+        status: 'published',
+        posts: userPosts
+      }
+    }
+
+    return {
+      id: user.id,
+      userId: user.id,
+      name: user.name || 'Creator',
+      username: user.name?.toLowerCase().replace(/\s+/g, '') || 'creator',
+      niche: 'Digital Creator',
+      followersCount: 0,
+      engagementRate: 0,
+      rateCard: {},
+      portfolioLinks: [],
+      location: 'India',
+      bio: '',
+      profileImageUrl: null,
+      status: 'published',
+      posts: userPosts
+    }
+  }
+
+  throw new ApiError(404, 'Creator profile not found', 'NOT_FOUND')
 }
 
 export async function save(user, payload) {
@@ -437,8 +535,8 @@ export async function save(user, payload) {
   const record = {
     user_id: user.id,
     niche: boundedText(payload.niche || 'Digital Creator', 'niche', 100),
-    followers_count: Number(payload.followersCount || 10000),
-    engagement_rate: Number(payload.engagementRate || 4.5),
+    followers_count: payload.followersCount !== undefined && payload.followersCount !== null ? Number(payload.followersCount) : 0,
+    engagement_rate: payload.engagementRate !== undefined && payload.engagementRate !== null ? Number(payload.engagementRate) : 0,
     rate_card: existingRateCard,
     portfolio_links: Array.isArray(payload.portfolioLinks) ? payload.portfolioLinks : [],
     location: boundedText(payload.location || 'India', 'location', 100),
@@ -487,8 +585,8 @@ export async function addPost(user, postData) {
     .upsert({
       user_id: user.id,
       niche: profile?.niche || 'Digital Creator',
-      followers_count: profile?.followers_count || 10000,
-      engagement_rate: profile?.engagement_rate || 4.5,
+      followers_count: Number(profile?.followers_count || 0),
+      engagement_rate: Number(profile?.engagement_rate || 0),
       location: profile?.location || 'India',
       rate_card: updatedRateCard,
       status: 'published'

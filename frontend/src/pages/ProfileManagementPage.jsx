@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { authService } from '../services/auth'
+import { socialService } from '../services/social'
 import { api } from '../services/api'
 import { Button, Input, Textarea, Badge, LoadingState, ErrorState, FollowersBreakdownModal } from '../components/ui'
+import CreatePostModal from './social/CreatePostModal'
 
 // Helper to reliably convert any YouTube link/id into a working embed URL
 function getYouTubeEmbedUrl(url = '', videoId = '') {
@@ -20,90 +22,6 @@ function getYouTubeEmbedUrl(url = '', videoId = '') {
   }
   return url
 }
-
-const DEFAULT_POSTS = [
-  {
-    id: 'post-1',
-    type: 'image',
-    mediaUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=1000',
-    caption: 'Monochrome editorial aesthetic 🖤 Styled in sustainable linen for the new collection.',
-    likesCount: 2840,
-    commentsCount: 64,
-    createdAt: '2 days ago',
-    comments: [
-      { id: 'c-1', user: 'priya_style', text: 'Stunning fit! Where is the blazer from?' },
-      { id: 'c-2', user: 'zara_india', text: 'Love the creative direction ✨' },
-      { id: 'c-3', user: 'rahul_clicks', text: 'The lighting here is top tier 📸' }
-    ]
-  },
-  {
-    id: 'post-2',
-    type: 'video',
-    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=1000',
-    caption: '3 Ways to style oversized neutral blazers 🎥👗 Save for your weekly styling inspo!',
-    likesCount: 5410,
-    commentsCount: 118,
-    viewsCount: 48200,
-    createdAt: '4 days ago',
-    comments: [
-      { id: 'c-4', user: 'fashion_daily', text: 'Option 2 is an absolute vibe!' },
-      { id: 'c-5', user: 'ananya_v', text: 'Obsessed with your reel transitions 🔥' }
-    ]
-  },
-  {
-    id: 'post-3',
-    type: 'image',
-    mediaUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1000',
-    caption: 'South Bombay golden hour architecture walk ✨ Never getting tired of these silhouettes.',
-    likesCount: 3120,
-    commentsCount: 42,
-    createdAt: '1 week ago',
-    comments: [
-      { id: 'c-6', user: 'mumbai_frames', text: 'Classic South Bombay charm.' }
-    ]
-  },
-  {
-    id: 'post-4',
-    type: 'video',
-    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=1000',
-    caption: 'Morning mindfulness routine before brand shoots 🧘‍♀️ Focus & clean energy only.',
-    likesCount: 4290,
-    commentsCount: 89,
-    viewsCount: 36500,
-    createdAt: '2 weeks ago',
-    comments: [
-      { id: 'c-7', user: 'wellness_hub', text: 'Needed this reminder today 🙏' }
-    ]
-  },
-  {
-    id: 'post-5',
-    type: 'image',
-    mediaUrl: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=1000',
-    caption: 'Minimalist brand campaign moodboard & creative direction prep 💼',
-    likesCount: 1980,
-    commentsCount: 35,
-    createdAt: '3 weeks ago',
-    comments: [
-      { id: 'c-8', user: 'studio_k', text: 'Excited for this launch!' }
-    ]
-  },
-  {
-    id: 'post-6',
-    type: 'video',
-    mediaUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&q=80&w=1000',
-    caption: 'Weekend road trip escape 🚗🌲 Testing the new dynamic lens setup.',
-    likesCount: 6100,
-    commentsCount: 142,
-    viewsCount: 52100,
-    createdAt: '1 month ago',
-    comments: [
-      { id: 'c-9', user: 'wanderlust_in', text: 'Where was this shot?' }
-    ]
-  }
-]
 
 export default function ProfileManagementPage() {
   const nav = useNavigate()
@@ -122,23 +40,18 @@ export default function ProfileManagementPage() {
 
   // Follow State
   const [isFollowing, setIsFollowing] = useState(false)
-  const [followerCount, setFollowerCount] = useState(14800)
+  const [followerCount, setFollowerCount] = useState(0)
   const [showBreakdown, setShowBreakdown] = useState(false)
 
   // Posts & Lightbox State
-  const [posts, setPosts] = useState(DEFAULT_POSTS)
+  const [posts, setPosts] = useState([])
   const [selectedPost, setSelectedPost] = useState(null)
   const [newComment, setNewComment] = useState('')
   const [likedPosts, setLikedPosts] = useState({})
 
-  // Manual Create Post Modal
+  // Create Post Modal
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newPostForm, setNewPostForm] = useState({
-    type: 'image',
-    mediaUrl: '',
-    caption: '',
-    thumbnailUrl: ''
-  })
+
 
   // Auto-Import Social Posts Modal & Verification State
   const [showImportModal, setShowImportModal] = useState(false)
@@ -217,9 +130,28 @@ export default function ProfileManagementPage() {
             }
           }
 
-          const totalFollowers = Number(rateCard.instagram_followers || inf.followers_count || 14800)
-          if (totalFollowers > 0) {
-            setFollowerCount(totalFollowers)
+          const totalFollowers = Number(rateCard.instagram_followers || inf.followers_count || 0)
+          setFollowerCount(totalFollowers)
+
+          // Fetch user's actual posts from backend / memory
+          try {
+            const postsRes = await socialService.getUserPosts(res.id || user?.id)
+            if (postsRes && Array.isArray(postsRes.items)) {
+              setPosts(postsRes.items.map(p => ({
+                id: p.id,
+                type: p.media_type || (p.media_url?.includes('.mp4') ? 'video' : 'image'),
+                mediaUrl: p.media_url,
+                thumbnailUrl: p.thumbnail_url || p.media_url,
+                caption: p.caption || '',
+                likesCount: p.likes_count || 0,
+                commentsCount: p.comments_count || 0,
+                viewsCount: p.views_count,
+                createdAt: p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Just now',
+                comments: p.comments || []
+              })))
+            }
+          } catch (postErr) {
+            console.warn('Could not load user posts:', postErr)
           }
 
           if (rateCard.verified_accounts) {
@@ -587,33 +519,6 @@ export default function ProfileManagementPage() {
     setNewComment('')
   }
 
-  const handleCreatePost = (e) => {
-    e.preventDefault()
-    if (!newPostForm.mediaUrl) {
-      setErrorMsg('Please provide an image or video URL.')
-      return
-    }
-
-    const created = {
-      id: `post-${Date.now()}`,
-      type: newPostForm.type,
-      mediaUrl: newPostForm.mediaUrl,
-      thumbnailUrl: newPostForm.type === 'video' ? (newPostForm.thumbnailUrl || newPostForm.mediaUrl) : undefined,
-      caption: newPostForm.caption || 'New post on Brand2Influence ✨',
-      likesCount: 0,
-      commentsCount: 0,
-      viewsCount: newPostForm.type === 'video' ? 1 : undefined,
-      createdAt: 'Just now',
-      comments: []
-    }
-
-    setPosts([created, ...posts])
-    setShowCreateModal(false)
-    setNewPostForm({ type: 'image', mediaUrl: '', caption: '', thumbnailUrl: '' })
-    setSuccessMsg('New post published to your Instagram feed!')
-    setTimeout(() => setSuccessMsg(''), 3000)
-  }
-
   if (loading) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center' }}>
@@ -768,117 +673,22 @@ export default function ProfileManagementPage() {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button
                 type="button"
-                onClick={toggleFollow}
-                style={{
-                  padding: '7px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  background: isFollowing ? 'rgba(255, 255, 255, 0.12)' : '#0095F6',
-                  color: isFollowing ? '#E5E7EB' : '#FFFFFF',
-                  boxShadow: isFollowing ? 'none' : '0 2px 10px rgba(0, 149, 246, 0.3)'
-                }}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => nav('/conversations')}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <span>💬</span> Message
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setImportHandle(importPlatform === 'youtube' ? (formData.youtube_url || '@techburn') : (formData.instagram_handle || handleUsername))
-                  setShowImportModal(true)
-                }}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(245, 158, 11, 0.5)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  color: '#FBBF24',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <span>🛡️</span> Auto-Fetch
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowCreateModal(true)}
+                onClick={() => setActiveTab(activeTab === 'edit' ? 'posts' : 'edit')}
+                title="Edit Profile Settings"
+                aria-label="Edit Profile Settings"
                 style={{
                   padding: '7px 12px',
                   borderRadius: '8px',
-                  border: '1px solid rgba(99, 102, 241, 0.4)',
-                  fontSize: '13px',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  fontSize: '15px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  background: 'rgba(99, 102, 241, 0.15)',
-                  color: '#A5B4FC',
-                  display: 'flex',
+                  background: activeTab === 'edit' ? '#4F46E5' : 'rgba(255, 255, 255, 0.06)',
+                  color: '#FFFFFF',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <span>➕</span> Post
-              </button>
-
-              <button
-                type="button"
-                onClick={copyProfileLink}
-                title="Share Profile"
-                style={{
-                  padding: '7px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#D1D5DB'
-                }}
-              >
-                {copiedLink ? '✓' : '🔗'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('edit')}
-                title="Edit Profile Settings"
-                style={{
-                  padding: '7px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  background: activeTab === 'edit' ? '#4F46E5' : 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF'
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease'
                 }}
               >
                 ⚙️
@@ -2301,114 +2111,31 @@ export default function ProfileManagementPage() {
         </div>
       )}
 
-      {/* =========================================================================
-          MANUAL CREATE POST / REEL MODAL
-      ========================================================================= */}
+      {/* Create Post Modal (Instagram-style file upload & caption) */}
       {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(8px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: '20px'
+        <CreatePostModal
+          onClose={() => setShowCreateModal(false)}
+          onPosted={(newPost) => {
+            setShowCreateModal(false)
+            if (newPost) {
+              const formatted = {
+                id: newPost.id,
+                type: newPost.media_type || newPost.type || (newPost.media_url?.includes('.mp4') ? 'video' : 'image'),
+                mediaUrl: newPost.media_url || newPost.mediaUrl,
+                thumbnailUrl: newPost.thumbnail_url || newPost.thumbnailUrl || newPost.media_url,
+                caption: newPost.caption || '',
+                likesCount: newPost.likes_count || 0,
+                commentsCount: 0,
+                viewsCount: newPost.media_type === 'video' ? 1 : undefined,
+                createdAt: 'Just now',
+                comments: []
+              }
+              setPosts(prev => [formatted, ...prev])
+              setSuccessMsg('🎉 Post published to your profile!')
+              setTimeout(() => setSuccessMsg(''), 3500)
+            }
           }}
-          onClick={() => setShowCreateModal(false)}
-        >
-          <div
-            style={{
-              background: '#0F172A',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: '16px',
-              maxWidth: '520px',
-              width: '100%',
-              padding: '28px',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.8)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Add New Post or Reel</h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: '20px', cursor: 'pointer' }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreatePost} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Type Switcher */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setNewPostForm({ ...newPostForm, type: 'image' })}
-                  style={{
-                    padding: '8px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: newPostForm.type === 'image' ? '#4F46E5' : 'transparent',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  📷 Photo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setNewPostForm({ ...newPostForm, type: 'video' })}
-                  style={{
-                    padding: '8px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    background: newPostForm.type === 'video' ? '#4F46E5' : 'transparent',
-                    color: '#FFFFFF'
-                  }}
-                >
-                  🎬 Video / Reel
-                </button>
-              </div>
-
-              <Input
-                label={newPostForm.type === 'video' ? 'Video Media URL (.mp4 or YouTube URL)' : 'Image Media URL'}
-                required
-                placeholder="https://..."
-                value={newPostForm.mediaUrl}
-                onChange={(e) => setNewPostForm({ ...newPostForm, mediaUrl: e.target.value })}
-              />
-
-              {newPostForm.type === 'video' && (
-                <Input
-                  label="Reel Thumbnail Cover URL (Optional)"
-                  placeholder="https://images.unsplash.com/..."
-                  value={newPostForm.thumbnailUrl}
-                  onChange={(e) => setNewPostForm({ ...newPostForm, thumbnailUrl: e.target.value })}
-                />
-              )}
-
-              <Textarea
-                label="Caption"
-                rows={3}
-                placeholder="Write a caption, tags, or styling notes…"
-                value={newPostForm.caption}
-                onChange={(e) => setNewPostForm({ ...newPostForm, caption: e.target.value })}
-              />
-
-              <Button type="submit" size="lg" className="full" style={{ marginTop: '8px' }}>
-                Publish to Profile Grid
-              </Button>
-            </form>
-          </div>
-        </div>
+        />
       )}
       {/* Followers Breakdown Modal */}
       <FollowersBreakdownModal

@@ -4,6 +4,7 @@ import {
   me,
   role,
   register,
+  login,
   checkUsername,
   resolveIdentifier,
   profile,
@@ -27,6 +28,7 @@ authRouter.post('/verify-otp', verifyOtp)
 authRouter.post('/forgot-password-otp', forgotPasswordOtp)
 authRouter.post('/reset-password-otp', resetPasswordOtp)
 authRouter.post('/register', register)
+authRouter.post('/login', login)
 authRouter.post('/resolve-identifier', resolveIdentifier)
 authRouter.post('/logout', logout)
 authRouter.get('/me', authenticate, me)

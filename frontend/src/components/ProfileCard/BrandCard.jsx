@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './ProfileCard.css';
 
 export const BrandCard = ({
@@ -11,11 +12,15 @@ export const BrandCard = ({
   onApplyClick,
   className = ''
 }) => {
+  const navigate = useNavigate();
+
   const handleClick = (e) => {
     if (onClick) {
       onClick(e);
     } else if (onApplyClick) {
       onApplyClick(e);
+    } else if (id) {
+      navigate(`/brands/${id}`);
     }
   };
 

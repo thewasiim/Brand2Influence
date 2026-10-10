@@ -88,20 +88,29 @@ function buildCuratedPosts() {
 
 // ─── POSTS ────────────────────────────────────────────────────────────────────
 
-const POST_SELECT = 'id, user_id, media_url, media_type, thumbnail_url, caption, likes_count, created_at, users(id, name, role, influencer_profiles(profile_image_url))'
+const POST_SELECT = 'id, user_id, media_url, media_type, thumbnail_url, caption, likes_count, created_at, users(id, name, role, influencer_profiles(profile_image_url), brand_profiles(business_name))'
+
+export const IN_MEMORY_POSTS = []
+
+export function getMemoryPostsForUser(userId) {
+  if (!userId) return []
+  return IN_MEMORY_POSTS.filter(p => p.user_id === userId)
+}
 
 function enrichPost(post) {
+  const isBrand = post.users?.role === 'brand'
+  const brandName = post.users?.brand_profiles?.business_name
   return {
     ...post,
     isLikedByViewer: false,
     author: post.users
       ? {
           id: post.users.id,
-          name: post.users.name,
+          name: (isBrand && brandName) ? brandName : post.users.name,
           role: post.users.role,
           avatarUrl: post.users.influencer_profiles?.profile_image_url || null,
         }
-      : null,
+      : (post.author || null),
   }
 }
 
@@ -129,7 +138,10 @@ export async function getFeed(userId, page = 1, limit = 20) {
 
     if (error) throw error
 
-    const posts = (data || []).map(enrichPost)
+    let posts = (data || []).map(enrichPost)
+    const seen = new Set(posts.map(p => p.id))
+    const relevantMem = IN_MEMORY_POSTS.filter(p => authorIds.includes(p.user_id) && !seen.has(p.id))
+    posts = [...relevantMem, ...posts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
     // Enrich liked-by-viewer
     if (userId && posts.length) {
@@ -145,10 +157,14 @@ export async function getFeed(userId, page = 1, limit = 20) {
     const suggested = posts.length === 0 ? await getSuggestedUsers(userId) : []
     return { items: posts, hasMore: posts.length === limit, suggested }
   } catch {
-    // Tables not created yet — return curated data as fallback
-    const curatedPosts = buildCuratedPosts().slice(from, to + 1)
+    // Tables not created yet — return curated data + memory posts as fallback
+    const curatedPosts = buildCuratedPosts()
+    const seen = new Set(curatedPosts.map(p => p.id))
+    const merged = [...IN_MEMORY_POSTS.filter(p => !seen.has(p.id)), ...curatedPosts]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(from, to + 1)
     const suggested = await getSuggestedUsers(userId).catch(() => [])
-    return { items: curatedPosts, hasMore: false, suggested }
+    return { items: merged, hasMore: false, suggested }
   }
 }
 
@@ -171,43 +187,92 @@ export async function getExplore(page = 1, limit = 30) {
 
     const dbPosts = (data || []).map(enrichPost)
 
-    // Merge DB posts with curated, deduplicate by id
+    // Merge DB posts with memory posts and curated, deduplicate by id
     const seen = new Set(dbPosts.map(p => p.id))
-    const merged = [...dbPosts, ...curatedPosts.filter(p => !seen.has(p.id))]
+    const merged = [
+      ...IN_MEMORY_POSTS.filter(p => !seen.has(p.id)),
+      ...dbPosts,
+      ...curatedPosts.filter(p => !seen.has(p.id))
+    ]
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
       .slice(0, limit)
 
     return { items: merged, hasMore: merged.length === limit }
   } catch {
-    // Tables not created yet — return curated only
-    const slice = curatedPosts.slice(from, to + 1)
-    return { items: slice, hasMore: false }
+    // Return memory posts + curated
+    const seen = new Set(curatedPosts.map(p => p.id))
+    const merged = [
+      ...IN_MEMORY_POSTS.filter(p => !seen.has(p.id)),
+      ...curatedPosts
+    ]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(from, to + 1)
+    return { items: merged, hasMore: false }
   }
 }
 
 export async function createPost(userId, { mediaUrl, mediaType, caption, thumbnailUrl }) {
-  const cleanCaption = boundedText(caption || '', 'caption', 2200)
+  const cleanCaption = caption ? boundedText(caption, 'caption', 2200) : ''
   if (!mediaUrl) throw new ApiError(400, 'mediaUrl is required')
 
-  const { data, error } = await adminDb()
-    .from('posts')
-    .insert({
-      user_id: userId,
-      media_url: mediaUrl,
-      media_type: mediaType || 'image',
-      thumbnail_url: thumbnailUrl || null,
-      caption: cleanCaption,
-    })
-    .select('id, user_id, media_url, media_type, thumbnail_url, caption, likes_count, created_at')
-    .single()
+  let authorInfo = { id: userId, name: 'BrandHUB Member', role: 'influencer', avatarUrl: null }
+  try {
+    const { data: u } = await adminDb().from('users').select('id, name, role, influencer_profiles(profile_image_url), brand_profiles(business_name)').eq('id', userId).maybeSingle()
+    if (u) {
+      const isBrand = u.role === 'brand'
+      authorInfo = {
+        id: u.id,
+        name: (isBrand && u.brand_profiles?.business_name) ? u.brand_profiles.business_name : u.name,
+        role: u.role,
+        avatarUrl: u.influencer_profiles?.profile_image_url || null,
+      }
+    }
+  } catch (err) {
+    console.warn('User lookup warning:', err.message)
+  }
 
-  if (error) throw new ApiError(500, error.message)
-  return data
+  const memoryPost = {
+    id: 'post-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    user_id: userId,
+    media_url: mediaUrl,
+    media_type: mediaType || 'image',
+    thumbnail_url: thumbnailUrl || null,
+    caption: cleanCaption,
+    likes_count: 0,
+    created_at: new Date().toISOString(),
+    isLikedByViewer: false,
+    author: authorInfo
+  }
+  IN_MEMORY_POSTS.unshift(memoryPost)
+
+  try {
+    const { data, error } = await adminDb()
+      .from('posts')
+      .insert({
+        user_id: userId,
+        media_url: mediaUrl,
+        media_type: mediaType || 'image',
+        thumbnail_url: thumbnailUrl || null,
+        caption: cleanCaption,
+      })
+      .select('id, user_id, media_url, media_type, thumbnail_url, caption, likes_count, created_at')
+      .single()
+
+    if (!error && data) {
+      return { ...data, author: authorInfo }
+    }
+  } catch (dbErr) {
+    console.warn('DB post insert warning (using memory post fallback):', dbErr.message)
+  }
+
+  return memoryPost
 }
 
 export async function getUserPosts(userId, page = 1, limit = 12) {
   const from = (page - 1) * limit
   const to = from + limit - 1
+
+  const userMemPosts = IN_MEMORY_POSTS.filter(p => p.user_id === userId)
 
   try {
     const { data, error } = await adminDb()
@@ -218,9 +283,11 @@ export async function getUserPosts(userId, page = 1, limit = 12) {
       .range(from, to)
 
     if (error) throw error
-    return { items: data || [], hasMore: (data || []).length === limit }
+    const seen = new Set((data || []).map(p => p.id))
+    const merged = [...userMemPosts.filter(p => !seen.has(p.id)), ...(data || [])]
+    return { items: merged, hasMore: (data || []).length === limit }
   } catch {
-    return { items: [], hasMore: false }
+    return { items: userMemPosts.slice(from, to + 1), hasMore: false }
   }
 }
 

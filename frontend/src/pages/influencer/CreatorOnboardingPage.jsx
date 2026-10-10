@@ -242,7 +242,7 @@ export function CreatorOnboardingPage() {
         otp: instaOtp.trim()
       })
       setIsInstaVerified(true)
-      const count = res.stats?.followers ?? 24500
+      const count = res.stats?.followers ?? 0
       setInstaFollowers(count)
     } catch (err) {
       setError(err.message || 'Invalid or expired OTP.')
@@ -262,12 +262,12 @@ export function CreatorOnboardingPage() {
         urlOrHandle: ytChannel.trim()
       })
       setIsYtVerified(true)
-      const count = res.subscribers ?? 16800
+      const count = res.subscribers ?? 0
       setYtSubscribers(count)
     } catch (err) {
       console.warn('YouTube check fallback:', err)
       setIsYtVerified(true)
-      setYtSubscribers(14500)
+      setYtSubscribers(0)
     } finally {
       setVerifyingYt(false)
     }
@@ -286,12 +286,11 @@ export function CreatorOnboardingPage() {
       await new Promise((r) => setTimeout(r, 600))
       const clean = handle.replace(/^@/, '')
       const hash = clean.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-      const count = 12000 + ((hash * 47) % 68000)
-      setSnapFollowers(count)
+      setSnapFollowers(0)
       setIsSnapConnected(true)
     } catch {
       setIsSnapConnected(true)
-      setSnapFollowers(18400)
+      setSnapFollowers(0)
     } finally {
       setFetchingSnap(false)
     }
@@ -310,12 +309,11 @@ export function CreatorOnboardingPage() {
       await new Promise((r) => setTimeout(r, 600))
       const clean = handle.replace(/^@/, '').split('/').pop() || handle
       const hash = clean.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-      const count = 16000 + ((hash * 53) % 78000)
-      setFbFollowers(count)
+      setFbFollowers(0)
       setIsFbConnected(true)
     } catch {
       setIsFbConnected(true)
-      setFbFollowers(24200)
+      setFbFollowers(0)
     } finally {
       setFetchingFb(false)
     }
@@ -328,13 +326,13 @@ export function CreatorOnboardingPage() {
       // If user provided handle, auto-verify for demonstration ease
       if (instaHandle.trim()) {
         setIsInstaVerified(true)
-        setInstaFollowers(24500)
+        setInstaFollowers(0)
       } else if (snapHandle.trim()) {
         setIsSnapConnected(true)
-        setSnapFollowers(18500)
+        setSnapFollowers(0)
       } else if (fbHandle.trim()) {
         setIsFbConnected(true)
-        setFbFollowers(22400)
+        setFbFollowers(0)
       } else {
         setError('Please connect and verify at least one social media account to continue.')
         return
@@ -352,9 +350,9 @@ export function CreatorOnboardingPage() {
         name: name.trim(),
         niche: primaryNiche,
         secondary_niches: secondaryNiches,
-        followersCount: String(totalReach || 24500),
-        followers_count: totalReach || 24500,
-        engagementRate: '4.8',
+        followersCount: String(totalReach || 0),
+        followers_count: totalReach || 0,
+        engagementRate: '0',
         reelRate,
         postRate,
         storyRate,
@@ -1051,7 +1049,7 @@ export function CreatorOnboardingPage() {
             <div style={{ background: 'rgba(244, 241, 232, 0.025)', border: '1px solid rgba(244, 241, 232, 0.1)', padding: '16px 20px', borderRadius: '6px' }}>
               <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Instagram</span>
               <h4 style={{ fontSize: '22px', color: '#F4F1E8', margin: '6px 0 0', fontWeight: 600 }}>
-                {instaFollowers > 0 ? Number(instaFollowers).toLocaleString() : (isInstaVerified ? '24,500' : '0')}
+                {instaFollowers > 0 ? Number(instaFollowers).toLocaleString() : '0'}
               </h4>
             </div>
 

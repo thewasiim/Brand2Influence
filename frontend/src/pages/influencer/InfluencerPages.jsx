@@ -465,9 +465,15 @@ export function InfluencerProfilePage() {
             </div>
           </div>
           <div className="profile-hero-actions">
-            <Button size="lg" variant="primary" loading={busy} onClick={message} style={{ minWidth: '160px' }}>
-              💬 Message Creator
-            </Button>
+            {isOwner ? (
+              <Button size="lg" variant="secondary" onClick={() => nav('/profile')} style={{ minWidth: '160px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                ⚙️ Settings
+              </Button>
+            ) : (
+              <Button size="lg" variant="primary" loading={busy} onClick={message} style={{ minWidth: '160px' }}>
+                💬 Message Creator
+              </Button>
+            )}
             {actionNotice && (
               <div style={{ width: '100%', fontSize: '12.5px', color: 'var(--color-text-secondary)', background: 'var(--color-surface-3)', border: '1px solid var(--color-border)', padding: '8px 12px', borderRadius: 'var(--radius-md)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{actionNotice}</span>

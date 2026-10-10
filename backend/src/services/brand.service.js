@@ -1,5 +1,6 @@
 import { adminDb } from '../config/supabase.js'
 import { ApiError, boundedText } from '../utils/api-error.js'
+import { CURATED_CREATORS } from './influencer.service.js'
 
 const IS_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -457,30 +458,74 @@ function cleanDescriptionText(desc) {
 }
 
 export async function getById(id) {
-  const curated = CURATED_BRANDS.find(b => b.id === id || b.userId === id)
+  if (!id) throw new ApiError(404, 'Brand profile not found', 'NOT_FOUND')
+  const cleanId = String(id).replace(/^@/, '').trim()
+
+  const curated = CURATED_BRANDS.find(
+    b => b.id === cleanId ||
+         b.userId === cleanId ||
+         b.businessName?.toLowerCase() === cleanId.toLowerCase() ||
+         b.businessName?.toLowerCase().replace(/\s+/g, '') === cleanId.toLowerCase().replace(/\s+/g, '')
+  )
   if (curated) return curated
 
-  // If id is not a valid UUID, return 404 instead of querying Postgres UUID columns
-  if (!IS_UUID.test(id)) {
-    throw new ApiError(404, 'Brand profile not found', 'NOT_FOUND')
+  const curatedCreator = CURATED_CREATORS.find(
+    c => c.id === cleanId ||
+         c.userId === cleanId ||
+         c.username === cleanId ||
+         c.name?.toLowerCase() === cleanId.toLowerCase()
+  )
+  if (curatedCreator) {
+    return {
+      id: curatedCreator.id,
+      userId: curatedCreator.userId,
+      businessName: curatedCreator.name,
+      businessType: curatedCreator.niche,
+      budgetRange: 'Creator Profile',
+      location: curatedCreator.location || 'India',
+      description: curatedCreator.bio || '',
+      website: '',
+      deckLink: '',
+      logoUrl: curatedCreator.profileImageUrl,
+      user: { id: curatedCreator.userId, name: curatedCreator.name },
+      campaigns: []
+    }
   }
 
   const db = adminDb()
-  const { data: brandProfile } = await db.from('brand_profiles').select('*').eq('user_id', id).maybeSingle()
-  const { data: user } = await db.from('users').select('id, name, email, created_at, phone').eq('id', id).maybeSingle()
+
+  // If cleanId is not a valid UUID, search by business_name or user name
+  if (!IS_UUID.test(cleanId)) {
+    try {
+      const { data: bp } = await db.from('brand_profiles').select('user_id').ilike('business_name', cleanId).maybeSingle()
+      if (bp) return getById(bp.user_id)
+      const { data: u } = await db.from('users').select('id').ilike('name', cleanId).maybeSingle()
+      if (u) return getById(u.id)
+    } catch {
+      // ignore
+    }
+    throw new ApiError(404, 'Brand profile not found', 'NOT_FOUND')
+  }
+
+  const { data: brandProfile } = await db.from('brand_profiles').select('*').eq('user_id', cleanId).maybeSingle()
+  const { data: user } = await db.from('users').select('id, name, email, created_at, phone').eq('id', cleanId).maybeSingle()
 
   if (!brandProfile && !user) {
     throw new ApiError(404, 'Brand profile not found', 'NOT_FOUND')
   }
 
   // Fetch all campaigns created by this brand
-  const { data: campaigns, error: campError } = await db
-    .from('campaigns')
-    .select('*')
-    .eq('brand_id', id)
-    .order('created_at', { ascending: false })
-
-  if (campError) throw campError
+  let campaigns = []
+  try {
+    const { data: campData } = await db
+      .from('campaigns')
+      .select('*')
+      .eq('brand_id', cleanId)
+      .order('created_at', { ascending: false })
+    if (campData) campaigns = campData
+  } catch (campErr) {
+    console.warn('Campaigns query warning in brand getById:', campErr.message)
+  }
 
   const desc = brandProfile?.description || ''
   const deckLink = extractDeckLink(desc) || brandProfile?.deck_link || brandProfile?.upload_link || ''

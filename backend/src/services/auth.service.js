@@ -1,6 +1,29 @@
-import { adminDb } from '../config/supabase.js'
+import { adminDb, authClient } from '../config/supabase.js'
 import { ApiError } from '../utils/api-error.js'
 import { env } from '../config/env.js'
+
+export async function login({ email, password }) {
+  if (!email || !password) throw new ApiError(400, 'Email and password are required', 'VALIDATION_ERROR')
+  const { data, error } = await authClient().auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password
+  })
+  if (error || !data.user) {
+    throw new ApiError(401, error?.message || 'Invalid login credentials', 'UNAUTHENTICATED')
+  }
+  const db = adminDb()
+  const { data: userProfile } = await db.from('users').select('*').eq('id', data.user.id).maybeSingle()
+  return {
+    success: true,
+    user: {
+      id: data.user.id,
+      email: data.user.email,
+      name: userProfile?.name || data.user.user_metadata?.name || '',
+      role: userProfile?.role || 'influencer'
+    },
+    session: data.session
+  }
+}
 
 
 export async function getMe(auth) {
@@ -262,7 +285,7 @@ export async function register(payload) {
     const snapSubscribers = Boolean(roleData?.snapchat_skipped) ? 0 : toNonNegativeInt(roleData?.snapchat_subscribers)
     const fbFollowers = Boolean(roleData?.facebook_skipped) ? 0 : toNonNegativeInt(roleData?.facebook_followers)
 
-    const totalFollowers = (igFollowers + ytSubscribers + snapSubscribers + fbFollowers) || toNonNegativeInt(roleData?.followers_count) || 1000
+    const totalFollowers = (igFollowers + ytSubscribers + snapSubscribers + fbFollowers) || toNonNegativeInt(roleData?.followers_count) || 0
 
     const portfolioLinks = [
       roleData?.instagram_url,
@@ -303,11 +326,11 @@ export async function register(payload) {
       user_id: userId,
       niche: roleData?.niche || 'Lifestyle',
       followers_count: totalFollowers,
-      engagement_rate: Number(roleData?.engagement_rate) || 4.5,
+      engagement_rate: Number(roleData?.engagement_rate) || 0,
       rate_card: rateCard,
       portfolio_links: portfolioLinks,
       location: locStr,
-      bio: roleData?.bio || `Content creator specializing in ${roleData?.niche || 'Lifestyle'}.`,
+      bio: roleData?.bio || '',
       profile_image_url: roleData?.profile_image_url || roleData?.profileImageUrl || payload?.profile_image_url || payload?.profileImageUrl || null,
       status: 'published'
     }, { onConflict: 'user_id' })
@@ -418,8 +441,8 @@ export async function updateProfile(auth, payload) {
     const infUpdate = {
       user_id: auth.id,
       niche: infData.niche || existingInf?.niche || 'Lifestyle',
-      followers_count: Number(infData.followers_count || infData.followersCount || updatedRateCard.instagram_followers || existingInf?.followers_count || 1000),
-      engagement_rate: Number(infData.engagement_rate || infData.engagementRate || existingInf?.engagement_rate || 4.5),
+      followers_count: Number(infData.followers_count || infData.followersCount || updatedRateCard.instagram_followers || existingInf?.followers_count || 0),
+      engagement_rate: Number(infData.engagement_rate || infData.engagementRate || existingInf?.engagement_rate || 0),
       rate_card: updatedRateCard,
       portfolio_links: Array.isArray(infData.portfolio_links) ? infData.portfolio_links : (existingInf?.portfolio_links || []),
       location: loc,

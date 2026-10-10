@@ -268,14 +268,8 @@ export function InstagramSidebar() {
             <button
               type="button"
               className="ig-nav-item ig-create-btn"
-              onClick={() => {
-                if (isBrand) {
-                  navigate('/brand/campaigns')
-                } else {
-                  setShowCreateModal(true)
-                }
-              }}
-              title={isBrand ? 'Create Brief' : 'Create Post'}
+              onClick={() => setShowCreateModal(true)}
+              title={isBrand ? 'Create Brand Post' : 'Create Post'}
             >
               <div className="ig-item-icon-box">
                 <svg className="ig-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
@@ -284,7 +278,7 @@ export function InstagramSidebar() {
                   <line x1="8" y1="12" x2="16" y2="12" />
                 </svg>
               </div>
-              <span className="ig-item-label">{isBrand ? 'Create Brief' : 'Create Post'}</span>
+              <span className="ig-item-label">{isBrand ? 'Create Brand Post' : 'Create Post'}</span>
             </button>
 
             {/* 7. Profile */}
@@ -383,20 +377,42 @@ export function InstagramSidebar() {
             </Link>
           </div>
         </div>
+      </aside>
 
-        {/* Notifications Slide-out Flyout */}
-        {notificationsOpen && (
+      {/* Notifications Slide-out Flyout (Desktop & Mobile) */}
+      {notificationsOpen && (
+        <>
+          <div
+            className="ig-flyout-backdrop"
+            onClick={() => setNotificationsOpen(false)}
+            aria-hidden="true"
+          />
           <div className="ig-flyout-panel" role="dialog" aria-label="Notifications">
             <div className="ig-flyout-header">
               <h3>Notifications</h3>
-              <button
-                type="button"
-                className="ig-flyout-close"
-                onClick={() => setNotificationsOpen(false)}
-                aria-label="Close notifications"
-              >
-                ✕
-              </button>
+              <div className="ig-flyout-header-actions">
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    className="ig-flyout-mark-read"
+                    onClick={() => {
+                      socialService.markNotificationsRead().catch(() => {})
+                      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+                      setUnreadCount(0)
+                    }}
+                  >
+                    Mark read
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="ig-flyout-close"
+                  onClick={() => setNotificationsOpen(false)}
+                  aria-label="Close notifications"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
             <div className="ig-flyout-content">
               {notifications.length === 0 ? (
@@ -414,7 +430,7 @@ export function InstagramSidebar() {
                     <div className="ig-notif-dot read" />
                     <div className="ig-notif-body">
                       <p className="ig-notif-text">
-                        New creator sponsorships available in your niche.
+                        New collaboration opportunities available in your niche.
                       </p>
                       <span className="ig-notif-time">2 hours ago</span>
                     </div>
@@ -429,9 +445,10 @@ export function InstagramSidebar() {
                         {n.type === 'follow' && <><strong>{n.actor?.name || 'Someone'}</strong> started following you</>}
                         {n.type === 'like' && <><strong>{n.actor?.name || 'Someone'}</strong> liked your post</>}
                         {n.type === 'comment' && <><strong>{n.actor?.name || 'Someone'}</strong> commented on your post</>}
+                        {!['follow', 'like', 'comment'].includes(n.type) && (n.message || 'New notification')}
                       </p>
                       <span className="ig-notif-time">
-                        {new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        {n.createdAt ? new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Recently'}
                       </span>
                     </div>
                   </div>
@@ -439,8 +456,8 @@ export function InstagramSidebar() {
               )}
             </div>
           </div>
-        )}
-      </aside>
+        </>
+      )}
 
       {/* Mobile Top Header (< 768px) */}
       <header className="ig-mobile-topbar" aria-label="Mobile Navigation Bar">
@@ -449,25 +466,44 @@ export function InstagramSidebar() {
           <span className="ig-mobile-role-pill">{roleLabel}</span>
         </Link>
         <div className="ig-mobile-actions">
-          <Link to="/?view=site" className="ig-mobile-website-btn" title="Return to Website">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span>Website</span>
-          </Link>
+          {/* Mobile Create (+) Button */}
           <button
             type="button"
-            className="ig-mobile-icon-btn"
-            onClick={() => setNotificationsOpen(!notificationsOpen)}
-            aria-label="Notifications"
+            className="ig-mobile-icon-btn ig-mobile-create-btn"
+            onClick={() => setShowCreateModal(true)}
+            aria-label="Create Post"
+            title={isBrand ? 'Create Brand Post' : 'Create Post'}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+          </button>
+
+          {/* Mobile Notifications Heart Button */}
+          <button
+            type="button"
+            className={`ig-mobile-icon-btn ${notificationsOpen ? 'is-active' : ''}`}
+            onClick={() => {
+              const nextState = !notificationsOpen
+              setNotificationsOpen(nextState)
+              if (nextState && unreadCount > 0) {
+                socialService.markNotificationsRead().catch(() => {})
+                setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+                setUnreadCount(0)
+              }
+            }}
+            aria-label="Notifications"
+            title="Notifications"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill={notificationsOpen ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
-            <span className="ig-mobile-badge-dot" />
+            {unreadCount > 0 && <span className="ig-mobile-badge-dot" />}
           </button>
+
+          {/* Mobile Account Menu Drawer Button */}
           <button
             type="button"
             className="ig-mobile-icon-btn"
@@ -482,6 +518,43 @@ export function InstagramSidebar() {
           </button>
         </div>
       </header>
+
+      {/* Mobile More Sheet */}
+      {moreMenuOpen && (
+        <>
+          <div
+            className="ig-mobile-menu-backdrop"
+            onClick={() => setMoreMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="ig-mobile-menu-sheet" role="dialog" aria-label="Account Menu">
+            <div className="ig-mobile-menu-header">
+              <span className="ig-mobile-menu-user">{displayName} ({roleLabel})</span>
+              <button
+                type="button"
+                className="ig-flyout-close"
+                onClick={() => setMoreMenuOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="ig-mobile-menu-links">
+              <Link to="/profile" className="ig-mobile-menu-item" onClick={() => setMoreMenuOpen(false)}>
+                <span>Profile & Settings</span>
+              </Link>
+              <Link to="/conversations" className="ig-mobile-menu-item" onClick={() => setMoreMenuOpen(false)}>
+                <span>Messages</span>
+              </Link>
+              <Link to="/?view=site" className="ig-mobile-menu-item" onClick={() => setMoreMenuOpen(false)}>
+                <span>Return to Website</span>
+              </Link>
+              <button type="button" className="ig-mobile-menu-item is-danger" onClick={handleLogout}>
+                <span>Log out</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
       {/* Order: Home | Explore (video/play) | Messages (send) | Search | Profile — matches design spec */}

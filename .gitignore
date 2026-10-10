@@ -36,3 +36,9 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Python test artifacts
+test_env/
+.pytest_cache/
+__pycache__/
+*.pyc

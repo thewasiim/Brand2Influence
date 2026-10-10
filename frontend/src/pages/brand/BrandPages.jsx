@@ -979,6 +979,7 @@ export function BrandProfilePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [brand, setBrand] = useState(null)
+  const isOwner = Boolean(user && (user.id === brand?.userId || user.id === brand?.id))
   const [error, setError] = useState('')
   const [actionNotice, setActionNotice] = useState('')
   const [loading, setLoading] = useState(true)
@@ -1236,39 +1237,64 @@ export function BrandProfilePage() {
                 📄 Brand Lookbook ↗
               </a>
             )}
-            <button
-              type="button"
-              disabled={busy}
-              onClick={handleMessageBrand}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 22px',
-                borderRadius: '9999px',
-                background: '#f4f1e8',
-                border: '1px solid #f4f1e8',
-                color: '#0b0b0a',
-                fontSize: '13px',
-                fontWeight: 700,
-                fontFamily: 'var(--font-display)',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#ffffff'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(244, 241, 232, 0.25)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#f4f1e8'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(244, 241, 232, 0.15)'
-              }}
-            >
-              💬 {busy ? 'Connecting…' : 'Message Brand'}
-            </button>
+            {isOwner ? (
+              <button
+                type="button"
+                onClick={() => navigate('/profile')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 22px',
+                  borderRadius: '9999px',
+                  background: '#f4f1e8',
+                  border: '1px solid #f4f1e8',
+                  color: '#0b0b0a',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                ⚙️ Settings
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={handleMessageBrand}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 22px',
+                  borderRadius: '9999px',
+                  background: '#f4f1e8',
+                  border: '1px solid #f4f1e8',
+                  color: '#0b0b0a',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-display)',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(244, 241, 232, 0.15)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#ffffff'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(244, 241, 232, 0.25)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f4f1e8'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(244, 241, 232, 0.15)'
+                }}
+              >
+                💬 {busy ? 'Connecting…' : 'Message Brand'}
+              </button>
+            )}
             {actionNotice && (
               <div style={{ width: '100%', fontSize: '12.5px', color: 'rgba(244, 241, 232, 0.8)', background: 'rgba(244, 241, 232, 0.06)', border: '1px solid rgba(244, 241, 232, 0.14)', padding: '8px 14px', borderRadius: '12px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>{actionNotice}</span>

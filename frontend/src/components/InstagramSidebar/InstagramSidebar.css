@@ -527,6 +527,27 @@
   font-weight: 700;
 }
 
+.ig-flyout-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ig-flyout-mark-read {
+  background: none;
+  border: none;
+  color: #3B82F6;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.ig-flyout-mark-read:hover {
+  color: #60A5FA;
+}
+
 .ig-flyout-close {
   background: transparent;
   border: none;
@@ -667,6 +688,136 @@
     height: 6px;
     border-radius: 50%;
     background: #EF4444;
+  }
+
+  /* Mobile Flyout Notifications Overlay */
+  .ig-flyout-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9998;
+    animation: igFadeInMobile 0.2s ease;
+  }
+
+  .ig-flyout-panel {
+    top: 56px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: calc(100vh - 118px);
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    padding: 16px;
+    border-radius: 0 0 16px 16px;
+    animation: igSlideDownMobile 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+  }
+
+  @keyframes igFadeInMobile {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes igSlideDownMobile {
+    from {
+      opacity: 0;
+      transform: translateY(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Mobile Menu Drawer Sheet */
+  .ig-mobile-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9998;
+    animation: igFadeInMobile 0.2s ease;
+  }
+
+  .ig-mobile-menu-sheet {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    width: 280px;
+    background: #141416;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0 0 0 16px;
+    box-shadow: -8px 10px 30px rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: igSlideMenuMobile 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes igSlideMenuMobile {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .ig-mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .ig-mobile-menu-user {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+
+  .ig-mobile-menu-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ig-mobile-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    color: #E2E8F0;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+
+  .ig-mobile-menu-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .ig-mobile-menu-item.is-danger {
+    color: #F87171;
+  }
+  .ig-mobile-menu-item.is-danger:hover {
+    background: rgba(239, 68, 68, 0.15);
   }
 
   /* Mobile Bottom Navigation Bar — matches screenshot exactly */

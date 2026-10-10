@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import ProfileCard from './ProfileCard/ProfileCard'
 
 /**
@@ -374,6 +374,7 @@ export function InfluencerCard({
   onMessage = null,
   className = '',
 }) {
+  const navigate = useNavigate()
   const {
     id,
     name,
@@ -394,13 +395,26 @@ export function InfluencerCard({
       : followersCount >= 1000
         ? `${(followersCount / 1000).toFixed(0)}K`
         : followersCount.toLocaleString()
-    : followersCount || '10K+'
+    : (followersCount || '0')
 
   const reelRate = rateCard?.reel || creator.budget || 2500
 
   const instagramUrl = rateCard?.instagram_url || creator.instagramUrl || (rateCard?.instagram_handle ? `https://instagram.com/${rateCard.instagram_handle.replace('@', '')}` : null)
   const youtubeUrl = rateCard?.youtube_url || creator.youtubeUrl || null
   const snapchatUrl = rateCard?.snapchat_url || creator.snapchatUrl || null
+
+  const profileId = creator.userId || creator.id || creator.username || (name ? name.toLowerCase().replace(/\s+/g, '') : null)
+
+  const handleCardClick = (e) => {
+    e?.stopPropagation?.()
+    if (onSelect) {
+      onSelect(creator)
+    } else if (onMessage) {
+      onMessage(creator)
+    } else if (profileId) {
+      navigate(`/creators/${profileId}`)
+    }
+  }
 
   return (
     <ProfileCard
@@ -409,12 +423,13 @@ export function InfluencerCard({
       location={location}
       avatarUrl={profileImageUrl}
       followersCount={formattedFollowers}
-      engagementRate={`${engagementRate}%`}
+      engagementRate={`${engagementRate || 0}%`}
       contactText="Connect"
       instagramUrl={instagramUrl}
       youtubeUrl={youtubeUrl}
       snapchatUrl={snapchatUrl}
-      onContactClick={() => (onMessage ? onMessage(creator) : onSelect ? onSelect(creator) : null)}
+      onClick={handleCardClick}
+      onContactClick={handleCardClick}
       className={className}
     />
   )
