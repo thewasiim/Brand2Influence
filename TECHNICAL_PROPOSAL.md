@@ -7,7 +7,7 @@
 **Brand2Influence (BrandHUB)** — An AI-Ready, Two-Sided Marketplace & Collaboration Platform for Brands and Micro/Nano Creators.
 
 ---
-
+       
 ## 2. Introduction
 **Brand2Influence** is a full-stack, two-sided web platform designed to bridge the gap between emerging direct-to-consumer (D2C) brands, local businesses, and micro/nano content creators. 
 

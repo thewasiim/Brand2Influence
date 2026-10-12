@@ -717,8 +717,8 @@ export default function ProfileManagementPage() {
                   {followerCount >= 1000000
                     ? `${(followerCount / 1000000).toFixed(1)}M`
                     : followerCount >= 1000
-                    ? `${(followerCount / 1000).toFixed(1)}K`
-                    : followerCount.toLocaleString()}
+                      ? `${(followerCount / 1000).toFixed(1)}K`
+                      : followerCount.toLocaleString()}
                 </strong>{' '}
                 <span style={{ color: '#818cf8', textDecoration: 'underline', textUnderlineOffset: '3px' }}>followers ▾</span>
               </div>
