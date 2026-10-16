@@ -500,7 +500,7 @@ export function ErrorState({ error, onRetry = null, className = '' }) {
     <div className={`state error ${className}`} role="alert">
       <div className="state-error-icon">!</div>
       <div className="state-error-body">
-        <span className="state-error-title">Error</span>
+        <span className="state-error-title" style={{ fontWeight: 700, marginRight: '6px' }}>Error:</span>
         <span className="state-text">{typeof error === 'string' ? error : error?.message || 'An error occurred'}</span>
       </div>
       {onRetry && (
