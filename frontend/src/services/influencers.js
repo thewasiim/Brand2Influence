@@ -15,4 +15,7 @@ export const influencersService = {
   addPost: payload => api('/influencers/posts', { method: 'POST', body: JSON.stringify(payload) }),
   sendSocialOtp: payload => api('/influencers/social-otp/send', { method: 'POST', body: JSON.stringify(payload) }),
   verifySocialOtp: payload => api('/influencers/social-otp/verify', { method: 'POST', body: JSON.stringify(payload) }),
+  fetchSocial: payload => api('/influencers/fetch-social', { method: 'POST', body: JSON.stringify(payload) }),
+  verifyChannel: payload => api('/influencers/fetch-social', { method: 'POST', body: JSON.stringify(payload) }),
+  fetchPosts: payload => api('/influencers/fetch-posts', { method: 'POST', body: JSON.stringify(payload) }),
 }

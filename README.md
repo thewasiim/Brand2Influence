@@ -1,4 +1,4 @@
-# BrandHUB
+# Brand2Influence
 
 A React + Express marketplace for local brands and micro/nano influencers. Product scope is defined in [`docs/PRD.md`](docs/PRD.md), [`docs/TRD.md`](docs/TRD.md), and [`docs/User-Flows.md`](docs/User-Flows.md).
 

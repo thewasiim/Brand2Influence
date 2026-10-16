@@ -121,16 +121,9 @@ export function CreatorOnboardingPage() {
   // Step 3: Social Accounts Verification
   // Instagram
   const [instaHandle, setInstaHandle] = useState('')
-  const [instaPhone, setInstaPhone] = useState(draft.phone || profile?.phone || '')
-  const [instaOtpSent, setInstaOtpSent] = useState(false)
-  const [instaOtp, setInstaOtp] = useState('')
-  const [instaMaskedPhone, setInstaMaskedPhone] = useState('')
-  const [instaTestOtp, setInstaTestOtp] = useState('')
   const [isInstaVerified, setIsInstaVerified] = useState(false)
   const [instaFollowers, setInstaFollowers] = useState(0)
-  const [sendingInstaOtp, setSendingInstaOtp] = useState(false)
-  const [verifyingInstaOtp, setVerifyingInstaOtp] = useState(false)
-  const [instaCooldown, setInstaCooldown] = useState(0)
+  const [fetchingInsta, setFetchingInsta] = useState(false)
 
   // YouTube
   const [ytChannel, setYtChannel] = useState('')
@@ -150,12 +143,7 @@ export function CreatorOnboardingPage() {
   const [fbFollowers, setFbFollowers] = useState(0)
   const [fetchingFb, setFetchingFb] = useState(false)
 
-  // Cooldown countdown
-  useEffect(() => {
-    if (instaCooldown <= 0) return
-    const timer = setInterval(() => setInstaCooldown((c) => c - 1), 1000)
-    return () => clearInterval(timer)
-  }, [instaCooldown])
+
 
   const totalReach =
     (Number(instaFollowers) || 0) +
@@ -195,79 +183,51 @@ export function CreatorOnboardingPage() {
     goToStep(3)
   }
 
-  // --- Instagram OTP Actions ---
-  const handleSendInstaOtp = async () => {
+  // --- Direct Instagram Fetch Action (No phone or OTP required) ---
+  const handleDirectFetchInstagram = async () => {
     setError('')
     if (!instaHandle.trim()) {
-      setError('Please enter your Instagram handle first.')
-      return
-    }
-    const cleanPhone = instaPhone.trim().replace(/\D/g, '')
-    if (cleanPhone.length < 10) {
-      setError('Please enter the 10-digit mobile number registered with your Instagram account.')
+      setError('Please enter your Instagram handle or profile URL.')
       return
     }
 
-    setSendingInstaOtp(true)
+    setFetchingInsta(true)
     try {
-      const res = await influencersService.sendSocialOtp({
+      const res = await influencersService.fetchSocial({
         platform: 'instagram',
-        urlOrHandle: instaHandle.trim(),
-        phone: cleanPhone
+        urlOrHandle: instaHandle.trim()
       })
-      setInstaOtpSent(true)
-      setInstaMaskedPhone(res.maskedPhone)
-      setInstaTestOtp(res.testOtp || '')
-      setInstaCooldown(45)
-    } catch (err) {
-      setError(err.message || 'Failed to dispatch Instagram OTP.')
-    } finally {
-      setSendingInstaOtp(false)
-    }
-  }
-
-  const handleVerifyInstaOtp = async () => {
-    setError('')
-    if (!instaOtp || instaOtp.trim().length < 6) {
-      setError('Please enter the 6-digit verification code.')
-      return
-    }
-
-    setVerifyingInstaOtp(true)
-    try {
-      const res = await influencersService.verifySocialOtp({
-        platform: 'instagram',
-        urlOrHandle: instaHandle.trim(),
-        phone: instaPhone.trim().replace(/\D/g, ''),
-        otp: instaOtp.trim()
-      })
-      setIsInstaVerified(true)
-      const count = res.stats?.followers ?? 0
+      const stats = res?.stats || res?.data || res || {}
+      const count = Number(stats.followers ?? stats.subscribers ?? 0)
       setInstaFollowers(count)
+      setIsInstaVerified(true)
     } catch (err) {
-      setError(err.message || 'Invalid or expired OTP.')
+      console.warn('Instagram fetch note:', err)
+      setError(err.message || 'Failed to fetch Instagram account. You can enter followers manually.')
+      setIsInstaVerified(true)
     } finally {
-      setVerifyingInstaOtp(false)
+      setFetchingInsta(false)
     }
   }
 
-  // --- YouTube Verify Action ---
+  // --- YouTube Fetch Action ---
   const handleVerifyYouTube = async () => {
     if (!ytChannel.trim()) return
     setError('')
     setVerifyingYt(true)
     try {
-      const res = await influencersService.verifyChannel({
+      const res = await influencersService.fetchSocial({
         platform: 'youtube',
         urlOrHandle: ytChannel.trim()
       })
+      const stats = res?.stats || res?.data || res || {}
+      const count = Number(stats.subscribers ?? stats.followers ?? 0)
       setIsYtVerified(true)
-      const count = res.subscribers ?? 0
       setYtSubscribers(count)
     } catch (err) {
       console.warn('YouTube check fallback:', err)
+      setError(err.message || 'Failed to fetch YouTube subscribers. You can enter count manually.')
       setIsYtVerified(true)
-      setYtSubscribers(0)
     } finally {
       setVerifyingYt(false)
     }
@@ -283,14 +243,16 @@ export function CreatorOnboardingPage() {
     setError('')
     setFetchingSnap(true)
     try {
-      await new Promise((r) => setTimeout(r, 600))
-      const clean = handle.replace(/^@/, '')
-      const hash = clean.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-      setSnapFollowers(0)
+      const res = await influencersService.fetchSocial({
+        platform: 'snapchat',
+        urlOrHandle: handle
+      })
+      const stats = res?.stats || res?.data || res || {}
+      const count = Number(stats.subscribers ?? stats.followers ?? 0)
+      setSnapFollowers(count)
       setIsSnapConnected(true)
     } catch {
       setIsSnapConnected(true)
-      setSnapFollowers(0)
     } finally {
       setFetchingSnap(false)
     }
@@ -306,14 +268,16 @@ export function CreatorOnboardingPage() {
     setError('')
     setFetchingFb(true)
     try {
-      await new Promise((r) => setTimeout(r, 600))
-      const clean = handle.replace(/^@/, '').split('/').pop() || handle
-      const hash = clean.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
-      setFbFollowers(0)
+      const res = await influencersService.fetchSocial({
+        platform: 'facebook',
+        urlOrHandle: handle
+      })
+      const stats = res?.stats || res?.data || res || {}
+      const count = Number(stats.followers ?? stats.subscribers ?? 0)
+      setFbFollowers(count)
       setIsFbConnected(true)
     } catch {
       setIsFbConnected(true)
-      setFbFollowers(0)
     } finally {
       setFetchingFb(false)
     }
@@ -693,11 +657,11 @@ export function CreatorOnboardingPage() {
                   <span style={{ fontSize: '24px' }}>📸</span>
                   <div>
                     <strong style={{ fontSize: '16px', color: '#F4F1E8', display: 'block' }}>Instagram</strong>
-                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Reels, posts & stories verification</span>
+                    <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Live followers count (Direct fetch, no verification code)</span>
                   </div>
                 </div>
                 {isInstaVerified ? (
-                  <Badge variant="success">✓ Verified &bull; {Number(instaFollowers).toLocaleString()} Followers</Badge>
+                  <Badge variant="success">✓ Connected &bull; {Number(instaFollowers).toLocaleString()} Followers</Badge>
                 ) : (
                   <Badge variant="neutral">Not Connected</Badge>
                 )}
@@ -705,92 +669,67 @@ export function CreatorOnboardingPage() {
 
               {!isInstaVerified ? (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
                     <Input
-                      label="Instagram Handle"
-                      placeholder="@yourhandle"
+                      label="Instagram Handle or URL"
+                      placeholder="@yourhandle or instagram.com/handle"
                       value={instaHandle}
                       onChange={(e) => setInstaHandle(e.target.value)}
                     />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="md"
+                      disabled={fetchingInsta || !instaHandle.trim()}
+                      loading={fetchingInsta}
+                      onClick={handleDirectFetchInstagram}
+                    >
+                      ⚡ Direct Fetch
+                    </Button>
+                  </div>
+                  <div style={{ marginTop: '10px' }}>
                     <Input
-                      label="Linked Mobile Number"
-                      placeholder="10-digit registered number"
-                      value={instaPhone}
-                      onChange={(e) => setInstaPhone(e.target.value)}
+                      label="Followers Count (Editable / Manual Fallback)"
+                      type="number"
+                      placeholder="e.g. 50000"
+                      value={instaFollowers || ''}
+                      onChange={(e) => setInstaFollowers(e.target.value)}
+                      helper="Live count is auto-fetched directly. You can adjust manually if needed."
                     />
                   </div>
-
-                  {instaOtpSent ? (
-                    <div style={{ marginTop: '12px' }}>
-                      {instaTestOtp && (
-                        <div style={{ background: 'rgba(0, 71, 171, 0.15)', padding: '6px 12px', fontSize: '11px', fontFamily: 'var(--font-mono)', color: '#60A5FA', marginBottom: '10px' }}>
-                          Simulator OTP: <b>{instaTestOtp}</b>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <input
-                          type="text"
-                          maxLength="6"
-                          placeholder="6-digit code"
-                          value={instaOtp}
-                          onChange={(e) => setInstaOtp(e.target.value.replace(/\D/g, ''))}
-                          style={{
-                            background: 'rgba(244, 241, 232, 0.04)',
-                            border: '1px solid rgba(244, 241, 232, 0.14)',
-                            color: '#F4F1E8',
-                            fontFamily: 'var(--font-mono)',
-                            letterSpacing: '0.2em',
-                            fontSize: '16px',
-                            textAlign: 'center',
-                            padding: '8px 12px',
-                            width: '140px'
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={verifyingInstaOtp || instaOtp.length !== 6}
-                          loading={verifyingInstaOtp}
-                          onClick={handleVerifyInstaOtp}
-                        >
-                          Confirm OTP
-                        </Button>
-                      </div>
-                      <div style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
-                        {instaCooldown > 0 ? `Resend code in ${instaCooldown}s` : (
-                          <button type="button" onClick={handleSendInstaOtp} style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', padding: 0 }}>
-                            Resend Code
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: '8px' }}>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        disabled={sendingInstaOtp || !instaHandle.trim()}
-                        loading={sendingInstaOtp}
-                        onClick={handleSendInstaOtp}
-                      >
-                        ⚡ Send Ownership OTP
-                      </Button>
-                    </div>
-                  )}
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', color: '#10B981' }}>
-                    Connected as @{instaHandle.replace(/^@/, '')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => { setIsInstaVerified(false); setInstaOtpSent(false); }}
-                    style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer' }}
-                  >
-                    Disconnect
-                  </button>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '14px', color: '#10B981', fontWeight: 600 }}>
+                      ✓ Connected as @{instaHandle.replace(/^@/, '')} &bull; {Number(instaFollowers).toLocaleString()} Followers
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsInstaVerified(false)}
+                      style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      Change Account
+                    </button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                    <Input
+                      label="Followers Count"
+                      type="number"
+                      value={instaFollowers || ''}
+                      onChange={(e) => setInstaFollowers(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      disabled={fetchingInsta}
+                      loading={fetchingInsta}
+                      onClick={handleDirectFetchInstagram}
+                    >
+                      ⚡ Re-fetch
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -819,35 +758,67 @@ export function CreatorOnboardingPage() {
 
               {!isYtVerified ? (
                 <div>
-                  <Input
-                    label="YouTube Channel Handle or Link"
-                    placeholder="e.g. @MayaSharma or youtube.com/c/..."
-                    value={ytChannel}
-                    onChange={(e) => setYtChannel(e.target.value)}
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    disabled={verifyingYt || !ytChannel.trim()}
-                    loading={verifyingYt}
-                    onClick={handleVerifyYouTube}
-                  >
-                    Verify YouTube Channel
-                  </Button>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                    <Input
+                      label="YouTube Channel Handle or Link"
+                      placeholder="e.g. @MrBeast or youtube.com/@channel"
+                      value={ytChannel}
+                      onChange={(e) => setYtChannel(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="md"
+                      disabled={verifyingYt || !ytChannel.trim()}
+                      loading={verifyingYt}
+                      onClick={handleVerifyYouTube}
+                    >
+                      ⚡ Direct Fetch
+                    </Button>
+                  </div>
+                  <div style={{ marginTop: '10px' }}>
+                    <Input
+                      label="Subscribers Count (Editable / Manual Fallback)"
+                      type="number"
+                      placeholder="e.g. 25000"
+                      value={ytSubscribers || ''}
+                      onChange={(e) => setYtSubscribers(e.target.value)}
+                      helper="Live count is auto-fetched directly. You can adjust manually."
+                    />
+                  </div>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', color: '#10B981' }}>
-                    Channel connected: {ytChannel}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setIsYtVerified(false)}
-                    style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer' }}
-                  >
-                    Disconnect
-                  </button>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '14px', color: '#10B981', fontWeight: 600 }}>
+                      ✓ Channel connected: {ytChannel} &bull; {Number(ytSubscribers).toLocaleString()} Subscribers
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsYtVerified(false)}
+                      style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      Change Channel
+                    </button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                    <Input
+                      label="Subscribers Count"
+                      type="number"
+                      value={ytSubscribers || ''}
+                      onChange={(e) => setYtSubscribers(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      disabled={verifyingYt}
+                      loading={verifyingYt}
+                      onClick={handleVerifyYouTube}
+                    >
+                      ⚡ Re-fetch
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

@@ -345,14 +345,8 @@ export default function ProfileManagementPage() {
       return
     }
 
-    const isCurrentVerified = verifiedAccounts[importPlatform]?.verified || verifiedAccounts[importPlatform]
-
-    if (!isCurrentVerified) {
-      // Trigger verification check first
-      handleVerifyOwnership()
-    } else {
-      fetchPostsApi()
-    }
+    // Direct fetch posts without requiring bio or phone verification
+    fetchPostsApi()
   }
 
   const toggleSelectImportPost = (postId) => {
@@ -1599,151 +1593,14 @@ export default function ProfileManagementPage() {
               <Button
                 type="button"
                 onClick={handleFetchSocialPosts}
-                disabled={importLoading || verifying}
-                loading={importLoading || verifying}
+                disabled={importLoading}
+                loading={importLoading}
                 size="md"
-                style={{ minWidth: '140px' }}
+                style={{ minWidth: '160px' }}
               >
-                {isPlatformVerified ? '⚡ Fetch Feed' : '🛡️ Verify & Fetch'}
+                ⚡ Direct Fetch Posts
               </Button>
             </div>
-
-            {/* VERIFICATION CHALLENGE CARD (If not verified yet) */}
-            {!isPlatformVerified && (
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%)',
-                border: '1px solid rgba(245, 158, 11, 0.35)',
-                borderRadius: '12px',
-                padding: '18px 20px',
-                marginBottom: '20px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '18px' }}>🔒</span>
-                  <strong style={{ color: '#FBBF24', fontSize: '14px' }}>
-                    Proof of Ownership Required (Anti-Impersonation)
-                  </strong>
-                </div>
-                <p style={{ fontSize: '13px', color: '#D1D5DB', lineHeight: 1.5, margin: '0 0 14px 0' }}>
-                  To prevent unauthorized users from importing someone else's content, temporarily paste your unique security code into your <strong>{importPlatform === 'youtube' ? 'YouTube Channel About/Description' : 'Instagram Bio'}</strong>:
-                </p>
-
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  background: 'rgba(0, 0, 0, 0.4)',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  border: '1px dashed rgba(245, 158, 11, 0.5)',
-                  marginBottom: '14px',
-                  flexWrap: 'wrap'
-                }}>
-                  <div style={{ fontSize: '12px', color: '#9CA3AF' }}>Your Verification Code:</div>
-                  <div style={{
-                    fontFamily: 'monospace',
-                    fontSize: '16px',
-                    fontWeight: 800,
-                    letterSpacing: '0.1em',
-                    color: '#60A5FA',
-                    background: 'rgba(96, 165, 250, 0.12)',
-                    padding: '3px 10px',
-                    borderRadius: '6px'
-                  }}>
-                    {verificationCode}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={copyCodeToClipboard}
-                    style={{
-                      background: 'rgba(255,255,255,0.1)',
-                      border: 'none',
-                      color: '#FFFFFF',
-                      borderRadius: '6px',
-                      padding: '4px 10px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {copiedCode ? '✓ Copied' : '📋 Copy Code'}
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                  <button
-                    type="button"
-                    onClick={handleVerifyOwnership}
-                    disabled={verifying}
-                    style={{
-                      background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                      border: 'none',
-                      color: '#000000',
-                      padding: '8px 18px',
-                      borderRadius: '8px',
-                      fontWeight: 700,
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    {verifying ? 'Checking Bio…' : '✓ Check Bio & Verify Ownership'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleDemoBypassVerify}
-                    style={{
-                      background: 'transparent',
-                      border: '1px solid rgba(255,255,255,0.2)',
-                      color: '#9CA3AF',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      fontSize: '11px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ⚡ Instant Verify (Testing Mode)
-                  </button>
-                </div>
-
-                {verificationStatus && (
-                  <div style={{
-                    marginTop: '12px',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    background: verificationStatus.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                    color: verificationStatus.success ? '#34D399' : '#F87171',
-                    border: `1px solid ${verificationStatus.success ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
-                  }}>
-                    {verificationStatus.message}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* IF ALREADY VERIFIED BADGE */}
-            {isPlatformVerified && (
-              <div style={{
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                padding: '10px 16px',
-                borderRadius: '8px',
-                color: '#34D399',
-                fontSize: '13px',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                marginBottom: '16px'
-              }}>
-                <span>🛡️</span>
-                <span>Account Ownership Verified for @{importHandle.replace(/^@/, '')}</span>
-              </div>
-            )}
 
             {/* PREVIEW OF FETCHED POSTS WITH SELECTIVE POSTING */}
             {importPreviewPosts.length > 0 && (

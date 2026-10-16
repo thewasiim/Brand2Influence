@@ -21,14 +21,6 @@ export const COUNTRY_OPTIONS = [
   'Other'
 ]
 
-export const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400'
-]
 
 export const STEP_LABELS = {
   1: 'Contact Details',
@@ -429,62 +421,109 @@ export function SignupPage() {
 
       {/* ================= STEP 2: CHOOSE ACCOUNT TYPE ================= */}
       {step === 2 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '20px', width: '100%' }}>
-          <Button
-            type="button"
-            size="lg"
-            className="full"
-            onClick={() => handleSelectRole('brand')}
-            style={{
-              padding: '16px 20px',
-              fontSize: '15px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            As a Brand
-          </Button>
+        <div className="signup-step-container">
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '14px', textAlign: 'center', lineHeight: 1.5 }}>
+            Select how you want to use Brand2Influence. You can customize your preferences anytime.
+          </p>
 
-          <Button
-            type="button"
-            size="lg"
-            variant="secondary"
-            className="full"
-            onClick={() => handleSelectRole('influencer')}
-            style={{
-              padding: '16px 20px',
-              fontSize: '15px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            As a Creator
-          </Button>
+          <div className="role-selection-grid" style={{ gridTemplateColumns: '1fr', gap: '12px', marginBottom: '20px' }}>
+            <div
+              className={`role-choice-card ${selectedRole === 'brand' ? 'is-selected' : ''}`}
+              onClick={() => setSelectedRole('brand')}
+              style={{
+                padding: '16px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                borderWidth: selectedRole === 'brand' ? '2px' : '1px'
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedRole('brand'); } }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '24px', lineHeight: 1 }}>🏢</span>
+                  <div>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#F4F1E8' }}>
+                      Brand / Business
+                    </h3>
+                    <span style={{ fontSize: '10.5px', color: '#60A5FA', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                      FOR ADVERTISERS & AGENCIES
+                    </span>
+                  </div>
+                </div>
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  border: selectedRole === 'brand' ? '2px solid #60A5FA' : '2px solid rgba(244, 241, 232, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: selectedRole === 'brand' ? '#60A5FA' : 'transparent',
+                  flexShrink: 0
+                }}>
+                  {selectedRole === 'brand' && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0E0E0D' }} />}
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                Discover vetted creators, manage collaboration briefs, and track campaign ROI.
+              </p>
+            </div>
 
-          <Button
-            type="button"
-            variant="secondary"
-            size="lg"
-            className="full"
-            onClick={() => setStep(1)}
-            style={{
-              padding: '14px 20px',
-              fontSize: '14px',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            ← Back
-          </Button>
+            <div
+              className={`role-choice-card role-choice-card--creator ${selectedRole === 'influencer' ? 'is-selected' : ''}`}
+              onClick={() => setSelectedRole('influencer')}
+              style={{
+                padding: '16px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                borderWidth: selectedRole === 'influencer' ? '2px' : '1px'
+              }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedRole('influencer'); } }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '24px', lineHeight: 1 }}>✨</span>
+                  <div>
+                    <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#F4F1E8' }}>
+                      Creator / Influencer
+                    </h3>
+                    <span style={{ fontSize: '10.5px', color: '#FBBF24', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+                      FOR CREATORS & TALENT
+                    </span>
+                  </div>
+                </div>
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  border: selectedRole === 'influencer' ? '2px solid #FBBF24' : '2px solid rgba(244, 241, 232, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: selectedRole === 'influencer' ? '#FBBF24' : 'transparent',
+                  flexShrink: 0
+                }}>
+                  {selectedRole === 'influencer' && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0E0E0D' }} />}
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.45 }}>
+                Publish rate cards, showcase verified metrics, and get booked by top brands.
+              </p>
+            </div>
+          </div>
+
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)}>
+              ← Back
+            </Button>
+            <Button type="button" size="lg" onClick={() => setStep(3)}>
+              Continue as {selectedRole === 'brand' ? 'Brand' : 'Creator'} →
+            </Button>
+          </div>
         </div>
       )}
 

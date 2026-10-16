@@ -620,7 +620,7 @@ export function ForgotPasswordPage() {
       subtitle={
         otpStage === 2
           ? `Enter the 6-digit code sent to ${maskedEmail || 'your email'} to choose a new password.`
-          : 'Recover access to your BrandHUB account via 6-digit security OTP or reset link.'
+          : 'Recover access to your Brand2Influence account via 6-digit security OTP or reset link.'
       }
       showBack={true}
       onBack={() => {

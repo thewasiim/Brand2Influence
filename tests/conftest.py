@@ -7,10 +7,26 @@ FRONTEND_URL = "http://localhost:5173"
 
 @pytest.fixture(scope="session")
 def api_base_url():
+    try:
+        requests.get("http://localhost:3001/api", timeout=1.5)
+    except Exception:
+        pytest.fail(
+            "\n[QA Pre-Flight Check Failed] Backend server is not running at http://localhost:3001.\n"
+            "Please start the backend before running tests:\n"
+            "  cd backend && npm run dev\n"
+        )
     return BACKEND_URL
 
 @pytest.fixture(scope="session")
 def frontend_url():
+    try:
+        requests.get("http://localhost:5173", timeout=1.5)
+    except Exception:
+        pytest.fail(
+            "\n[QA Pre-Flight Check Failed] Frontend server is not running at http://localhost:5173.\n"
+            "Please start the frontend before running tests:\n"
+            "  cd frontend && npm run dev\n"
+        )
     return FRONTEND_URL
 
 @pytest.fixture(scope="session")

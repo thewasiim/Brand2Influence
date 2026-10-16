@@ -215,7 +215,7 @@ export async function createPost(userId, { mediaUrl, mediaType, caption, thumbna
   const cleanCaption = caption ? boundedText(caption, 'caption', 2200) : ''
   if (!mediaUrl) throw new ApiError(400, 'mediaUrl is required')
 
-  let authorInfo = { id: userId, name: 'BrandHUB Member', role: 'influencer', avatarUrl: null }
+  let authorInfo = { id: userId, name: 'Brand2Influence Member', role: 'influencer', avatarUrl: null }
   try {
     const { data: u } = await adminDb().from('users').select('id, name, role, influencer_profiles(profile_image_url), brand_profiles(business_name)').eq('id', userId).maybeSingle()
     if (u) {

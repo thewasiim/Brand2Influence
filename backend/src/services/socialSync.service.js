@@ -89,8 +89,24 @@ export async function fetchYouTubeStats(urlOrHandle) {
 /**
  * Fetch Instagram Statistics via Apify Instagram Scraper or Meta Graph API
  */
+
+// Fast in-memory cache to make repeated calls instantaneous
+const statsCache = new Map()
+const postsCache = new Map()
+const CACHE_TTL_MS = 15 * 60 * 1000 // 15 mins
+
 export async function fetchInstagramStats(urlOrHandle) {
   const handle = extractHandle(urlOrHandle, 'instagram')
+  if (!handle) {
+    return { platform: 'instagram', handle: '', url: '', followers: 0, subscribers: 0, verified: false }
+  }
+
+  const cacheKey = handle.toLowerCase()
+  const cached = statsCache.get(cacheKey)
+  if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+    return cached.data
+  }
+
   const apifyToken = process.env.APIFY_TOKEN
   const appId = process.env.INSTAGRAM_APP_ID
   const appSecret = process.env.INSTAGRAM_APP_SECRET
@@ -103,13 +119,13 @@ export async function fetchInstagramStats(urlOrHandle) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ usernames: [handle] }),
-        signal: AbortSignal.timeout(4000)
+        signal: AbortSignal.timeout(50000)
       })
       const items = await res.json()
       if (Array.isArray(items) && items.length > 0) {
         const item = items[0]
         const count = item.followersCount ?? 0
-        return {
+        const result = {
           platform: 'instagram',
           handle: `@${item.username || handle}`,
           url: item.url || `https://instagram.com/${handle}`,
@@ -119,6 +135,10 @@ export async function fetchInstagramStats(urlOrHandle) {
           fullName: item.fullName || '',
           verified: item.verified || false
         }
+        if (count > 0) {
+          statsCache.set(cacheKey, { timestamp: Date.now(), data: result })
+        }
+        return result
       }
     } catch (err) {
       console.warn('Apify Instagram fetch warning:', err.message)
@@ -129,7 +149,7 @@ export async function fetchInstagramStats(urlOrHandle) {
   if (appSecret && (appSecret.startsWith('IG') || appSecret.length > 60)) {
     try {
       const igRes = await fetch(`https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=${appSecret}`, {
-        signal: AbortSignal.timeout(4000)
+        signal: AbortSignal.timeout(50000)
       })
       const igData = await igRes.json()
       if (igData && igData.username && igData.username.toLowerCase() === handle.toLowerCase()) {
@@ -236,14 +256,25 @@ export async function fetchSocialPublic({ platform, urlOrHandle, manualFollowers
   }
 
   let stats = {}
-  if (platform === 'youtube') {
+  const normPlatform = (platform || 'instagram').toLowerCase()
+  if (normPlatform === 'youtube') {
     stats = await fetchYouTubeStats(urlOrHandle)
-  } else if (platform === 'instagram') {
+  } else if (normPlatform === 'instagram') {
     stats = await fetchInstagramStats(urlOrHandle)
-  } else if (platform === 'snapchat') {
+  } else if (normPlatform === 'snapchat') {
     stats = await fetchSnapchatStats(urlOrHandle)
+  } else if (normPlatform === 'facebook') {
+    const handle = extractHandle(urlOrHandle, 'facebook')
+    stats = {
+      platform: 'facebook',
+      handle: handle ? ("@" + handle) : "Facebook Page",
+      url: urlOrHandle.startsWith("http") ? urlOrHandle : ("https://facebook.com/" + handle),
+      followers: 0,
+      subscribers: 0,
+      verified: true
+    }
   } else {
-    throw new ApiError(400, 'Unsupported platform. Choose Instagram, YouTube, or Snapchat.', 'VALIDATION_ERROR')
+    throw new ApiError(400, 'Unsupported platform. Choose Instagram, YouTube, Snapchat, or Facebook.', 'VALIDATION_ERROR')
   }
 
   const count = Number(stats.followers ?? stats.subscribers ?? 0)
@@ -267,12 +298,23 @@ export async function syncSocialAccount(user, { platform, urlOrHandle, manualFol
   }
 
   let stats = {}
-  if (platform === 'youtube') {
+  const normPlatform = (platform || 'instagram').toLowerCase()
+  if (normPlatform === 'youtube') {
     stats = await fetchYouTubeStats(urlOrHandle)
-  } else if (platform === 'instagram') {
+  } else if (normPlatform === 'instagram') {
     stats = await fetchInstagramStats(urlOrHandle)
-  } else if (platform === 'snapchat') {
+  } else if (normPlatform === 'snapchat') {
     stats = await fetchSnapchatStats(urlOrHandle)
+  } else if (normPlatform === 'facebook') {
+    const handle = extractHandle(urlOrHandle, 'facebook')
+    stats = {
+      platform: 'facebook',
+      handle: handle ? ("@" + handle) : "Facebook Page",
+      url: urlOrHandle.startsWith("http") ? urlOrHandle : ("https://facebook.com/" + handle),
+      followers: 0,
+      subscribers: 0,
+      verified: true
+    }
   } else {
     throw new ApiError(400, 'Unsupported platform', 'VALIDATION_ERROR')
   }
@@ -488,6 +530,14 @@ export async function fetchYouTubePosts(urlOrHandle) {
 
 export async function fetchInstagramPosts(urlOrHandle) {
   const handle = extractHandle(urlOrHandle, 'instagram')
+  if (!handle) return []
+
+  const cacheKey = handle.toLowerCase()
+  const cached = postsCache.get(cacheKey)
+  if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+    return cached.data
+  }
+
   const apifyToken = process.env.APIFY_TOKEN
 
   if (apifyToken && !apifyToken.includes('your_')) {
@@ -499,11 +549,12 @@ export async function fetchInstagramPosts(urlOrHandle) {
         body: JSON.stringify({
           username: [handle],
           resultsLimit: 9
-        })
+        }),
+        signal: AbortSignal.timeout(55000)
       })
       const items = await res.json()
       if (Array.isArray(items) && items.length > 0) {
-        return items.map((p, idx) => ({
+        const posts = items.map((p, idx) => ({
           id: `ig-${p.id || idx}`,
           type: p.isVideo ? 'video' : 'image',
           mediaUrl: p.videoUrl || p.displayUrl || p.imageUrl,
@@ -515,6 +566,10 @@ export async function fetchInstagramPosts(urlOrHandle) {
           createdAt: p.timestamp ? new Date(p.timestamp).toLocaleDateString() : 'Recent',
           platform: 'instagram'
         }))
+        if (posts.length > 0) {
+          postsCache.set(cacheKey, { timestamp: Date.now(), data: posts })
+        }
+        return posts
       }
     } catch (e) {
       console.warn('Instagram scraper error:', e.message)

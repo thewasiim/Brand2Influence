@@ -23,7 +23,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
   const [caption, setCaption] = useState('')
   const [category, setCategory] = useState(isBrand ? 'D2C & Retail' : 'Fashion & Style')
   const [location, setLocation] = useState('')
-  
+
   // Creator-specific basis
   const [creatorPostType, setCreatorPostType] = useState('Showcase Reel')
   const [brandTag, setBrandTag] = useState('')
@@ -115,7 +115,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
         if (targetCreators) metadataParts.push(`🎯 Target: ${targetCreators}`)
         if (budgetPerk) metadataParts.push(`💰 Compensation: ${budgetPerk}`)
         if (campaignUrl) metadataParts.push(`🔗 Link: ${campaignUrl}`)
-        
+
         if (metadataParts.length > 0) {
           finalCaption = `${finalCaption}\n\n${metadataParts.join('\n')}`.trim()
         }
@@ -173,7 +173,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
   return (
     <div className="cpm-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Create new post">
       <div className={`cpm-modal ${step === 'edit' || step === 'posting' ? 'is-edit-mode' : ''}`} onClick={e => e.stopPropagation()}>
-        
+
         {/* Instagram Modal Header */}
         <div className="cpm-header">
           {step === 'edit' ? (
@@ -191,8 +191,8 @@ export default function CreatePostModal({ onClose, onPosted }) {
             {step === 'pick'
               ? (isBrand ? 'Create Brand Post' : 'Create new post')
               : step === 'done'
-              ? '✓ Shared'
-              : (isBrand ? 'New Brand Campaign Update' : 'New Post')}
+                ? '✓ Shared'
+                : (isBrand ? 'New Brand Campaign Update' : 'New Post')}
           </h2>
 
           <div className="cpm-header-actions">
@@ -273,7 +273,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
         {/* ── STEP 2: 2-COLUMN INSTAGRAM EDIT & PUBLISH INTERFACE ── */}
         {(step === 'edit' || step === 'posting') && preview && (
           <div className="cpm-split-layout">
-            
+
             {/* Left Column: Media Preview */}
             <div className={`cpm-media-column aspect-${aspectRatio.replace('/', '-')}`} onClick={mediaType === 'video' ? togglePlay : undefined}>
               {mediaType === 'video' ? (
@@ -368,7 +368,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
 
             {/* Right Column: Author, Caption & Role-Specific Details */}
             <div className="cpm-details-column">
-              
+
               {/* Author Header */}
               <div className="cpm-author-header">
                 <div className="cpm-author-avatar">
@@ -424,7 +424,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
 
               {/* Role-Based Basis Fields (CREATOR vs BRAND) */}
               <div className="cpm-custom-fields">
-                
+
                 {/* ── CREATOR BASIS ── */}
                 {isInfluencer && (
                   <div className="cpm-role-group">
@@ -635,7 +635,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
                   {step === 'posting' ? (
                     <>
                       <span className="cpm-spinner" />
-                      <span>Publishing to BrandHUB…</span>
+                      <span>Publishing to Brand2Influence…</span>
                     </>
                   ) : (
                     <span>Share Post</span>
@@ -652,7 +652,7 @@ export default function CreatePostModal({ onClose, onPosted }) {
           <div className="cpm-done">
             <div className="cpm-done-icon">✓</div>
             <h3 className="cpm-done-title">Your post has been shared!</h3>
-            <p className="cpm-done-sub">It is now live on BrandHUB Explore and your profile.</p>
+            <p className="cpm-done-sub">It is now live on Brand2Influence Explore and your profile.</p>
           </div>
         )}
 
