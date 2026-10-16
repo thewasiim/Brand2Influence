@@ -23,8 +23,8 @@ export const COUNTRY_OPTIONS = [
 
 
 export const STEP_LABELS = {
-  1: 'Contact Details',
-  2: 'Account Type',
+  1: 'Account Type',
+  2: 'Contact Details',
   3: 'Verification',
   4: 'Security',
   5: 'Profile Setup'
@@ -35,8 +35,8 @@ export function SignupPage() {
   const { refreshProfile } = useAuth()
 
   // 5 Step Flow:
-  // Step 1: Create an Account (Email, Phone)
-  // Step 2: Choose Account Type (Brand vs Creator)
+  // Step 1: Choose Account Type (Brand vs Creator)
+  // Step 2: Contact Details (Email, Phone)
   // Step 3: Verify Email or Phone (6-digit OTP)
   // Step 4: Create a Password (8+ chars, strength, confirm)
   // Step 5: Basic Profile & Complete Registration (Full Name, Username live check, Avatar, Country)
@@ -137,8 +137,16 @@ export function SignupPage() {
     reader.readAsDataURL(file)
   }
 
-  // --- Step 1: Contact Submit (Dispatches OTP and advances to Step 2) ---
-  const handleStep1Submit = async (e) => {
+  // --- Step 1: Choose Account Type Submit ---
+  const handleSelectRole = (roleChoice) => {
+    setSelectedRole(roleChoice)
+    setError('')
+    setSuccessMsg('')
+    setStep(2)
+  }
+
+  // --- Step 2: Contact Submit (Dispatches OTP and advances to Step 3) ---
+  const handleStep2ContactSubmit = async (e) => {
     e.preventDefault()
     setError('')
     const cleanEmail = email.trim().toLowerCase()
@@ -161,21 +169,13 @@ export function SignupPage() {
       setMaskedContact(res.maskedEmail || res.maskedPhone || cleanEmail)
       setTestOtp(res.testOtp || '')
       setResendCooldown(30)
-      setStep(2)
+      setStep(3)
       setSuccessMsg(`Verification code dispatched to ${res.maskedEmail || res.maskedPhone || cleanEmail}`)
     } catch (err) {
       setError(err.message || 'Failed to send verification code. Please try again.')
     } finally {
       setBusy(false)
     }
-  }
-
-  // --- Step 2: Choose Account Type Submit ---
-  const handleSelectRole = (roleChoice) => {
-    setSelectedRole(roleChoice)
-    setError('')
-    setSuccessMsg('')
-    setStep(3)
   }
 
   // --- Step 3: Resend OTP ---
@@ -339,15 +339,15 @@ export function SignupPage() {
     <AuthCard
       eyebrow={null}
       title={
-        step === 1 ? 'Create an Account' :
-          step === 2 ? 'Choose Account Type' :
+        step === 1 ? 'Choose Account Type' :
+          step === 2 ? 'Create an Account' :
             step === 3 ? 'Verify Email or Phone' :
               step === 4 ? 'Create a Password' :
                 'Set Up Your Profile'
       }
       subtitle={
         step === 1 ? null :
-          step === 2 ? null :
+          step === 2 ? `Enter your contact details to register as a ${selectedRole === 'brand' ? 'Brand' : 'Creator'}.` :
             step === 3 ? null :
               step === 4 ? 'Choose a secure password to protect your account.' :
                 null
@@ -380,9 +380,99 @@ export function SignupPage() {
         </div>
       )}
 
-      {/* ================= STEP 1: CREATE AN ACCOUNT ================= */}
+      {/* ================= STEP 1: CHOOSE ACCOUNT TYPE ================= */}
       {step === 1 && (
-        <form onSubmit={handleStep1Submit} className="signup-step-form">
+        <div className="signup-step-container" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <Button
+            type="button"
+            size="lg"
+            className="full"
+            onClick={() => {
+              setSelectedRole('influencer')
+              setStep(2)
+            }}
+            style={{
+              padding: '16px',
+              fontSize: '15px',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.16) 0%, rgba(245, 158, 11, 0.26) 100%)',
+              border: '1px solid rgba(251, 191, 36, 0.45)',
+              color: '#FDE68A',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              cursor: 'pointer'
+            }}
+          >
+            <span>✨</span>
+            <span>As a Creator</span>
+          </Button>
+
+          <Button
+            type="button"
+            size="lg"
+            className="full"
+            onClick={() => {
+              setSelectedRole('brand')
+              setStep(2)
+            }}
+            style={{
+              padding: '16px',
+              fontSize: '15px',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.16) 0%, rgba(59, 130, 246, 0.26) 100%)',
+              border: '1px solid rgba(96, 165, 250, 0.45)',
+              color: '#BFDBFE',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              cursor: 'pointer'
+            }}
+          >
+            <span>🏢</span>
+            <span>As a Brand</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="full"
+            onClick={() => nav('/login')}
+            style={{
+              marginTop: '4px'
+            }}
+          >
+            ← Back
+          </Button>
+        </div>
+      )}
+
+      {/* ================= STEP 2: CONTACT DETAILS ================= */}
+      {step === 2 && (
+        <form onSubmit={handleStep2ContactSubmit} className="signup-step-form">
+          {/* Active Role Confirmation Badge */}
+          <div className="signup-role-badge-row" style={{ marginBottom: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <span style={{ fontSize: '16px', flexShrink: 0 }}>{selectedRole === 'brand' ? '🏢' : '✨'}</span>
+              <span style={{ fontSize: '12.5px', color: '#F4F1E8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Joining as:{' '}
+                <strong style={{ color: selectedRole === 'brand' ? '#60A5FA' : '#FBBF24', textTransform: 'capitalize' }}>
+                  {selectedRole === 'brand' ? 'Brand / Business' : 'Creator / Influencer'}
+                </strong>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
+            >
+              Change
+            </button>
+          </div>
+
           <Input
             label="Email Address"
             type="email"
@@ -406,9 +496,14 @@ export function SignupPage() {
             🔒 We'll send a 6-digit verification code to confirm your email or mobile.
           </div>
 
-          <Button disabled={busy} loading={busy} size="lg" className="full">
-            {busy ? 'Sending Code…' : 'Continue to Account Type →'}
-          </Button>
+          <div className="auth-actions-row">
+            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)}>
+              ← Back to Role
+            </Button>
+            <Button disabled={busy} loading={busy} size="lg" type="submit">
+              {busy ? 'Sending Code…' : 'Continue to Verification →'}
+            </Button>
+          </div>
 
           <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
             Already have an account?{' '}
@@ -417,114 +512,6 @@ export function SignupPage() {
             </Link>
           </div>
         </form>
-      )}
-
-      {/* ================= STEP 2: CHOOSE ACCOUNT TYPE ================= */}
-      {step === 2 && (
-        <div className="signup-step-container">
-          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '14px', textAlign: 'center', lineHeight: 1.5 }}>
-            Select how you want to use Brand2Influence. You can customize your preferences anytime.
-          </p>
-
-          <div className="role-selection-grid" style={{ gridTemplateColumns: '1fr', gap: '12px', marginBottom: '20px' }}>
-            <div
-              className={`role-choice-card ${selectedRole === 'brand' ? 'is-selected' : ''}`}
-              onClick={() => setSelectedRole('brand')}
-              style={{
-                padding: '16px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                borderWidth: selectedRole === 'brand' ? '2px' : '1px'
-              }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedRole('brand'); } }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '24px', lineHeight: 1 }}>🏢</span>
-                  <div>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#F4F1E8' }}>
-                      Brand / Business
-                    </h3>
-                    <span style={{ fontSize: '10.5px', color: '#60A5FA', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                      FOR ADVERTISERS & AGENCIES
-                    </span>
-                  </div>
-                </div>
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  border: selectedRole === 'brand' ? '2px solid #60A5FA' : '2px solid rgba(244, 241, 232, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: selectedRole === 'brand' ? '#60A5FA' : 'transparent',
-                  flexShrink: 0
-                }}>
-                  {selectedRole === 'brand' && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0E0E0D' }} />}
-                </div>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.45 }}>
-                Discover vetted creators, manage collaboration briefs, and track campaign ROI.
-              </p>
-            </div>
-
-            <div
-              className={`role-choice-card role-choice-card--creator ${selectedRole === 'influencer' ? 'is-selected' : ''}`}
-              onClick={() => setSelectedRole('influencer')}
-              style={{
-                padding: '16px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                borderWidth: selectedRole === 'influencer' ? '2px' : '1px'
-              }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedRole('influencer'); } }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '24px', lineHeight: 1 }}>✨</span>
-                  <div>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#F4F1E8' }}>
-                      Creator / Influencer
-                    </h3>
-                    <span style={{ fontSize: '10.5px', color: '#FBBF24', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-                      FOR CREATORS & TALENT
-                    </span>
-                  </div>
-                </div>
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  border: selectedRole === 'influencer' ? '2px solid #FBBF24' : '2px solid rgba(244, 241, 232, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: selectedRole === 'influencer' ? '#FBBF24' : 'transparent',
-                  flexShrink: 0
-                }}>
-                  {selectedRole === 'influencer' && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0E0E0D' }} />}
-                </div>
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.45 }}>
-                Publish rate cards, showcase verified metrics, and get booked by top brands.
-              </p>
-            </div>
-          </div>
-
-          <div className="auth-actions-row">
-            <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)}>
-              ← Back
-            </Button>
-            <Button type="button" size="lg" onClick={() => setStep(3)}>
-              Continue as {selectedRole === 'brand' ? 'Brand' : 'Creator'} →
-            </Button>
-          </div>
-        </div>
       )}
 
       {/* ================= STEP 3: VERIFY EMAIL OR PHONE ================= */}
@@ -599,7 +586,7 @@ export function SignupPage() {
           <div className="signup-verify-actions">
             <button
               type="button"
-              onClick={() => setStep(1)}
+              onClick={() => setStep(2)}
               style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}
             >
               Change email or phone
@@ -623,7 +610,7 @@ export function SignupPage() {
 
           <div className="auth-actions-row">
             <Button type="button" variant="secondary" size="lg" onClick={() => setStep(2)}>
-              ← Back to Role
+              ← Back
             </Button>
             <Button type="submit" size="lg" disabled={otp.length !== 6 || busy} loading={busy}>
               {busy ? 'Verifying…' : 'Verify & Continue →'}
@@ -765,7 +752,7 @@ export function SignupPage() {
             </div>
             <button
               type="button"
-              onClick={() => setStep(2)}
+              onClick={() => setStep(1)}
               style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
             >
               Change
