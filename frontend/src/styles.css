@@ -9567,3 +9567,103 @@ body::before {
     max-width: 440px !important;
   }
 }
+
+/* ============================================================
+   SIGNUP CONGRATULATIONS SCREEN
+   ============================================================ */
+.signup-congrats-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 0 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.signup-congrats-emoji {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 20px;
+  animation: congrats-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes congrats-pop {
+  from {
+    transform: scale(0.3) rotate(-10deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.signup-congrats-heading {
+  font-size: clamp(22px, 6vw, 28px);
+  font-weight: 800;
+  color: #F4F1E8;
+  margin: 0 0 10px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 40%, #EF4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: congrats-fade-up 0.5s 0.15s ease both;
+}
+
+.signup-congrats-sub {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text-secondary, rgba(244, 241, 232, 0.65));
+  max-width: 340px;
+  margin: 0 auto 20px;
+  animation: congrats-fade-up 0.5s 0.25s ease both;
+}
+
+.signup-congrats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(244, 241, 232, 0.06);
+  border: 1px solid rgba(244, 241, 232, 0.12);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #F4F1E8;
+  margin-bottom: 24px;
+  animation: congrats-fade-up 0.5s 0.35s ease both;
+}
+
+@keyframes congrats-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .signup-congrats-emoji {
+    font-size: 52px;
+    margin-bottom: 16px;
+  }
+
+  .signup-congrats-heading {
+    font-size: 22px;
+  }
+
+  .signup-congrats-sub {
+    font-size: 13px;
+  }
+
+  .signup-congrats-wrap .ui-button {
+    font-size: 14px !important;
+    padding: 13px 16px !important;
+  }
+}

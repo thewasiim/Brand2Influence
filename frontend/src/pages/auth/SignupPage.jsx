@@ -384,23 +384,25 @@ export function SignupPage() {
       wide={false}
       showBack={false}
     >
-      {/* Step Progress Pill Indicator */}
-      <div className="signup-progress-wrap">
-        <div className="signup-progress-header">
-          <span className="signup-progress-label">
-            Step {step} of 5 &bull; {STEP_LABELS[step]}
-          </span>
-          <span className="signup-progress-pct">
-            {Math.round((step / 5) * 100)}% Completed
-          </span>
+      {/* Step Progress Pill Indicator — hidden on congratulations screen */}
+      {step < 6 && (
+        <div className="signup-progress-wrap">
+          <div className="signup-progress-header">
+            <span className="signup-progress-label">
+              Step {step} of 5 &bull; {STEP_LABELS[step]}
+            </span>
+            <span className="signup-progress-pct">
+              {Math.round((Math.min(step, 5) / 5) * 100)}% Completed
+            </span>
+          </div>
+          <div className="signup-progress-track">
+            <div
+              className="signup-progress-fill"
+              style={{ width: `${(Math.min(step, 5) / 5) * 100}%` }}
+            />
+          </div>
         </div>
-        <div className="signup-progress-track">
-          <div
-            className="signup-progress-fill"
-            style={{ width: `${(step / 5) * 100}%` }}
-          />
-        </div>
-      </div>
+      )}
 
       {error && <ErrorState error={error} />}
       {successMsg && (
@@ -411,7 +413,7 @@ export function SignupPage() {
 
       {/* ================= STEP 1: CHOOSE ACCOUNT TYPE ================= */}
       {step === 1 && (
-        <div className="signup-step-container" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="signup-step-container" style={{ display: 'flex', flexDirection: 'column', gap: '14px', alignItems: 'stretch', width: '100%' }}>
           <Button
             type="button"
             size="lg"
@@ -908,6 +910,68 @@ export function SignupPage() {
             </Button>
           </div>
         </form>
+      )}
+
+      {/* ================= STEP 6: CONGRATULATIONS ================= */}
+      {step === 6 && (
+        <div className="signup-congrats-wrap">
+          {/* Animated Trophy/Confetti Emoji */}
+          <div className="signup-congrats-emoji" aria-hidden="true">
+            🎉
+          </div>
+
+          <h2 className="signup-congrats-heading">Congratulations!</h2>
+          <p className="signup-congrats-sub">
+            Your account has been created successfully.
+            {selectedRole === 'brand'
+              ? ' Welcome aboard — start exploring creators and launching campaigns!'
+              : ' You're all set to connect with brands and grow your influence!'}
+          </p>
+
+          {/* Role badge */}
+          <div className="signup-congrats-badge">
+            <span>{selectedRole === 'brand' ? '🏢' : '✨'}</span>
+            <span>{selectedRole === 'brand' ? 'Brand / Business' : 'Creator / Influencer'}</span>
+          </div>
+
+          {/* Primary CTA */}
+          <Button
+            type="button"
+            size="lg"
+            className="full"
+            onClick={() => nav('/profile')}
+            style={{
+              marginTop: '8px',
+              background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+              border: 'none',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '15px',
+              padding: '14px 20px',
+              width: '100%',
+              borderRadius: '10px',
+              cursor: 'pointer'
+            }}
+          >
+            Go to Profile →
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => nav('/dashboard')}
+            style={{
+              marginTop: '12px',
+              background: 'none',
+              border: 'none',
+              color: 'var(--color-text-secondary)',
+              fontSize: '13px',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Go to Dashboard instead
+          </button>
+        </div>
       )}
     </AuthCard>
   )
