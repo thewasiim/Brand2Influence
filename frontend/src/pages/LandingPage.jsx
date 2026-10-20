@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Link, useNavigate, useSearchParams, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { influencersService } from '../services/influencers'
 import { UserAvatarMenu } from '../components/UserAvatarMenu'
 import {
   Button,
@@ -193,8 +194,33 @@ export default function LandingPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user, profile, loading } = useAuth()
+  const [liveCreators, setLiveCreators] = useState([])
 
-
+  useEffect(() => {
+    influencersService
+      .list({})
+      .then((data) => {
+        if (data && data.items && data.items.length > 0) {
+          setLiveCreators(data.items.map(item => ({
+            id: item.id || item.userId,
+            name: item.name,
+            username: item.username ? (item.username.startsWith('@') ? item.username : `@${item.username}`) : `@${(item.name || 'creator').toLowerCase().replace(/\s+/g, '')}`,
+            niche: item.niche || 'Digital Creator',
+            location: item.location || 'India',
+            followersCount: item.followersCount || 0,
+            engagementRate: item.engagementRate || 0,
+            rateCard: item.rateCard || { reel: item.rateCard?.reel || 0 },
+            budget: item.rateCard?.reel || 0,
+            profileImageUrl: item.profileImageUrl || null,
+            bio: item.bio || '',
+            featured: false,
+          })))
+        }
+      })
+      .catch(() => {
+        setLiveCreators([])
+      })
+  }, [])
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('All')
@@ -214,7 +240,8 @@ export default function LandingPage() {
 
   // Live filtered creator list
   const filteredCreators = useMemo(() => {
-    return liveCreators.filter((c) => {
+    return (liveCreators || []).filter((c) => {
+      if (!c) return false
       // Tab filter
       if (activeTab !== 'All' && c.niche !== activeTab) return false
       // Niche filter from search bar
@@ -224,29 +251,29 @@ export default function LandingPage() {
       // Query filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase()
-        const text = `${c.name} ${c.username} ${c.niche} ${c.location} ${c.bio}`.toLowerCase()
+        const text = `${c.name || ''} ${c.username || ''} ${c.niche || ''} ${c.location || ''} ${c.bio || ''}`.toLowerCase()
         if (!text.includes(q)) return false
       }
       // Budget filter
-      if (searchBudget === 'Up to ₹2,500' && c.rateCard.reel > 2500) return false
-      if (searchBudget === 'Up to ₹3,500' && c.rateCard.reel > 3500) return false
-      if (searchBudget === 'Up to ₹5,000' && c.rateCard.reel > 5000) return false
+      const reelRate = c.rateCard?.reel || 0
+      if (searchBudget === 'Up to ₹2,500' && reelRate > 2500) return false
+      if (searchBudget === 'Up to ₹3,500' && reelRate > 3500) return false
+      if (searchBudget === 'Up to ₹5,000' && reelRate > 5000) return false
 
       // Followers filter
-      if (searchFollowers === '10K – 50K' && (c.followersCount < 10000 || c.followersCount > 50000)) return false
-      if (searchFollowers === '50K – 150K' && (c.followersCount < 50000 || c.followersCount > 150000)) return false
-      if (searchFollowers === '150K+' && c.followersCount < 150000) return false
+      const f = Number(c.followersCount || 0)
+      if (searchFollowers === '10K – 50K' && (f < 10000 || f > 50000)) return false
+      if (searchFollowers === '50K – 150K' && (f < 50000 || f > 150000)) return false
+      if (searchFollowers === '150K+' && f < 150000) return false
 
       return true
     })
-  }, [activeTab, searchNiche, searchLocation, searchQuery, searchBudget, searchFollowers])
+  }, [liveCreators, activeTab, searchNiche, searchLocation, searchQuery, searchBudget, searchFollowers])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
     scrollTo('marketplace')
   }
-
-  const activeHeroCreator = SHOWCASE_CREATORS[heroCardIndex] || SHOWCASE_CREATORS[0]
 
   // Prevent background scrolling when mobile menu is open
   useEffect(() => {
