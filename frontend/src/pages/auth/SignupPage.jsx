@@ -377,7 +377,7 @@ export function SignupPage() {
       subtitle={
         step === 6 ? null :
         step === 1 ? null :
-          step === 2 ? `Enter your contact details to register as a ${selectedRole === 'brand' ? 'Brand' : 'Creator'}.` :
+          step === 2 ? 'Enter your contact details to register.' :
             step === 3 ? null :
               step === 4 ? 'Choose a secure password to protect your account.' :
                 null
@@ -438,7 +438,7 @@ export function SignupPage() {
             }}
           >
             <span>✨</span>
-            <span>As a Creator</span>
+            <span>Join as an Influencer</span>
           </Button>
 
           <Button
@@ -464,7 +464,7 @@ export function SignupPage() {
             }}
           >
             <span>🏢</span>
-            <span>As a Brand</span>
+            <span>Join as a Brand</span>
           </Button>
 
           <Button
@@ -486,20 +486,17 @@ export function SignupPage() {
       {step === 2 && (
         <form onSubmit={handleStep2ContactSubmit} className="signup-step-form">
           {/* Active Role Confirmation Badge */}
-          <div className="signup-role-badge-row" style={{ marginBottom: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-              <span style={{ fontSize: '16px', flexShrink: 0 }}>{selectedRole === 'brand' ? '🏢' : '✨'}</span>
-              <span style={{ fontSize: '12.5px', color: '#F4F1E8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                Joining as:{' '}
-                <strong style={{ color: selectedRole === 'brand' ? '#60A5FA' : '#FBBF24', textTransform: 'capitalize' }}>
-                  {selectedRole === 'brand' ? 'Brand / Business' : 'Creator / Influencer'}
-                </strong>
+          <div className={`signup-role-badge-row ${selectedRole === 'brand' ? 'is-brand' : ''}`}>
+            <div className="signup-role-badge-left">
+              <span className="signup-role-badge-icon">{selectedRole === 'brand' ? '🏢' : '✨'}</span>
+              <span className="signup-role-badge-text">
+                {selectedRole === 'brand' ? 'Join as a Brand' : 'Join as an Influencer'}
               </span>
             </div>
             <button
               type="button"
               onClick={() => setStep(1)}
-              style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
+              className="signup-role-badge-change"
             >
               Change
             </button>
@@ -531,11 +528,11 @@ export function SignupPage() {
             }}
             onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
             error={touched.phone && phone.trim() && !phoneValidation.isValid ? phoneValidation.error : ''}
-            hint="10-digit Indian number. Leave blank to verify via email only."
+            hint="Optional. 10-digit Indian number."
           />
 
-          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '-4px', marginBottom: '16px', lineHeight: 1.5 }}>
-            🔒 We'll send a 6-digit verification code to confirm your email or mobile.
+          <div className="signup-security-note">
+            🔒 We'll send a 6-digit code to confirm your email.
           </div>
 
           <div className="auth-actions-row">
@@ -544,7 +541,7 @@ export function SignupPage() {
               variant="secondary"
               size="md"
               onClick={() => setStep(1)}
-              style={{ minWidth: '85px', padding: '12px 16px' }}
+              className="auth-back-btn"
             >
               ← Back
             </Button>
@@ -553,13 +550,13 @@ export function SignupPage() {
               loading={busy}
               size="md"
               type="submit"
-              style={{ flex: 1, minWidth: 0, padding: '12px 18px', fontSize: '13px', whiteSpace: 'nowrap' }}
+              className="auth-submit-btn"
             >
               {busy ? 'Sending Code…' : 'Continue to Verification →'}
             </Button>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+          <div className="auth-footer-link" style={{ textAlign: 'center', marginTop: '8px', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
             Already have an account?{' '}
             <Link to="/login" style={{ color: '#60A5FA', fontWeight: 600, textDecoration: 'none' }}>
               Log In →
@@ -766,20 +763,17 @@ export function SignupPage() {
       {step === 5 && (
         <form onSubmit={handleStep5FinalSubmit} className="signup-step-form">
           {/* Active Role Confirmation Badge */}
-          <div className="signup-role-badge-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-              <span style={{ fontSize: '16px', flexShrink: 0 }}>{selectedRole === 'brand' ? '🏢' : '✨'}</span>
-              <span style={{ fontSize: '12.5px', color: '#F4F1E8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                Account Type:{' '}
-                <strong style={{ color: selectedRole === 'brand' ? '#60A5FA' : '#FBBF24', textTransform: 'capitalize' }}>
-                  {selectedRole === 'brand' ? 'Brand' : 'Creator'}
-                </strong>
+          <div className={`signup-role-badge-row ${selectedRole === 'brand' ? 'is-brand' : ''}`}>
+            <div className="signup-role-badge-left">
+              <span className="signup-role-badge-icon">{selectedRole === 'brand' ? '🏢' : '✨'}</span>
+              <span className="signup-role-badge-text">
+                {selectedRole === 'brand' ? 'Join as a Brand' : 'Join as an Influencer'}
               </span>
             </div>
             <button
               type="button"
               onClick={() => setStep(1)}
-              style={{ background: 'none', border: 'none', color: '#60A5FA', fontSize: '12px', cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
+              className="signup-role-badge-change"
             >
               Change
             </button>
@@ -925,7 +919,7 @@ export function SignupPage() {
             Your account has been created successfully.
             {selectedRole === 'brand'
               ? ' Welcome aboard — start exploring creators and launching campaigns!'
-              : ' You're all set to connect with brands and grow your influence!'}
+              : " You're all set to connect with brands and grow your influence!"}
           </p>
 
           {/* Role badge */}

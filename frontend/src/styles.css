@@ -3433,11 +3433,12 @@ select option {
 /* Auth & Onboarding Layouts */
 .auth-layout {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 80px 24px 48px;
+  justify-content: safe center;
+  padding: 16px 20px 32px;
   background-color: var(--cb-bg, #0b0b0a);
   background-image:
     radial-gradient(ellipse 70% 50% at 50% -10%, rgba(0, 71, 171, 0.22) 0%, transparent 70%),
@@ -3459,16 +3460,17 @@ select option {
 }
 
 .auth-top-nav {
-  position: absolute;
-  top: 24px;
-  left: 0;
-  right: 0;
-  padding: 0 clamp(20px, 4vw, 44px);
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 16px;
+  padding: 14px clamp(16px, 4vw, 44px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 20;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .auth-top-nav .brand,
@@ -9519,8 +9521,10 @@ body::before {
   }
 
   .signup-role-badge-row {
-    flex-direction: column !important;
-    align-items: flex-start !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
     gap: 8px !important;
   }
 
@@ -9542,29 +9546,205 @@ body::before {
   }
 }
 
-/* Mobile Vertical & Horizontal Centering for Auth Cards */
+/* Mobile Responsive Auth Flow & Card Layout (No scroll, No logo overlap, Single page fit) */
 @media (max-width: 768px) {
   .auth-layout {
     min-height: 100dvh !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
+    justify-content: safe center !important;
     align-items: center !important;
-    padding: 12px 14px 20px !important;
+    padding: 6px 12px 12px !important;
     box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
   .auth-top-nav {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: 440px !important;
+    margin: 0 auto 6px !important;
+    padding: 4px 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     flex-shrink: 0 !important;
-    margin-bottom: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .auth-top-nav .brand-text {
+    font-size: 12.5px !important;
+  }
+
+  .auth-back-nav-btn {
+    padding: 4px 8px !important;
+    font-size: 9.5px !important;
   }
 
   .auth-card,
   .auth-card--wide {
-    margin: auto auto !important;
+    margin: 0 auto !important;
     align-self: center !important;
     width: 100% !important;
     max-width: 440px !important;
+    padding: 14px 14px 12px !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .auth-card-header {
+    margin-bottom: 6px !important;
+  }
+
+  .auth-card-header h1,
+  .auth-card h1 {
+    font-size: 18px !important;
+    margin: 0 0 2px 0 !important;
+    line-height: 1.25 !important;
+  }
+
+  .auth-card-header .auth-subtitle {
+    font-size: 11.5px !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.35 !important;
+  }
+
+  .signup-progress-wrap {
+    margin-bottom: 8px !important;
+  }
+
+  .signup-progress-header {
+    margin-bottom: 3px !important;
+    font-size: 10px !important;
+  }
+
+  .signup-progress-track {
+    height: 3px !important;
+  }
+
+  .signup-step-form {
+    gap: 7px !important;
+    margin: 4px 0 0 0 !important;
+  }
+
+  .signup-role-badge-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    background: rgba(244, 241, 232, 0.04) !important;
+    border: 1px solid rgba(244, 241, 232, 0.12) !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    margin-bottom: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    gap: 6px !important;
+  }
+
+  .signup-role-badge-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+
+  .signup-role-badge-icon {
+    font-size: 14px !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+  }
+
+  .signup-role-badge-text {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #FBBF24 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .signup-role-badge-row.is-brand .signup-role-badge-text {
+    color: #60A5FA !important;
+  }
+
+  .signup-role-badge-change {
+    background: none !important;
+    border: none !important;
+    color: #60A5FA !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    text-decoration: underline !important;
+    flex-shrink: 0 !important;
+    padding: 2px 4px !important;
+    white-space: nowrap !important;
+  }
+
+  .auth-card form .field {
+    gap: 2px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .auth-card form .field-label {
+    font-size: 11px !important;
+    margin-bottom: 1px !important;
+  }
+
+  .auth-card form .field-input,
+  .auth-card form input:not(.otp-digit-input) {
+    padding: 8px 10px !important;
+    font-size: 13.5px !important;
+    height: 38px !important;
+    border-radius: 6px !important;
+  }
+
+  .auth-card form .field-hint {
+    font-size: 10px !important;
+    margin-top: 1px !important;
+    line-height: 1.25 !important;
+  }
+
+  .signup-security-note {
+    font-size: 11px !important;
+    color: var(--color-text-secondary, rgba(244, 241, 232, 0.6)) !important;
+    margin: 2px 0 2px 0 !important;
+    line-height: 1.3 !important;
+  }
+
+  .auth-actions-row {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 6px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+  }
+
+  .auth-actions-row > button,
+  .auth-actions-row > .ui-button {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 38px !important;
+    padding: 8px 14px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .auth-footer-link {
+    text-align: center !important;
+    margin-top: 4px !important;
+    font-size: 11.5px !important;
+    color: var(--color-text-secondary) !important;
   }
 }
 
@@ -9666,4 +9846,62 @@ body::before {
     font-size: 14px !important;
     padding: 13px 16px !important;
   }
+}
+
+/* Signup Role Badge Elements */
+.signup-role-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  background: rgba(244, 241, 232, 0.03);
+  border: 1px solid rgba(244, 241, 232, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 8px;
+}
+.signup-role-badge-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+.signup-role-badge-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.signup-role-badge-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FBBF24;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.signup-role-badge-row.is-brand .signup-role-badge-text {
+  color: #60A5FA;
+}
+.signup-role-badge-change {
+  background: none;
+  border: none;
+  color: #60A5FA;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  flex-shrink: 0;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+.signup-security-note {
+  font-size: 11.5px;
+  color: var(--color-text-secondary, rgba(244, 241, 232, 0.6));
+  margin: 0 0 6px 0;
+  line-height: 1.35;
 }
