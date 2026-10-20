@@ -94,7 +94,7 @@ export function SignupPage() {
 
   // Real-time validation results
   const emailValidation = validateEmail(email)
-  const phoneValidation = validatePhone(phone)
+  const phoneValidation = validatePhone(phone, 'Mobile number', false)
   const passValidation = validatePassword(password)
   const confirmValidation = validateConfirmPassword(password, confirmPassword)
   const nameValidation = validateFullName(fullName, selectedRole === 'brand', selectedRole === 'brand' ? 'Brand name' : 'Full name')
@@ -184,13 +184,14 @@ export function SignupPage() {
       return
     }
 
-    if (!phoneValidation.isValid) {
+    // Phone is optional — only validate if user actually typed something
+    if (phone.trim() && !phoneValidation.isValid) {
       setError(phoneValidation.error)
       return
     }
 
     const cleanEmail = emailValidation.value
-    const cleanPhone = phoneValidation.value
+    const cleanPhone = (phone.trim() && phoneValidation.isValid) ? phoneValidation.value : ''
 
     setBusy(true)
     try {
@@ -520,9 +521,8 @@ export function SignupPage() {
           />
 
           <Input
-            label="Mobile Number"
+            label="Mobile Number (Optional)"
             type="tel"
-            required
             placeholder="9876543210"
             value={phone}
             onChange={(e) => {
@@ -530,8 +530,8 @@ export function SignupPage() {
               if (error) setError('')
             }}
             onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
-            error={touched.phone && !phoneValidation.isValid ? phoneValidation.error : ''}
-            hint="Enter 10-digit Indian mobile number (e.g. 9876543210)"
+            error={touched.phone && phone.trim() && !phoneValidation.isValid ? phoneValidation.error : ''}
+            hint="10-digit Indian number. Leave blank to verify via email only."
           />
 
           <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '-4px', marginBottom: '16px', lineHeight: 1.5 }}>
@@ -549,7 +549,7 @@ export function SignupPage() {
               ← Back
             </Button>
             <Button
-              disabled={busy || !emailValidation.isValid || !phoneValidation.isValid}
+              disabled={busy || !emailValidation.isValid || (phone.trim() && !phoneValidation.isValid)}
               loading={busy}
               size="md"
               type="submit"
