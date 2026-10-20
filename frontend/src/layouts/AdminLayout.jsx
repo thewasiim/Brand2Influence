@@ -82,19 +82,21 @@ export function AdminLayout() {
   )
   const currentLabel = currentNav ? currentNav.label : 'Control Panel'
 
-  const navLinksContent = (
+  const renderNavLinks = (isMobile = false) => (
     <>
-      <div className="admin-sidebar-brand">
-        <div className="admin-sidebar-logo-row">
-          <Link to="/" className="admin-brand-link">
-            BRAND2INFLUENCE
-          </Link>
-          <span className="admin-console-pill">
-            <span className="admin-status-dot" />
-            LIVE
-          </span>
+      {!isMobile && (
+        <div className="admin-sidebar-brand">
+          <div className="admin-sidebar-logo-row">
+            <Link to="/" className="admin-brand-link">
+              BRAND2INFLUENCE
+            </Link>
+            <span className="admin-console-pill">
+              <span className="admin-status-dot" />
+              LIVE
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <span className="admin-nav-group-label">[ 01 ] CONTROL CONSOLE</span>
       <div className="admin-nav-links">
@@ -149,7 +151,7 @@ export function AdminLayout() {
     <div className="portal admin">
       {/* Mobile Top Header Bar (< 1024px) */}
       <header className="portal-mobile-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="admin-mobile-header-brand">
           <Link to="/" className="admin-brand-link">
             BRAND2INFLUENCE
           </Link>
@@ -159,12 +161,13 @@ export function AdminLayout() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="admin-mobile-header-actions">
           <UserAvatarMenu />
           <button
             type="button"
-            className="menu"
+            className="menu admin-mobile-menu-btn"
             aria-label="Toggle Admin Navigation"
+            aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -185,40 +188,46 @@ export function AdminLayout() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="nav-backdrop" onClick={() => setMobileMenuOpen(false)} />
+          <div className="nav-backdrop admin-nav-backdrop" onClick={() => setMobileMenuOpen(false)} />
         )}
 
-        {mobileMenuOpen && (
-          <nav className="portal-mobile-drawer open" style={{ background: '#0e0e0d' }}>
-            <div className="nav-drawer-header">
+        <nav className={`portal-mobile-drawer admin-mobile-drawer ${mobileMenuOpen ? 'open' : ''}`}>
+          <div className="nav-drawer-header admin-drawer-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span className="nav-drawer-title" style={{ fontFamily: 'var(--font-mono)' }}>[ ADMIN CONSOLE ]</span>
-              <button
-                type="button"
-                className="nav-drawer-close"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+              <span className="admin-console-pill" style={{ padding: '2px 6px', fontSize: '9px' }}>
+                <span className="admin-status-dot" />
+                LIVE
+              </span>
             </div>
-            {navLinksContent}
-          </nav>
-        )}
+            <button
+              type="button"
+              className="nav-drawer-close"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div className="admin-drawer-body">
+            {renderNavLinks(true)}
+          </div>
+        </nav>
       </header>
 
       {/* Desktop Left Sidebar (>= 1024px) */}
       <aside className="portal-desktop-aside">
-        {navLinksContent}
+        {renderNavLinks(false)}
       </aside>
 
       {/* Main Administrative Viewport */}
       <section className="portal-main-section">
         <header className="admin-topbar-luxury">
           <div className="admin-topbar-breadcrumbs">
-            <span>ADMIN</span>
+            <span className="breadcrumb-root">ADMIN</span>
             <span className="divider">/</span>
             <span className="current">{currentLabel.toUpperCase()}</span>
           </div>
@@ -226,7 +235,8 @@ export function AdminLayout() {
           <div className="admin-topbar-actions">
             <div className="admin-system-health-badge">
               <span className="admin-status-dot" />
-              <span>100% OPERATIONAL</span>
+              <span className="health-text">100% OPERATIONAL</span>
+              <span className="health-text-mobile">LIVE</span>
             </div>
 
             <Link to="/dashboard" className="admin-back-btn">
@@ -234,10 +244,12 @@ export function AdminLayout() {
                 <line x1="19" x2="5" y1="12" y2="12" />
                 <polyline points="12 19 5 12 12 5" />
               </svg>
-              <span>Back to App</span>
+              <span className="admin-back-btn-text">Back to App</span>
             </Link>
 
-            <UserAvatarMenu />
+            <div className="admin-topbar-avatar-desktop">
+              <UserAvatarMenu />
+            </div>
           </div>
         </header>
 

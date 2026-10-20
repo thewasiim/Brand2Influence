@@ -1,6 +1,20 @@
 import { adminDb, authClient } from '../config/supabase.js'
 import { ApiError } from '../utils/api-error.js'
 import { env } from '../config/env.js'
+import { sendOtpEmail } from './email.service.js'
+import {
+  validateFullName,
+  validateEmail,
+  validateIndianPhone,
+  validatePassword,
+  validateUsername,
+  validatePincode,
+  validateUrl,
+  validateBoundedText,
+  validateInteger,
+  validateEnum,
+  validateOtp
+} from '../utils/validators.js'
 
 export async function login({ email, password }) {
   if (!email || !password) throw new ApiError(400, 'Email and password are required', 'VALIDATION_ERROR')
@@ -167,66 +181,39 @@ export async function checkUsernameAvailability(rawUsername) {
 export async function register(payload) {
   const { email, password, name, username, phone, dob, pincode, location, role, roleData } = payload || {}
 
-  // 1. Mandatory Core Validations
-  if (!email || !password || !name || !role) {
-    throw new ApiError(400, 'Name, email, password, and role are required', 'VALIDATION_ERROR')
-  }
-  if (!['influencer', 'brand'].includes(role)) {
-    throw new ApiError(400, 'Role must be either influencer or brand', 'VALIDATION_ERROR')
-  }
+  // 1. Role Validation
+  const cleanRole = validateEnum(role, 'Account role', ['influencer', 'brand'])
+  const isBrand = cleanRole === 'brand'
 
-  // 2. Email Validation (String, Regex)
-  const cleanEmail = String(email).trim().toLowerCase()
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(cleanEmail)) {
-    throw new ApiError(400, 'Please provide a valid email address (e.g. name@domain.com)', 'VALIDATION_ERROR')
-  }
+  // 2. Full Name / Brand Name Validation
+  const cleanName = validateFullName(name, isBrand ? 'Brand name' : 'Full name', { isBrand })
 
-  // 3. Password Validation (String, Min 6 Chars)
-  if (typeof password !== 'string' || password.length < 6) {
-    throw new ApiError(400, 'Password must be at least 6 characters long', 'VALIDATION_ERROR')
-  }
+  // 3. Email Validation
+  const cleanEmail = validateEmail(email, 'Email address')
 
-  // 4. Username Validation & Uniqueness Enforcement
-  const rawUser = username || roleData?.username || roleData?.instagram_handle || name
-  const cleanUsername = String(rawUser)
-    .replace(/^@/, '')
-    .replace(/\s+/g, '_')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9_]/g, '')
+  // 4. Password Validation (min 8 chars, letter + number/symbol)
+  const cleanPassword = validatePassword(password, null, 'Password')
 
-  if (!cleanUsername || cleanUsername.length < 3) {
-    throw new ApiError(400, 'Username must be at least 3 characters (alphanumeric and underscores)', 'VALIDATION_ERROR')
-  }
-  if (cleanUsername.length > 30) {
-    throw new ApiError(400, 'Username cannot exceed 30 characters', 'VALIDATION_ERROR')
-  }
+  // 5. Username Validation & Uniqueness
+  const rawUser = username || roleData?.username || roleData?.instagram_handle || cleanName
+  const cleanUsername = validateUsername(rawUser, 'Username')
 
-  // Check username uniqueness
+  // Check username uniqueness in DB
   const usernameCheck = await checkUsernameAvailability(cleanUsername)
   if (!usernameCheck.available) {
     throw new ApiError(409, usernameCheck.message || `Username "@${cleanUsername}" is already taken. Please choose another username.`, 'USERNAME_TAKEN')
   }
 
-  // 5. Phone Validation (Numeric digits, 10-15 digits)
+  // 6. Phone Validation (Indian mobile format: 10 digits starting with 6-9)
   let cleanPhone = null
   if (phone) {
-    const digitsOnly = String(phone).replace(/\D/g, '')
-    if (digitsOnly.length < 10 || digitsOnly.length > 15) {
-      throw new ApiError(400, 'Mobile phone number must contain 10 to 15 numeric digits', 'VALIDATION_ERROR')
-    }
-    cleanPhone = digitsOnly
+    cleanPhone = validateIndianPhone(phone, 'Mobile phone number', { required: false })
   }
 
-  // 6. Pincode Validation (Numeric digits, 5-6 digits)
+  // 7. Pincode Validation (6 digits)
   let cleanPincode = null
   if (pincode) {
-    const pinDigits = String(pincode).replace(/\D/g, '')
-    if (pinDigits.length < 5 || pinDigits.length > 6) {
-      throw new ApiError(400, 'Pincode must be a 5 or 6 digit numeric code', 'VALIDATION_ERROR')
-    }
-    cleanPincode = pinDigits
+    cleanPincode = validatePincode(pincode, 'Pincode', { required: false })
   }
 
   const db = adminDb()
@@ -712,6 +699,7 @@ export async function resolveIdentifier(identifier) {
 const registrationOtpStore = new Map()
 const forgotPasswordOtpStore = new Map()
 
+
 /**
  * Generate and send a 6-digit OTP for signup contact verification
  */
@@ -722,19 +710,12 @@ export async function sendRegistrationOtp({ email, phone }) {
 
   let cleanEmail = ''
   if (email && String(email).trim()) {
-    cleanEmail = String(email).trim().toLowerCase()
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(cleanEmail)) {
-      throw new ApiError(400, 'Please provide a valid email address (e.g. name@domain.com)', 'VALIDATION_ERROR')
-    }
+    cleanEmail = validateEmail(email, 'Email address')
   }
 
   let cleanPhone = ''
   if (phone && String(phone).trim()) {
-    cleanPhone = String(phone).replace(/\D/g, '')
-    if (cleanPhone.length < 10 || cleanPhone.length > 15) {
-      throw new ApiError(400, 'Please provide a valid 10-15 digit mobile phone number', 'VALIDATION_ERROR')
-    }
+    cleanPhone = validateIndianPhone(phone, 'Mobile phone number', { required: false })
   }
 
   const primaryKey = cleanEmail || cleanPhone
@@ -765,12 +746,14 @@ export async function sendRegistrationOtp({ email, phone }) {
     throw new ApiError(429, `Please wait ${remainingSecs} seconds before requesting a new OTP code.`, 'RATE_LIMITED')
   }
 
-  // Generate 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  // Generate cryptographically secure 6-digit OTP
+  const { randomInt, createHash } = await import('node:crypto')
+  const otp = String(randomInt(100000, 1000000))
+  const otpHash = createHash('sha256').update(otp).digest('hex')
   const now = Date.now()
 
   const otpRecord = {
-    otp,
+    otpHash,
     email: cleanEmail,
     phone: cleanPhone,
     attempts: 0,
@@ -796,16 +779,19 @@ export async function sendRegistrationOtp({ email, phone }) {
     ? `+91 •••••• ${cleanPhone.slice(-4)}` 
     : ''
 
-  console.log(`[REGISTRATION OTP] Generated code ${otp} for ${cleanEmail || cleanPhone}`)
+  // Send OTP via Gmail SMTP — never expose OTP in API response
+  if (cleanEmail) {
+    await sendOtpEmail(cleanEmail, otp, 'registration')
+  }
+  console.info(`[EMAIL OTP] Registration OTP dispatched for ${cleanEmail || cleanPhone}`)
 
   return {
     success: true,
-    message: `A 6-digit verification code has been generated for ${[maskedPhone, maskedEmail].filter(Boolean).join(' & ')}`,
+    message: `A 6-digit verification code has been sent to ${[maskedPhone, maskedEmail].filter(Boolean).join(' & ')}`,
     email: cleanEmail,
     phone: cleanPhone,
     maskedEmail,
     maskedPhone,
-    testOtp: otp, // Provided for instant development/testing
     expiresInSeconds: 300,
     cooldownSeconds: 60
   }
@@ -815,18 +801,14 @@ export async function sendRegistrationOtp({ email, phone }) {
  * Verify 6-digit OTP for signup contact verification
  */
 export async function verifyRegistrationOtp({ email, phone, otp }) {
-  const cleanEmail = email ? String(email).trim().toLowerCase() : ''
-  const cleanPhone = phone ? String(phone).replace(/\D/g, '') : ''
+  const cleanEmail = email && String(email).trim() ? validateEmail(email, 'Email address') : ''
+  const cleanPhone = phone && String(phone).trim() ? validateIndianPhone(phone, 'Mobile phone number', { required: false }) : ''
 
   if (!cleanEmail && !cleanPhone) {
     throw new ApiError(400, 'Email address or mobile phone number is required for verification', 'VALIDATION_ERROR')
   }
 
-  const cleanOtp = String(otp || '').trim()
-
-  if (!cleanOtp || cleanOtp.length !== 6) {
-    throw new ApiError(400, 'Please enter a valid 6-digit OTP code', 'VALIDATION_ERROR')
-  }
+  const cleanOtp = validateOtp(otp, 'Verification code')
 
   const record = (cleanEmail && registrationOtpStore.get(cleanEmail)) || 
                  (cleanPhone && registrationOtpStore.get(cleanPhone))
@@ -842,14 +824,16 @@ export async function verifyRegistrationOtp({ email, phone, otp }) {
     throw new ApiError(429, 'Too many invalid attempts. This OTP has been invalidated. Please request a new code.', 'MAX_ATTEMPTS_EXCEEDED')
   }
 
-  if (record.otp !== cleanOtp) {
+  const { createHash: createHashReg } = await import('node:crypto')
+  const inputHash = createHashReg('sha256').update(cleanOtp).digest('hex')
+  if (record.otpHash !== inputHash) {
     const remaining = 5 - record.attempts
     throw new ApiError(400, `Incorrect verification code. ${remaining} attempts remaining.`, 'INVALID_OTP')
   }
 
-  record.verified = true
-  if (cleanEmail) registrationOtpStore.set(cleanEmail, record)
-  if (cleanPhone) registrationOtpStore.set(cleanPhone, record)
+  // Verified — delete the record immediately to prevent reuse
+  if (cleanEmail) registrationOtpStore.delete(cleanEmail)
+  if (cleanPhone) registrationOtpStore.delete(cleanPhone)
 
   return {
     success: true,
@@ -873,11 +857,13 @@ export async function sendForgotPasswordOtp({ identifier }) {
     throw new ApiError(429, `Please wait ${remainingSecs} seconds before requesting another reset code.`, 'RATE_LIMITED')
   }
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  const { randomInt: randomIntFP, createHash: createHashFP } = await import('node:crypto')
+  const otp = String(randomIntFP(100000, 1000000))
+  const otpHash = createHashFP('sha256').update(otp).digest('hex')
   const now = Date.now()
 
   forgotPasswordOtpStore.set(cleanEmail, {
-    otp,
+    otpHash,
     email: cleanEmail,
     attempts: 0,
     verified: false,
@@ -889,14 +875,15 @@ export async function sendForgotPasswordOtp({ identifier }) {
   const [uPart, dPart] = cleanEmail.split('@')
   const maskedEmail = `${uPart[0]}***${uPart[uPart.length - 1]}@${dPart}`
 
-  console.log(`[FORGOT PASSWORD OTP] Sent reset code ${otp} to ${cleanEmail}`)
+  // Send OTP via Gmail SMTP — never expose OTP in API response
+  await sendOtpEmail(cleanEmail, otp, 'password-reset')
+  console.info(`[EMAIL OTP] Password reset OTP dispatched to ${cleanEmail}`)
 
   return {
     success: true,
     message: `Password reset code sent to ${maskedEmail}`,
     email: cleanEmail,
     maskedEmail,
-    testOtp: otp,
     cooldownSeconds: 60,
     expiresInSeconds: 600
   }
@@ -906,18 +893,9 @@ export async function sendForgotPasswordOtp({ identifier }) {
  * Reset password using verified OTP
  */
 export async function verifyAndResetPasswordOtp({ email, otp, newPassword }) {
-  if (!email || !String(email).trim()) {
-    throw new ApiError(400, 'Email is required', 'VALIDATION_ERROR')
-  }
-  const cleanEmail = String(email).trim().toLowerCase()
-  const cleanOtp = String(otp || '').trim()
-
-  if (!cleanOtp || cleanOtp.length !== 6) {
-    throw new ApiError(400, 'Please enter a valid 6-digit OTP code', 'VALIDATION_ERROR')
-  }
-  if (!newPassword || newPassword.length < 6) {
-    throw new ApiError(400, 'New password must be at least 6 characters long', 'VALIDATION_ERROR')
-  }
+  const cleanEmail = validateEmail(email, 'Email address')
+  const cleanOtp = validateOtp(otp, 'Password reset OTP code')
+  const cleanNewPassword = validatePassword(newPassword, null, 'New password')
 
   const record = forgotPasswordOtpStore.get(cleanEmail)
   if (!record || record.expiresAt < Date.now()) {
@@ -930,7 +908,9 @@ export async function verifyAndResetPasswordOtp({ email, otp, newPassword }) {
     throw new ApiError(429, 'Too many invalid attempts. Please request a fresh reset code.', 'MAX_ATTEMPTS_EXCEEDED')
   }
 
-  if (record.otp !== cleanOtp) {
+  const { createHash: createHashFPV } = await import('node:crypto')
+  const inputHashFP = createHashFPV('sha256').update(cleanOtp).digest('hex')
+  if (record.otpHash !== inputHashFP) {
     throw new ApiError(400, 'Incorrect reset code.', 'INVALID_OTP')
   }
 

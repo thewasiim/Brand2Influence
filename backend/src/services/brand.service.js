@@ -1,5 +1,11 @@
 import { adminDb } from '../config/supabase.js'
 import { ApiError, boundedText } from '../utils/api-error.js'
+import {
+  validateFullName,
+  validateUrl,
+  validatePincode,
+  validateBoundedText
+} from '../utils/validators.js'
 import { CURATED_CREATORS } from './influencer.service.js'
 
 const IS_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -553,16 +559,21 @@ export async function save(user, payload) {
   if (user.role !== 'brand' && user.role !== 'admin') {
     throw new ApiError(403, 'Brand role required', 'FORBIDDEN')
   }
+  const bName = validateFullName(payload.businessName || user.name || 'Brand Partner', 'Business name', { isBrand: true })
+  const bType = validateBoundedText(payload.businessType || 'Consumer Brand', 'Business type', { max: 100, required: false })
+  const bBudget = validateBoundedText(payload.budgetRange || 'Flexible', 'Budget range', { max: 100, required: false })
+  const bLoc = validateBoundedText(payload.location || 'Pan-India', 'Location', { max: 100, required: false })
+
   const record = {
     user_id: user.id,
-    business_name: boundedText(payload.businessName || user.name || 'Brand Partner', 'business name', 150),
-    business_type: boundedText(payload.businessType || 'Consumer Brand', 'business type', 100),
-    budget_range: boundedText(payload.budgetRange || 'Flexible', 'budget range', 100),
-    location: boundedText(payload.location || 'Pan-India', 'location', 100),
+    business_name: bName,
+    business_type: bType,
+    budget_range: bBudget,
+    location: bLoc,
     updated_at: new Date().toISOString()
   }
-  if (payload.website) record.website = String(payload.website).trim()
-  if (payload.pincode) record.pincode = String(payload.pincode).trim()
+  if (payload.website) record.website = validateUrl(payload.website, 'Website', { required: false })
+  if (payload.pincode) record.pincode = validatePincode(payload.pincode, 'Pincode', { required: false })
 
   // Safely encode deckLink into description to avoid missing column error in Postgres
   let cleanDesc = payload.description ? String(payload.description).trim() : ''

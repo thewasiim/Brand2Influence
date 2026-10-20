@@ -532,15 +532,20 @@ export async function save(user, payload) {
     existingRateCard.posts = payload.posts
   }
 
+  const nicheClean = validateBoundedText(payload.niche || 'Digital Creator', 'Niche', { max: 100, required: false })
+  const followersClean = validateInteger(payload.followersCount, 'Followers count', { min: 0, defaultValue: 0 })
+  const bioClean = validateBoundedText(payload.bio || '', 'Bio', { max: 1500, required: false })
+  const locClean = validateBoundedText(payload.location || 'India', 'Location', { max: 100, required: false })
+
   const record = {
     user_id: user.id,
-    niche: boundedText(payload.niche || 'Digital Creator', 'niche', 100),
-    followers_count: payload.followersCount !== undefined && payload.followersCount !== null ? Number(payload.followersCount) : 0,
+    niche: nicheClean,
+    followers_count: followersClean,
     engagement_rate: payload.engagementRate !== undefined && payload.engagementRate !== null ? Number(payload.engagementRate) : 0,
     rate_card: existingRateCard,
     portfolio_links: Array.isArray(payload.portfolioLinks) ? payload.portfolioLinks : [],
-    location: boundedText(payload.location || 'India', 'location', 100),
-    bio: boundedText(payload.bio || '', 'bio', 1500),
+    location: locClean,
+    bio: bioClean,
     profile_image_url: payload.profileImageUrl || null,
     status: payload.status === 'draft' ? 'draft' : 'published'
   }

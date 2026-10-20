@@ -6,6 +6,12 @@ import { api } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { requireSupabase } from '../../lib/supabase'
 import { Button, ErrorState, Input, Textarea, Badge } from '../../components/ui'
+import {
+  validateEmail,
+  validatePassword,
+  validateConfirmPassword,
+  formatPhoneInput
+} from '../../utils/validation'
 
 
 export function AuthCard({
@@ -246,6 +252,7 @@ export function LoginPage() {
     identifier: localStorage.getItem('brandhub_remember_identifier') || '',
     password: ''
   }))
+  const [touched, setTouched] = useState({ identifier: false, password: false })
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -374,7 +381,12 @@ export function LoginPage() {
           autoCorrect="off"
           placeholder="name@example.com or @username"
           value={form.identifier}
-          onChange={(e) => setForm({ ...form, identifier: e.target.value })}
+          onChange={(e) => {
+            setForm({ ...form, identifier: e.target.value })
+            if (error) setError('')
+          }}
+          onBlur={() => setTouched((t) => ({ ...t, identifier: true }))}
+          error={touched.identifier && !form.identifier.trim() ? 'Please enter your email or username' : ''}
         />
         <div style={{ position: 'relative' }}>
           <Input
@@ -384,7 +396,12 @@ export function LoginPage() {
             minLength="6"
             placeholder="••••••••"
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onChange={(e) => {
+              setForm({ ...form, password: e.target.value })
+              if (error) setError('')
+            }}
+            onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+            error={touched.password && !form.password ? 'Please enter your password' : ''}
             style={{ paddingRight: '42px' }}
           />
           <button
@@ -428,7 +445,7 @@ export function LoginPage() {
           💡 Tip: You can sign in using your registered email address or your chosen <strong>@username</strong>.
         </div>
         {error && <ErrorState error={error} />}
-        <Button disabled={busy} loading={busy} size="lg" className="full">
+        <Button disabled={busy || !form.identifier.trim() || !form.password} loading={busy} size="lg" className="full">
           {busy ? 'Logging in…' : 'Log In →'}
         </Button>
         <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
@@ -519,7 +536,6 @@ export function ForgotPasswordPage() {
   const [otpCode, setOtpCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [testOtp, setTestOtp] = useState('')
   const [countdown, setCountdown] = useState(0)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -548,7 +564,6 @@ export function ForgotPasswordPage() {
       const res = await authService.forgotPasswordOtp({ identifier: identifier.trim() })
       setResolvedEmail(res.email)
       setMaskedEmail(res.maskedEmail)
-      setTestOtp(res.testOtp || '')
       setCountdown(res.cooldownSeconds || 60)
       setOtpStage(2)
       setMessage(res.message || 'Verification code sent to your contact!')
@@ -566,12 +581,14 @@ export function ForgotPasswordPage() {
       setError('Please enter the complete 6-digit OTP code.')
       return
     }
-    if (!newPassword || newPassword.length < 6) {
-      setError('New password must be at least 6 characters long.')
+    const passRes = validatePassword(newPassword, 'New password')
+    if (!passRes.isValid) {
+      setError(passRes.error)
       return
     }
-    if (newPassword !== confirmPassword) {
-      setError('New passwords do not match. Please re-enter.')
+    const matchRes = validateConfirmPassword(newPassword, confirmPassword)
+    if (!matchRes.isValid) {
+      setError(matchRes.error)
       return
     }
     setError('')
@@ -713,18 +730,6 @@ export function ForgotPasswordPage() {
               length={6}
               disabled={busy}
             />
-
-            {/* Dev / Test OTP quick fill */}
-            {testOtp && (
-              <div
-                className="dev-test-otp-chip"
-                onClick={() => setOtpCode(testOtp)}
-                title="Click to auto-fill test code"
-              >
-                <span>🧪 Dev / Test OTP: <b>{testOtp}</b></span>
-                <span style={{ opacity: 0.7 }}>(Click to fill)</span>
-              </div>
-            )}
 
             <div className="otp-timer-row">
               {countdown > 0 ? (

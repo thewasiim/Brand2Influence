@@ -264,11 +264,18 @@ export function AdminUsersPage({ role }) {
         </div>
 
         {loading ? (
-          <div style={{ padding: '60px 20px' }}>
+          <div className="admin-table-loading-wrap">
             <LoadingState label="Loading users directory…" />
           </div>
         ) : filteredUsers?.length ? (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="admin-table-scroll-wrap">
+            <div className="admin-table-mobile-hint">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+              <span>Swipe horizontally to inspect full user directory</span>
+            </div>
             <table className="admin-table-luxury">
               <thead>
                 <tr>
@@ -336,7 +343,7 @@ export function AdminUsersPage({ role }) {
             </table>
           </div>
         ) : (
-          <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+          <div className="admin-table-empty-wrap">
             <EmptyState>No matching entities found in directory.</EmptyState>
           </div>
         )}
@@ -422,11 +429,18 @@ export function AdminCampaignsPage() {
         </div>
 
         {loading ? (
-          <div style={{ padding: '60px 20px' }}>
+          <div className="admin-table-loading-wrap">
             <LoadingState label="Loading campaign briefs…" />
           </div>
         ) : filteredItems?.length ? (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="admin-table-scroll-wrap">
+            <div className="admin-table-mobile-hint">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+              <span>Swipe horizontally to audit deliverables & actions</span>
+            </div>
             <table className="admin-table-luxury">
               <thead>
                 <tr>
@@ -508,7 +522,7 @@ export function AdminCampaignsPage() {
             </table>
           </div>
         ) : (
-          <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+          <div className="admin-table-empty-wrap">
             <EmptyState>No campaign advertisements found.</EmptyState>
           </div>
         )}
@@ -592,11 +606,10 @@ export function ReportsPage() {
         <h3>Export Telemetry Logs</h3>
         <p>Export structured cryptographic logs and transaction metrics for external auditing.</p>
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="admin-export-btn-group">
           <button
             type="button"
             className="ui-button ui-btn--primary"
-            style={{ padding: '12px 24px', fontSize: '13px' }}
             onClick={() => alert('Platform Telemetry Audit CSV generated and queued for download.')}
           >
             Export Complete CSV Audit Log
@@ -604,7 +617,6 @@ export function ReportsPage() {
           <button
             type="button"
             className="ui-button ui-btn--secondary"
-            style={{ padding: '12px 24px', fontSize: '13px' }}
             onClick={() => alert('Platform Telemetry PDF Summary report generated.')}
           >
             Generate Executive PDF Summary
@@ -644,8 +656,9 @@ export function SettingsPage() {
       </div>
 
       {savedNotice && (
-        <div style={{ background: 'rgba(16, 185, 129, 0.15)', border: '1px solid #10B981', color: '#10B981', padding: '12px 20px', borderRadius: '8px', marginBottom: '24px', fontFamily: 'var(--font-mono)', fontSize: '13px' }}>
-          ✓ Configuration changes persisted to platform environment.
+        <div className="admin-persist-notice">
+          <span className="admin-status-dot-sm active" />
+          <span>Configuration changes persisted to platform environment.</span>
         </div>
       )}
 
@@ -718,11 +731,10 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+        <div className="admin-settings-save-wrap">
           <button
             type="button"
-            className="ui-button ui-btn--primary"
-            style={{ padding: '14px 32px' }}
+            className="ui-button ui-btn--primary admin-settings-save-btn"
             onClick={handleSave}
           >
             Save Configuration Changes

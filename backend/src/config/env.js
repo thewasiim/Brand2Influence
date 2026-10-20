@@ -14,5 +14,11 @@ export const env = {
     apiKey: process.env.CLOUDINARY_API_KEY,
     apiSecret: process.env.CLOUDINARY_API_SECRET,
   },
+  // Gmail SMTP — used exclusively on the server for OTP emails.
+  // Never expose these to the frontend or any client-side code.
+  gmail: {
+    user: process.env.GMAIL_USER,
+    appPassword: process.env.GMAIL_APP_PASSWORD,
+    fromName: process.env.EMAIL_FROM_NAME || 'Brand2Influence',
+  },
 }
-

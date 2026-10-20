@@ -387,12 +387,45 @@ export default function ProfileManagementPage() {
 
   const handleSave = async (e) => {
     if (e && e.preventDefault) e.preventDefault()
-    setSaving(true)
     setSuccessMsg('')
     setErrorMsg('')
 
+    const isInfluencer = formData.role === 'influencer'
+    const isBrand = formData.role === 'brand'
+
+    const nameCheck = validateFullName(formData.name, isBrand, isBrand ? 'Brand / Business Name' : 'Display Name')
+    if (!nameCheck.isValid) {
+      setErrorMsg(nameCheck.error)
+      return
+    }
+
+    if (formData.phone) {
+      const phoneCheck = validatePhone(formData.phone, 'Phone number', false)
+      if (!phoneCheck.isValid) {
+        setErrorMsg(phoneCheck.error)
+        return
+      }
+    }
+
+    if (formData.pincode) {
+      const pinCheck = validatePincode(formData.pincode, 'Pincode', false)
+      if (!pinCheck.isValid) {
+        setErrorMsg(pinCheck.error)
+        return
+      }
+    }
+
+    if (isBrand && formData.website) {
+      const webCheck = validateUrl(formData.website, 'Website', false)
+      if (!webCheck.isValid) {
+        setErrorMsg(webCheck.error)
+        return
+      }
+    }
+
+    setSaving(true)
+
     try {
-      const isInfluencer = formData.role === 'influencer'
 
       const updatePayload = {
         name: formData.name.trim(),

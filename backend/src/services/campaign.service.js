@@ -1,5 +1,11 @@
 import { adminDb } from '../config/supabase.js'
 import { ApiError, boundedText } from '../utils/api-error.js'
+import {
+  validateBoundedText,
+  validateInteger,
+  validateEnum,
+  validateDate
+} from '../utils/validators.js'
 import { CURATED_BRANDS } from './brand.service.js'
 
 const IS_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -9,21 +15,19 @@ export async function create(user, payload) {
     throw new ApiError(403, 'Only brands can create campaign advertisements', 'FORBIDDEN')
   }
 
-  const title = boundedText(payload.title, 'title', 200)
-  const description = boundedText(payload.description, 'description', 5000)
-  const niche = boundedText(payload.niche, 'niche', 100)
-  const platform = boundedText(payload.platform || 'Instagram', 'platform', 50)
-  const budgetRange = boundedText(payload.budgetRange, 'budget range', 100)
-  const location = boundedText(payload.location || 'Remote / All India', 'location', 100)
-  const targetFollowersMin = Number.isInteger(payload.targetFollowersMin) && payload.targetFollowersMin >= 0
-    ? payload.targetFollowersMin
-    : 0
+  const title = validateBoundedText(payload.title, 'Campaign title', { min: 3, max: 200, required: true })
+  const description = validateBoundedText(payload.description, 'Campaign description', { min: 10, max: 5000, required: true })
+  const niche = validateBoundedText(payload.niche || 'General', 'Niche', { min: 2, max: 100, required: true })
+  const platform = validateBoundedText(payload.platform || 'Instagram', 'Platform', { min: 2, max: 50, required: true })
+  const budgetRange = validateBoundedText(payload.budgetRange, 'Budget range', { min: 2, max: 100, required: true })
+  const location = validateBoundedText(payload.location || 'Remote / All India', 'Location', { min: 2, max: 100, required: false })
+  const targetFollowersMin = validateInteger(payload.targetFollowersMin, 'Target followers minimum', { min: 0, max: 100000000, defaultValue: 0 })
 
   const deliverables = Array.isArray(payload.deliverables)
     ? payload.deliverables.map(d => String(d).trim()).filter(Boolean)
     : []
 
-  const deadline = payload.deadline ? new Date(payload.deadline).toISOString() : null
+  const deadline = payload.deadline ? validateDate(payload.deadline, 'Deadline', { required: false }) : null
 
   const record = {
     brand_id: user.id,

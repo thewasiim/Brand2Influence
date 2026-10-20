@@ -3,6 +3,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../../services/auth'
 import { useAuth } from '../../context/AuthContext'
 import { Button, ErrorState, Input, Select, Badge } from '../../components/ui'
+import {
+  validateFullName,
+  validateEmail,
+  validatePhone,
+  formatPhoneInput,
+  validatePassword,
+  validateConfirmPassword,
+  validateUsername,
+  formatUsernameInput
+} from '../../utils/validation'
 import { AuthCard, OtpInputGrid } from './AuthPages'
 
 export const COUNTRY_OPTIONS = [
@@ -55,7 +65,6 @@ export function SignupPage() {
   // Step 3: OTP
   const [otp, setOtp] = useState('')
   const [maskedContact, setMaskedContact] = useState('')
-  const [testOtp, setTestOtp] = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
 
   // Step 4: Password
@@ -71,6 +80,24 @@ export function SignupPage() {
   const [country, setCountry] = useState('India')
   const [profileImageUrl, setProfileImageUrl] = useState('')
   const photoInputRef = useRef(null)
+
+  // Validation touched states for displaying inline errors appropriately
+  const [touched, setTouched] = useState({
+    email: false,
+    phone: false,
+    password: false,
+    confirmPassword: false,
+    fullName: false,
+    username: false
+  })
+
+  // Real-time validation results
+  const emailValidation = validateEmail(email)
+  const phoneValidation = validatePhone(phone)
+  const passValidation = validatePassword(password)
+  const confirmValidation = validateConfirmPassword(password, confirmPassword)
+  const nameValidation = validateFullName(fullName, selectedRole === 'brand', selectedRole === 'brand' ? 'Brand name' : 'Full name')
+  const usernameValidation = validateUsername(username)
 
   // Countdown for OTP resend
   useEffect(() => {
@@ -149,37 +176,32 @@ export function SignupPage() {
   const handleStep2ContactSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    const cleanEmail = email.trim().toLowerCase()
-    const cleanPhone = phone.trim()
+    setTouched((t) => ({ ...t, email: true, phone: true }))
 
-    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
-      setError('Please provide a valid email address.')
+    if (!emailValidation.isValid) {
+      setError(emailValidation.error)
       return
     }
 
-    const digitsOnly = cleanPhone.replace(/\D/g, '')
-    if (digitsOnly.length < 10) {
-      setError('Please provide a valid mobile number with at least 10 digits.')
+    if (!phoneValidation.isValid) {
+      setError(phoneValidation.error)
       return
     }
+
+    const cleanEmail = emailValidation.value
+    const cleanPhone = phoneValidation.value
 
     setBusy(true)
     try {
       const res = await authService.sendOtp({ email: cleanEmail, phone: cleanPhone })
       setMaskedContact(res.maskedEmail || res.maskedPhone || cleanEmail)
-      setTestOtp(res.testOtp || '')
       setResendCooldown(30)
       setStep(3)
       setSuccessMsg(`Verification code dispatched to ${res.maskedEmail || res.maskedPhone || cleanEmail}`)
     } catch (err) {
       console.warn('Backend sendOtp notice:', err.message)
       if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
-        const masked = cleanEmail.replace(/(.{2})(.*)(?=@)/, (_, a) => a + '•••')
-        setMaskedContact(masked)
-        setTestOtp('123456')
-        setResendCooldown(30)
-        setStep(3)
-        setSuccessMsg(`Test Mode: Verification code 123456 generated for ${masked}`)
+        setError(err.message || 'Failed to send verification code. Please try again.')
       } else {
         setError(err.message || 'Failed to send verification code. Please try again.')
       }
@@ -197,7 +219,6 @@ export function SignupPage() {
     try {
       const res = await authService.sendOtp({ email: email.trim(), phone: phone.trim() })
       setResendCooldown(30)
-      setTestOtp(res.testOtp || '')
       setSuccessMsg('A new verification code has been dispatched!')
     } catch (err) {
       setError(err.message || 'Failed to resend verification code.')
@@ -226,11 +247,7 @@ export function SignupPage() {
       })
       setStep(4)
     } catch (err) {
-      if (otp.trim() === testOtp || otp.trim() === '123456' || err.message?.includes('Failed to fetch')) {
-        setStep(4)
-      } else {
-        setError(err.message || 'Invalid code. Please try again.')
-      }
+      setError(err.message || 'Invalid code. Please try again.')
     } finally {
       setBusy(false)
     }
@@ -240,13 +257,14 @@ export function SignupPage() {
   const handleStep4Password = (e) => {
     e.preventDefault()
     setError('')
+    setTouched((t) => ({ ...t, password: true, confirmPassword: true }))
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long.')
+    if (!passValidation.isValid) {
+      setError(passValidation.error)
       return
     }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match. Please verify both fields.')
+    if (!confirmValidation.isValid) {
+      setError(confirmValidation.error)
       return
     }
 
@@ -257,15 +275,15 @@ export function SignupPage() {
   const handleStep5FinalSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setTouched((t) => ({ ...t, fullName: true, username: true }))
 
-    if (!fullName.trim()) {
-      setError('Please enter your full name.')
+    if (!nameValidation.isValid) {
+      setError(nameValidation.error)
       return
     }
 
-    const clean = username.trim().toLowerCase().replace(/^@/, '')
-    if (!clean || clean.length < 3) {
-      setError('Username must be at least 3 characters long.')
+    if (!usernameValidation.isValid) {
+      setError(usernameValidation.error)
       return
     }
 
@@ -273,6 +291,8 @@ export function SignupPage() {
       setError('Please choose an available username before continuing.')
       return
     }
+
+    const clean = usernameValidation.value
 
     setBusy(true)
     const payload = {
@@ -494,16 +514,27 @@ export function SignupPage() {
             autoCapitalize="none"
             placeholder="you@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              if (error) setError('')
+            }}
+            onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+            error={touched.email && !emailValidation.isValid ? emailValidation.error : ''}
           />
 
           <Input
             label="Mobile Number"
             type="tel"
             required
-            placeholder="+91 98765 43210"
+            placeholder="9876543210"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => {
+              setPhone(formatPhoneInput(e.target.value))
+              if (error) setError('')
+            }}
+            onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+            error={touched.phone && !phoneValidation.isValid ? phoneValidation.error : ''}
+            hint="Enter 10-digit Indian mobile number (e.g. 9876543210)"
           />
 
           <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '-4px', marginBottom: '16px', lineHeight: 1.5 }}>
@@ -521,7 +552,7 @@ export function SignupPage() {
               ← Back
             </Button>
             <Button
-              disabled={busy}
+              disabled={busy || !emailValidation.isValid || !phoneValidation.isValid}
               loading={busy}
               size="md"
               type="submit"
@@ -565,39 +596,7 @@ export function SignupPage() {
               </strong>
             </div>
 
-            {testOtp && (
-              <button
-                type="button"
-                id="dev-test-otp-btn"
-                onClick={() => setOtp(testOtp)}
-                style={{
-                  background: 'rgba(0, 71, 171, 0.12)',
-                  border: '1px solid rgba(96, 165, 250, 0.35)',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  width: '100%',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'background 0.2s',
-                  marginBottom: '12px',
-                  fontFamily: 'inherit'
-                }}
-                title="Tap to auto-fill development testing code"
-              >
-                <span style={{ fontSize: '11px', color: 'rgba(244, 241, 232, 0.7)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  DEV TEST CODE:
-                </span>
-                <strong style={{ fontSize: '16px', letterSpacing: '0.2em', color: '#60A5FA', fontFamily: 'var(--font-mono)' }}>
-                  {testOtp}
-                </strong>
-                <span style={{ fontSize: '10px', color: '#93C5FD', background: 'rgba(96, 165, 250, 0.2)', padding: '2px 6px', borderRadius: '4px' }}>
-                  Tap to fill
-                </span>
-              </button>
-            )}
+
           </div>
 
           <div style={{ marginBottom: '16px' }}>
@@ -655,7 +654,12 @@ export function SignupPage() {
             minLength="8"
             placeholder="••••••••••••"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (error) setError('')
+            }}
+            onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+            error={touched.password && !passValidation.isValid ? passValidation.error : ''}
             suffix={
               <button
                 type="button"
@@ -685,19 +689,19 @@ export function SignupPage() {
                 <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
                   Password Strength
                 </span>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: passwordStrength.color }}>
-                  {passwordStrength.label}
+                <span style={{ fontSize: '11px', fontWeight: 600, color: passValidation.color }}>
+                  {passValidation.label}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
-                {[1, 2, 3].map((level) => (
+                {[1, 2, 3, 4].map((level) => (
                   <div
                     key={level}
                     style={{
                       flex: 1,
                       height: '100%',
                       borderRadius: '2px',
-                      background: level <= passwordStrength.score ? passwordStrength.color : 'rgba(244, 241, 232, 0.1)'
+                      background: level <= passValidation.score ? passValidation.color : 'rgba(244, 241, 232, 0.1)'
                     }}
                   />
                 ))}
@@ -712,7 +716,12 @@ export function SignupPage() {
             minLength="8"
             placeholder="••••••••••••"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value)
+              if (error) setError('')
+            }}
+            onBlur={() => setTouched((t) => ({ ...t, confirmPassword: true }))}
+            error={touched.confirmPassword && !confirmValidation.isValid ? confirmValidation.error : ''}
             suffix={
               <button
                 type="button"
@@ -736,12 +745,6 @@ export function SignupPage() {
             }
           />
 
-          {confirmPassword && password !== confirmPassword && (
-            <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '-8px', marginBottom: '8px' }}>
-              ✕ Passwords do not match
-            </div>
-          )}
-
           <div style={{ fontSize: '11.5px', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: 1.5 }}>
             • Minimum 8 characters<br />
             • Include numbers and special characters for a stronger rating
@@ -754,7 +757,7 @@ export function SignupPage() {
             <Button
               type="submit"
               size="lg"
-              disabled={password.length < 8 || password !== confirmPassword}
+              disabled={!passValidation.isValid || !confirmValidation.isValid}
             >
               Continue to Profile →
             </Button>
@@ -844,7 +847,12 @@ export function SignupPage() {
             required
             placeholder={selectedRole === 'brand' ? 'e.g. Aura Studio' : 'e.g. Alex Morgan'}
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              setFullName(e.target.value)
+              if (error) setError('')
+            }}
+            onBlur={() => setTouched((t) => ({ ...t, fullName: true }))}
+            error={touched.fullName && !nameValidation.isValid ? nameValidation.error : ''}
           />
 
           <div>
@@ -856,7 +864,12 @@ export function SignupPage() {
               autoCorrect="off"
               placeholder="e.g. aurastudio"
               value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ''))}
+              onChange={(e) => {
+                setUsername(formatUsernameInput(e.target.value))
+                if (error) setError('')
+              }}
+              onBlur={() => setTouched((t) => ({ ...t, username: true }))}
+              error={touched.username && !usernameValidation.isValid ? usernameValidation.error : ''}
             />
             {username.trim().length >= 3 && (
               <div style={{
@@ -889,7 +902,7 @@ export function SignupPage() {
             <Button
               type="submit"
               size="lg"
-              disabled={!fullName.trim() || username.trim().length < 3 || usernameStatus.available === false || busy}
+              disabled={!nameValidation.isValid || !usernameValidation.isValid || usernameStatus.available === false || busy}
               loading={busy}
             >
               {busy
