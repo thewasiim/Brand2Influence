@@ -552,14 +552,9 @@ export function BrandOnboardingPage() {
             </ul>
           </div>
 
-          <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button size="lg" onClick={() => nav('/dashboard')}>
-              Go to Brand Dashboard →
-            </Button>
-            <Button size="lg" variant="secondary" onClick={() => nav('/discover')}>
-              Explore Creators
-            </Button>
-          </div>
+          <Button size="lg" className="full" onClick={() => nav('/profile')} style={{ padding: '16px 24px', fontSize: '15px', fontWeight: 700, width: '100%', justifyContent: 'center', background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)', color: '#FFFFFF', boxShadow: '0 4px 18px rgba(37, 99, 235, 0.35)', cursor: 'pointer' }}>
+            Go to Profile →
+          </Button>
         </div>
       )}
     </main>

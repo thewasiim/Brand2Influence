@@ -23,92 +23,7 @@ import GlowCursor from '../components/GlowCursor/GlowCursor'
 import { useEffect as useIntroEffect } from 'react'
 
 // Curated Showcase Creators for Bento Showcase & Dynamic Filtering
-const SHOWCASE_CREATORS = [
-  {
-    id: 'c-1',
-    name: 'Aanya Kapoor',
-    username: '@aanyakapoor',
-    niche: 'Fashion',
-    location: 'Mumbai',
-    followersCount: 185000,
-    engagementRate: 4.8,
-    rateCard: { reel: 4500 },
-    budget: 4500,
-    profileImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
-    bio: 'Sustainable fashion stylist and editorial creator based in Mumbai. Helping homegrown labels build cult followings.',
-    featured: true,
-  },
-  {
-    id: 'c-2',
-    name: 'Kabir Varma',
-    username: '@kabir.eats',
-    niche: 'Food',
-    location: 'Delhi NCR',
-    followersCount: 320000,
-    engagementRate: 5.4,
-    rateCard: { reel: 3800 },
-    budget: 3800,
-    profileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800',
-    bio: 'Regional street food archivist & micro-brewery storyteller across Delhi, Lucknow, and Jaipur.',
-    featured: false,
-  },
-  {
-    id: 'c-3',
-    name: 'Dr. Rhea Sen',
-    username: '@dr.rheasen',
-    niche: 'Beauty',
-    location: 'Bengaluru',
-    followersCount: 95000,
-    engagementRate: 6.2,
-    rateCard: { reel: 2800 },
-    budget: 2800,
-    profileImageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800',
-    bio: 'Dermatologist & science-backed skincare advocate. Zero fluff, ingredient-first reviews.',
-    featured: false,
-  },
-  {
-    id: 'c-4',
-    name: 'Vikramaditya Rao',
-    username: '@vikram_fitness',
-    niche: 'Fitness',
-    location: 'Hyderabad',
-    followersCount: 210000,
-    engagementRate: 4.2,
-    rateCard: { reel: 3500 },
-    budget: 3500,
-    profileImageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800',
-    bio: 'Calisthenics athlete and high-performance nutrition coach. Championing natural athleticism.',
-    featured: false,
-  },
-  {
-    id: 'c-5',
-    name: 'Tara Mukherjee',
-    username: '@tara_wanderlust',
-    niche: 'Travel',
-    location: 'Goa',
-    followersCount: 142000,
-    engagementRate: 5.1,
-    rateCard: { reel: 4200 },
-    budget: 4200,
-    profileImageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800',
-    bio: 'Slow-travel photographer and boutique homestay reviewer across South Asia.',
-    featured: false,
-  },
-  {
-    id: 'c-6',
-    name: 'Arjun Mehta',
-    username: '@arjun.craft',
-    niche: 'Lifestyle',
-    location: 'Pune',
-    followersCount: 68000,
-    engagementRate: 6.8,
-    rateCard: { reel: 2200 },
-    budget: 2200,
-    profileImageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=800',
-    bio: 'Minimalist living, coffee brewing rituals, and desk setup aesthetician.',
-    featured: false,
-  }
-]
+const SHOWCASE_CREATORS = []
 
 const SHOWCASE_BRANDS = [
   {
@@ -299,7 +214,7 @@ export default function LandingPage() {
 
   // Live filtered creator list
   const filteredCreators = useMemo(() => {
-    return SHOWCASE_CREATORS.filter((c) => {
+    return liveCreators.filter((c) => {
       // Tab filter
       if (activeTab !== 'All' && c.niche !== activeTab) return false
       // Niche filter from search bar
@@ -937,20 +852,20 @@ export default function LandingPage() {
               <div className="creator-mockup-header">
                 <div className="creator-mockup-avatar-wrap">
                   <img
-                    src="/creator-aanya.jpg"
-                    alt="Aanya Kapoor"
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+                    alt="Verified Creator"
                     className="creator-mockup-avatar"
                   />
                   <span className="creator-mockup-online-dot" title="Active now" />
                 </div>
                 <div className="creator-mockup-info">
                   <div className="creator-mockup-name-row">
-                    <span className="creator-mockup-name">Aanya Kapoor</span>
+                    <span className="creator-mockup-name">Verified Creator</span>
                     <svg className="creator-mockup-verified" width="16" height="16" viewBox="0 0 24 24" fill="#38BDF8">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
                   </div>
-                  <div className="creator-mockup-niche">@aanyakapoor • Sustainable Fashion • Mumbai</div>
+                  <div className="creator-mockup-niche">@creator • Sustainable Fashion • Mumbai</div>
                 </div>
               </div>
 

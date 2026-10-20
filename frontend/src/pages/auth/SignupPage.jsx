@@ -37,7 +37,8 @@ export const STEP_LABELS = {
   2: 'Contact Details',
   3: 'Verification',
   4: 'Security',
-  5: 'Profile Setup'
+  5: 'Profile Setup',
+  6: 'Congratulations'
 }
 
 export function SignupPage() {
@@ -339,12 +340,8 @@ export function SignupPage() {
         await refreshProfile()
       }
 
-      // 3. Route to dedicated onboarding flow based on role chosen in Step 2
-      if (selectedRole === 'brand') {
-        nav('/signup/brand')
-      } else {
-        nav('/signup/creator')
-      }
+      // 3. Registration complete -> show Congratulations screen with 'Go to Profile'
+      setStep(6)
     } catch (err) {
       if (err.message && err.message.toLowerCase().includes('already registered')) {
         try {
@@ -352,11 +349,7 @@ export function SignupPage() {
             email: email.trim().toLowerCase(),
             password
           })
-          if (selectedRole === 'brand') {
-            nav('/signup/brand')
-          } else {
-            nav('/signup/creator')
-          }
+          setStep(6)
           return
         } catch (loginErr) {
           setError('An account with this email already exists. Please log in.')
@@ -373,6 +366,7 @@ export function SignupPage() {
     <AuthCard
       eyebrow={null}
       title={
+        step === 6 ? null :
         step === 1 ? 'Choose Account Type' :
           step === 2 ? 'Create an Account' :
             step === 3 ? 'Verify Email or Phone' :
@@ -380,6 +374,7 @@ export function SignupPage() {
                 'Set Up Your Profile'
       }
       subtitle={
+        step === 6 ? null :
         step === 1 ? null :
           step === 2 ? `Enter your contact details to register as a ${selectedRole === 'brand' ? 'Brand' : 'Creator'}.` :
             step === 3 ? null :

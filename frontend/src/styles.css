@@ -9459,3 +9459,85 @@ body::before {
     transform: none;
   }
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS & SOCIAL FETCH ENHANCEMENTS
+   ========================================================================== */
+.social-fetch-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.signup-success-view,
+.signup-success-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .social-fetch-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .social-fetch-row > button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px 14px !important;
+  }
+
+  .auth-card,
+  .auth-card--wide,
+  .setup,
+  .onboarding-main {
+    padding: clamp(16px, 4vw, 24px) clamp(12px, 3.5vw, 20px) !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .auth-actions-row {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .auth-actions-row > button,
+  .auth-actions-row > .ui-button {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+  }
+
+  .signup-avatar-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .signup-role-badge-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  /* Profile Management on Mobile */
+  .profile-stat-clickable {
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 480px) {
+  .otp-digits-wrapper {
+    gap: 4px !important;
+  }
+  .otp-digit-input {
+    width: 38px !important;
+    height: 48px !important;
+    font-size: 18px !important;
+    border-radius: 6px !important;
+  }
+}

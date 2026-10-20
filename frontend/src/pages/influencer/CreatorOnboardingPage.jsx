@@ -652,7 +652,7 @@ export function CreatorOnboardingPage() {
               padding: '20px',
               borderRadius: '6px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '24px' }}>📸</span>
                   <div>
@@ -669,7 +669,7 @@ export function CreatorOnboardingPage() {
 
               {!isInstaVerified ? (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                  <div className="social-fetch-row">
                     <Input
                       label="Instagram Handle or URL"
                       placeholder="@yourhandle or instagram.com/handle"
@@ -712,7 +712,7 @@ export function CreatorOnboardingPage() {
                       Change Account
                     </button>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                  <div className="social-fetch-row">
                     <Input
                       label="Followers Count"
                       type="number"
@@ -741,7 +741,7 @@ export function CreatorOnboardingPage() {
               padding: '20px',
               borderRadius: '6px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '24px' }}>▶️</span>
                   <div>
@@ -758,7 +758,7 @@ export function CreatorOnboardingPage() {
 
               {!isYtVerified ? (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                  <div className="social-fetch-row">
                     <Input
                       label="YouTube Channel Handle or Link"
                       placeholder="e.g. @MrBeast or youtube.com/@channel"
@@ -801,7 +801,7 @@ export function CreatorOnboardingPage() {
                       Change Channel
                     </button>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                  <div className="social-fetch-row">
                     <Input
                       label="Subscribers Count"
                       type="number"
@@ -830,7 +830,7 @@ export function CreatorOnboardingPage() {
               padding: '20px',
               borderRadius: '6px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '24px' }}>👻</span>
                   <div>
@@ -890,7 +890,7 @@ export function CreatorOnboardingPage() {
               padding: '20px',
               borderRadius: '6px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '24px' }}>📘</span>
                   <div>

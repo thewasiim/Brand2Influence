@@ -461,16 +461,27 @@ export async function getSuggestedUsers(userId) {
     followingIds = new Set((followRows || []).map(r => r.following_id))
   } catch {/* ignore */}
 
-  return CURATED_CREATORS
-    .filter(c => !followingIds.has(c.userId))
-    .slice(0, 6)
-    .map(c => ({
-      id: c.id,
-      userId: c.userId,
-      name: c.name,
-      niche: c.niche,
-      followersCount: c.followersCount,
-      profileImageUrl: c.profileImageUrl,
-      role: 'influencer',
-    }))
+  try {
+    const { data: users } = await adminDb()
+      .from('users')
+      .select('id, name, role, influencer_profiles(profile_image_url, niche, followers_count)')
+      .eq('role', 'influencer')
+      .neq('id', userId)
+      .limit(10)
+
+    return (users || [])
+      .filter(u => !followingIds.has(u.id))
+      .slice(0, 6)
+      .map(u => ({
+        id: u.id,
+        userId: u.id,
+        name: u.name,
+        niche: u.influencer_profiles?.niche || 'Digital Creator',
+        followersCount: u.influencer_profiles?.followers_count || 0,
+        profileImageUrl: u.influencer_profiles?.profile_image_url || null,
+        role: 'influencer',
+      }))
+  } catch {
+    return []
+  }
 }

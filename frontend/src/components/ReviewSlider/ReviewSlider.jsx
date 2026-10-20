@@ -17,7 +17,7 @@ const REVIEWS = [
   },
   {
     id: 2,
-    name: 'Aanya Kapoor',
+    name: 'Ananya Rao',
     role: 'Fashion Stylist & Creator',
     company: '185K Audience (Mumbai)',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',

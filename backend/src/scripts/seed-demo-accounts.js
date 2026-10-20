@@ -19,19 +19,6 @@ const DEMO_USERS = [
       budget_range: '₹5,000–₹25,000',
     },
   },
-  {
-    email: 'influencer@brand2influence.com',
-    password: 'creator123',
-    name: 'Aanya Kapoor',
-    role: 'influencer',
-    influencerProfile: {
-      niche: 'Fashion & Lifestyle',
-      location: 'Mumbai',
-      bio: 'Sustainable fashion stylist and aesthetic routine creator based in Mumbai.',
-      starting_rate: 4500,
-      followers_count: 185000,
-    },
-  },
 ]
 
 async function seedDemoAccounts() {
