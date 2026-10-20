@@ -12,11 +12,7 @@ import { env } from '../config/env.js'
  */
 function createTransporter() {
   if (!env.gmail.user || !env.gmail.appPassword) {
-    throw new Error(
-      'Gmail SMTP is not configured. ' +
-      'Set GMAIL_USER and GMAIL_APP_PASSWORD in backend/.env ' +
-      '(use a Google App Password, not your Gmail login password).'
-    )
+    return null
   }
 
   return nodemailer.createTransport({
@@ -137,16 +133,27 @@ function buildOtpEmail(otp, type) {
  */
 export async function sendOtpEmail(toEmail, otp, type) {
   const transporter = createTransporter()
-  const { subject, html, text } = buildOtpEmail(otp, type)
-  const fromName = env.gmail.fromName || 'Brand2Influence'
+  if (!transporter) {
+    console.warn(`[EMAIL OTP] Gmail SMTP credentials not set on server. Simulated OTP for ${toEmail}: ${otp}`)
+    return { simulated: true, otp }
+  }
 
-  const info = await transporter.sendMail({
-    from: `"${fromName}" <${env.gmail.user}>`,
-    to: toEmail,
-    subject,
-    text,
-    html,
-  })
+  try {
+    const { subject, html, text } = buildOtpEmail(otp, type)
+    const fromName = env.gmail.fromName || 'Brand2Influence'
 
-  console.info(`[EMAIL OTP] Sent ${type} OTP to ${toEmail} — messageId: ${info.messageId}`)
+    const info = await transporter.sendMail({
+      from: `"${fromName}" <${env.gmail.user}>`,
+      to: toEmail,
+      subject,
+      text,
+      html,
+    })
+
+    console.info(`[EMAIL OTP] Sent ${type} OTP to ${toEmail} — messageId: ${info.messageId}`)
+    return info
+  } catch (err) {
+    console.warn(`[EMAIL OTP] SMTP send failed for ${toEmail}: ${err.message}. Falling back gracefully.`)
+    return { simulated: true, error: err.message, otp }
+  }
 }

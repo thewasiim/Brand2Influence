@@ -57,7 +57,7 @@ export const authService = {
   }),
   logoutBackend: () => api('/auth/logout', { method: 'POST' }),
   signInWithGoogle: (role = '') => {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+    const backendUrl = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? 'https://brand2influence-backend.onrender.com/api' : 'http://localhost:3001/api')
     window.location.href = `${backendUrl}/auth/google${role ? `?role=${encodeURIComponent(role)}` : ''}`
   },
   verifyOtpToken: async ({ email, token }) => {
